@@ -1,0 +1,461 @@
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 03-May-13
+-- Description:	Get detail from DD table
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_DD_GetDetailList]	
+	@AUTH_FLAG	bit
+AS
+BEGIN	
+		
+	SET NOCOUNT ON;
+
+	IF @AUTH_FLAG=0
+		BEGIN						
+			SELECT DD.*,'S' = 'U',b.BANK_NAME AS DRAWER_BANKNAME,
+				br.BRANCH_NAME AS DRAWER_BRANCHNAME,
+				l.LOCATION_NAME AS DRAWER_LOCATIONNAME,nbr.BRANCH_NAME AS DRAWEE			 
+				FROM DD_HIST DD
+				LEFT OUTER JOIN BANK b 
+				ON b.BANK_CODE=dd.DRAWER_BANKCODE
+				LEFT OUTER JOIN BRANCH br 
+				ON br.BANK_CODE=dd.DRAWER_BANKCODE AND br.BRANCH_CODE=dd.DRAWER_BRANCHCODE
+				AND br.LOCATION_CODE=dd.DRAWER_LOCATION
+				LEFT OUTER JOIN LOCATION l
+				ON l.LOCATION_CODE=dd.DRAWER_LOCATION
+				LEFT OUTER JOIN (SELECT * FROM BRANCH WHERE NIKBRANCH_CODE IS NOT NULL 
+					AND LTRIM(RTRIM(NIKBRANCH_CODE))<>'') nbr
+				ON nbr.BANK_CODE=dd.DRAWER_BANKCODE AND nbr.NIKBRANCH_CODE=dd.NIKBRANCH_CODE 
+				WHERE DD.IS_AUTH=0
+				ORDER BY DD.D_CODE,DD.SLNO;
+		END;
+	ELSE
+		BEGIN
+			
+			SELECT DD.*,'S' = 'A',b.BANK_NAME AS DRAWER_BANKNAME,
+				br.BRANCH_NAME AS DRAWER_BRANCHNAME,
+				l.LOCATION_NAME AS DRAWER_LOCATIONNAME,nbr.BRANCH_NAME AS DRAWEE			 
+				FROM DD DD
+				LEFT OUTER JOIN BANK b 
+				ON b.BANK_CODE=dd.DRAWER_BANKCODE
+				LEFT OUTER JOIN BRANCH br 
+				ON br.BANK_CODE=dd.DRAWER_BANKCODE AND br.BRANCH_CODE=dd.DRAWER_BRANCHCODE
+				AND br.LOCATION_CODE=dd.DRAWER_LOCATION
+				LEFT OUTER JOIN LOCATION l
+				ON l.LOCATION_CODE=dd.DRAWER_LOCATION
+				LEFT OUTER JOIN (SELECT * FROM BRANCH WHERE NIKBRANCH_CODE IS NOT NULL 
+					AND LTRIM(RTRIM(NIKBRANCH_CODE))<>'') nbr
+				ON nbr.BANK_CODE=dd.DRAWER_BANKCODE AND nbr.NIKBRANCH_CODE=dd.NIKBRANCH_CODE 
+				ORDER BY DD.D_CODE,DD.SLNO;
+									
+		END;	
+	   
+END
+
+GO
+
+
+
+ALTER VIEW [dbo].[V_SPEED_RETURN]
+as
+(
+SELECT ds.DS_CODE, ds.D_CODE, ds.DEPOSIT_TYPE, ds.CITICASH_AMOUNT, ds.CITICHECK_AMOUNT, 
+	ds.SCHEDULE_DATE, ds.NO_CHECK, ds.CLIENT_CODE, ds.LOCATION_CODE, ds.CORR_BANK_CODE, 
+	ds.CORR_BRANCH_CODE,ds.REF_NO,cdd.SLNO,cdd.AMOUNT,cdd.CHECK_NO,cdd.CHECK_REF,cdd.DRAWER,
+	cdd.SLIP_DATE,rr.REJECT_REASON,cl.ACC_NO,cl.ACC_NAME,l.LOCATION_NAME
+	FROM DSCHEDULE ds
+	INNER JOIN DCOLLECTED dc
+	ON dc.DS_CODE=ds.DS_CODE
+	INNER JOIN CSD_DET cdd
+	ON cdd.D_CODE=ds.D_CODE
+	INNER JOIN RETURN_REJECT rr
+	ON rr.REJECT_CODE=cdd.RTN_CODE
+	LEFT OUTER JOIN CLIENT cl
+	ON ds.CLIENT_CODE=cl.CLIENT_CODE
+	LEFT OUTER JOIN LOCATION l
+	ON l.LOCATION_CODE=ds.LOCATION_CODE
+	WHERE cdd.RTN_STATUS='R' AND dc.[STATUS]='L'
+)
+
+
+
+GO
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 14-May-13
+-- Description:	Get dschedule for missing citicash/citispeed entry
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_DSchedule_GetMissingDetail]			
+AS
+BEGIN	
+		
+	SET NOCOUNT ON;
+
+	SELECT a.* FROM
+		(SELECT ds.* FROM DSCHEDULE ds			
+			LEFT OUTER JOIN CCASH cc ON ds.D_CODE=cc.D_CODE
+			WHERE ds.[FILENAME] IS NULL AND ds.DEPOSIT_TYPE='Cash' and cc.D_CODE IS NULL
+		UNION ALL
+		SELECT ds.* FROM DSCHEDULE ds
+			LEFT OUTER JOIN CSD_DET cs ON ds.D_CODE=cs.D_CODE
+			WHERE ds.[FILENAME] IS NULL AND ds.DEPOSIT_TYPE='Check' and cs.D_CODE IS NULL)a
+		INNER JOIN DCOLLECTED dc
+		ON dc.DS_CODE=a.DS_CODE 
+		WHERE dc.[STATUS]='L'
+			
+	   
+END
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 02-June-13
+-- Description: Collection Process for CitiAnywhere Check
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_Process_CollectionCitiAny]	
+AS
+BEGIN	
+	DECLARE 
+		@ErrorVar		INT,
+		@v_D_CODE		varchar(12),
+		@v_SLNO			numeric(3,0),
+		@maxNONZONE_REF	numeric(7,0),
+		@v_Ref_From		numeric(7,0),
+		@v_Flag_Ref		bit;
+		
+	
+	SET NOCOUNT ON;
+
+	BEGIN TRANSACTION;
+
+	SET @v_Flag_Ref=0;
+
+	DECLARE tmpcursor1 CURSOR FOR
+		SELECT DISTINCT ct.D_CODE FROM CCHECKTOTAL as ct INNER JOIN CCHECK as cc 
+			ON ct.D_CODE=cc.D_CODE AND ct.MOD_NO=cc.MOD_NO
+			WHERE cc.RTN_STATUS ='O' AND cc.REMINDER_DATE is null
+			AND (cc.NONZONE_REF IS NULL) AND  ct.[STATUS]='L';
+
+	OPEN tmpcursor1;
+	FETCH NEXT FROM tmpcursor1 
+        INTO @v_D_CODE;
+
+	WHILE @@FETCH_STATUS=0 
+ 	BEGIN
+		
+		SET @v_Flag_Ref=1;
+
+		DELETE CCHECKTOTAL_HIST
+			WHERE D_CODE=@v_D_CODE AND IS_AUTH=0;
+
+		INSERT INTO CCHECKTOTAL_HIST
+			SELECT *,1 FROM CCHECKTOTAL WHERE D_CODE=@v_D_CODE;
+
+		UPDATE CCHECKTOTAL_HIST
+			SET [STATUS]='O'
+			WHERE D_CODE=@v_D_CODE AND [STATUS]='L';
+
+		UPDATE CCHECKTOTAL
+			SET MOD_NO=MOD_NO+1,
+				INPUT_BY=substring(suser_name(),charindex('\',suser_name())+1,20),	
+				INPUT_DATETIME=GETDATE(),INPUT_FROM=HOST_NAME(),
+				AUTH_BY=substring(suser_name(),charindex('\',suser_name())+1,20),
+				AUTH_DATETIME=GETDATE(),AUTH_FROM=HOST_NAME()
+			WHERE D_CODE=@v_D_CODE;
+		
+		DELETE CCHECK_HIST
+			WHERE D_CODE=@v_D_CODE AND IS_AUTH=0;
+
+		INSERT INTO CCHECK_HIST(SLNO, D_CODE, CLIENT_CODE, DLOCATION_CODE, 
+			CUSTOMER_REF, SLIP_DATE, VALUE_DATE, CHECK_NO, AMOUNT, CHECK_DATE, 
+			CHECK_TYPE, DRAWER, DRAWEE_BANK_CODE, LOCATION_CODE, BRANCH_CODE, 
+			CHECK_REF, RTN_STATUS, NONZONE_REF, MOD_NO, IS_AUTH, REMINDER_DATE, 
+			REMINDER_NO, RTN_CODE)
+			SELECT SLNO, D_CODE, CLIENT_CODE, DLOCATION_CODE, 
+			CUSTOMER_REF, SLIP_DATE, VALUE_DATE, CHECK_NO, AMOUNT, CHECK_DATE, 
+			CHECK_TYPE, DRAWER, DRAWEE_BANK_CODE, LOCATION_CODE, BRANCH_CODE, 
+			CHECK_REF, RTN_STATUS, NONZONE_REF, MOD_NO,1, REMINDER_DATE, 
+			REMINDER_NO , RTN_CODE
+			FROM CCHECK	
+			WHERE D_CODE=@v_D_CODE
+		
+		UPDATE CCHECK
+			SET MOD_NO=MOD_NO+1 
+			WHERE D_CODE=@v_D_CODE
+
+		FETCH NEXT FROM tmpcursor1 
+				INTO @v_D_CODE;
+
+	END
+
+	CLOSE tmpcursor1;	
+	DEALLOCATE tmpcursor1;
+----2----------------------
+	SELECT @maxNONZONE_REF=ISNULL(MAX(NONZONE_REF),0) FROM CCHECK
+		WHERE NONZONE_REF IS NOT NULL;
+	
+	SELECT @v_Ref_From=@maxNONZONE_REF+1;
+		
+	DECLARE tmpcursor2 CURSOR FOR
+		SELECT DISTINCT ct.D_CODE,cc.SLNO
+			FROM CCHECKTOTAL as ct INNER JOIN CCHECK as cc 
+			ON ct.D_CODE=cc.D_CODE AND ct.MOD_NO=cc.MOD_NO
+			WHERE cc.RTN_STATUS ='O' AND cc.REMINDER_DATE is null
+			AND (cc.NONZONE_REF IS NULL) AND ct.[STATUS]='L';
+
+	OPEN tmpcursor2;
+	FETCH NEXT FROM tmpcursor2 
+        INTO @v_D_CODE,@v_SLNO;
+
+	WHILE @@FETCH_STATUS=0 
+ 	BEGIN
+		SELECT @maxNONZONE_REF=@maxNONZONE_REF+1;
+
+		UPDATE CCHECK
+			SET NONZONE_REF=RIGHT('0000000' + convert(varchar,@maxNONZONE_REF), 7),
+			REMINDER_DATE=CONVERT(datetime,CONVERT(varchar(12), GETDATE())),
+			REMINDER_NO=1
+			WHERE D_CODE=@v_D_CODE AND SLNO=@v_SLNO;
+
+		INSERT NCOLLECTION(NONZONE_REF, 
+			REF_DATE, 
+			INPUT_BY, INPUT_DATETIME, INPUT_FROM, 
+			AUTH_BY, AUTH_DATETIME, AUTH_FROM, 
+			MOD_NO, RTN_STATUS, [STATUS])
+			VALUES(RIGHT('0000000' + convert(varchar,@maxNONZONE_REF), 7),
+			CONVERT(datetime,CONVERT(varchar(12), GETDATE())),
+			substring(suser_name(),charindex('\',suser_name())+1,20),
+			GETDATE(),HOST_NAME(),
+			substring(suser_name(),charindex('\',suser_name())+1,20),
+			GETDATE(),HOST_NAME(),
+			1,'O','L');
+
+
+		FETCH NEXT FROM tmpcursor2 
+        INTO @v_D_CODE,@v_SLNO;
+
+	END
+
+	CLOSE tmpcursor2;	
+	DEALLOCATE tmpcursor2;
+
+-----------------------------------
+	IF @v_Flag_Ref=1
+	BEGIN
+		UPDATE GENPRM 
+			SET  NONZONE_REF_FROM=RIGHT('0000000' + convert(varchar,@v_Ref_From), 7),
+			NONZONE_REF_TO=RIGHT('0000000' + convert(varchar,@maxNONZONE_REF), 7);
+
+	END
+
+	SELECT @ErrorVar = @@error;			
+
+	IF @ErrorVar <> 0
+		BEGIN
+			ROLLBACK TRANSACTION;
+			RETURN 1;
+		END
+
+	COMMIT TRANSACTION;
+         
+END
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 06-Mar-13
+-- Description: Reminder Process for CitiAnywhere Check
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_Process_ReminderCitiAny]	
+AS
+BEGIN	
+	DECLARE 
+		@ErrorVar		INT,
+		@v_D_CODE		varchar(12),
+		@v_SLNO			numeric(3,0),
+		@maxNONZONE_REF	numeric(7,0);
+		
+	
+	SET NOCOUNT ON;
+
+	BEGIN TRANSACTION;
+
+
+--3--------------------------------
+
+	DECLARE tmpcursor3 CURSOR FOR
+		SELECT DISTINCT ct.D_CODE FROM CCHECKTOTAL as ct INNER JOIN CCHECK as cc 
+			ON ct.D_CODE=cc.D_CODE AND ct.MOD_NO=cc.MOD_NO
+			WHERE cc.RTN_STATUS ='O' AND DATEDIFF(dd,cc.REMINDER_DATE,GETDATE())>30
+			AND ct.[STATUS]='L' AND cc.REMINDER_NO<7;
+
+	OPEN tmpcursor3;
+	FETCH NEXT FROM tmpcursor3 
+        INTO @v_D_CODE;
+
+	WHILE @@FETCH_STATUS=0 
+ 	BEGIN
+
+		DELETE CCHECKTOTAL_HIST
+			WHERE D_CODE=@v_D_CODE AND IS_AUTH=0;
+
+		INSERT INTO CCHECKTOTAL_HIST
+			SELECT *,1 FROM CCHECKTOTAL WHERE D_CODE=@v_D_CODE;
+
+		UPDATE CCHECKTOTAL_HIST
+			SET [STATUS]='O'
+			WHERE D_CODE=@v_D_CODE AND [STATUS]='L';
+
+		UPDATE CCHECKTOTAL
+			SET MOD_NO=MOD_NO+1,
+				INPUT_BY=substring(suser_name(),charindex('\',suser_name())+1,20),	
+				INPUT_DATETIME=GETDATE(),INPUT_FROM=HOST_NAME(),
+				AUTH_BY=substring(suser_name(),charindex('\',suser_name())+1,20),
+				AUTH_DATETIME=GETDATE(),AUTH_FROM=HOST_NAME()
+			WHERE D_CODE=@v_D_CODE;
+		
+		DELETE CCHECK_HIST
+			WHERE D_CODE=@v_D_CODE AND IS_AUTH=0;
+
+		INSERT INTO CCHECK_HIST(SLNO, D_CODE, CLIENT_CODE, DLOCATION_CODE, 
+			CUSTOMER_REF, SLIP_DATE, VALUE_DATE, CHECK_NO, AMOUNT, CHECK_DATE, 
+			CHECK_TYPE, DRAWER, DRAWEE_BANK_CODE, LOCATION_CODE, BRANCH_CODE, 
+			CHECK_REF, RTN_STATUS, NONZONE_REF, MOD_NO, IS_AUTH, REMINDER_DATE, 
+			REMINDER_NO, RTN_CODE)
+			SELECT SLNO, D_CODE, CLIENT_CODE, DLOCATION_CODE, 
+			CUSTOMER_REF, SLIP_DATE, VALUE_DATE, CHECK_NO, AMOUNT, CHECK_DATE, 
+			CHECK_TYPE, DRAWER, DRAWEE_BANK_CODE, LOCATION_CODE, BRANCH_CODE, 
+			CHECK_REF, RTN_STATUS, NONZONE_REF, MOD_NO,1, REMINDER_DATE, 
+			REMINDER_NO, RTN_CODE 
+			FROM CCHECK	
+			WHERE D_CODE=@v_D_CODE
+		
+		UPDATE CCHECK
+			SET MOD_NO=MOD_NO+1 
+			WHERE D_CODE=@v_D_CODE
+
+		FETCH NEXT FROM tmpcursor3 
+				INTO @v_D_CODE;
+
+	END
+
+	CLOSE tmpcursor3;	
+	DEALLOCATE tmpcursor3;
+
+-----4------------------------------
+
+			
+	DECLARE tmpcursor4 CURSOR FOR
+		SELECT DISTINCT ct.D_CODE,cc.SLNO
+			FROM CCHECKTOTAL as ct INNER JOIN CCHECK as cc 
+			ON ct.D_CODE=cc.D_CODE AND ct.MOD_NO=cc.MOD_NO
+			WHERE cc.RTN_STATUS ='O' AND DATEDIFF(dd,cc.REMINDER_DATE,GETDATE())>30
+			AND ct.[STATUS]='L' AND cc.REMINDER_NO<7 ;
+
+	OPEN tmpcursor4;
+	FETCH NEXT FROM tmpcursor4 
+        INTO @v_D_CODE,@v_SLNO;
+
+	WHILE @@FETCH_STATUS=0 
+ 	BEGIN
+		
+		UPDATE CCHECK
+			SET REMINDER_DATE=CONVERT(datetime,CONVERT(varchar(12), GETDATE())),
+			REMINDER_NO=ISNULL(REMINDER_NO,0)+1
+			WHERE D_CODE=@v_D_CODE AND SLNO=@v_SLNO;
+		
+		FETCH NEXT FROM tmpcursor4 
+        INTO @v_D_CODE,@v_SLNO;
+
+	END
+
+	CLOSE tmpcursor4;	
+	DEALLOCATE tmpcursor4;
+
+-----------------------------------
+
+	SELECT @ErrorVar = @@error;			
+
+	IF @ErrorVar <> 0
+		BEGIN
+			ROLLBACK TRANSACTION;
+			RETURN 1;
+		END
+
+	COMMIT TRANSACTION;
+
+	
+         
+END
+
+
+GO
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 4-Jul-13
+-- Description: Update CCHECK with CITYANY_FUND
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_Process_CitiAnyFundUpdateRef]
+	@FILENAME		varchar(15),	
+	@VALUE_DATE		datetime, 
+	@BATCH_NO		varchar(10)
+AS
+BEGIN	
+	DECLARE @ErrorVar	int;
+	
+	SET NOCOUNT ON;
+      
+    UPDATE CCHECK SET [FILENAME]=@FILENAME,
+		FILE_USER_ID=substring(suser_name(),charindex('\',suser_name())+1,20),
+		FLEXGEN_DATE=@VALUE_DATE 		
+		WHERE RTN_STATUS='P' 
+		AND [FILENAME] IS NULL;
+		
+	UPDATE CCHECK SET [FILENAME]=@FILENAME,
+		FILE_USER_ID=substring(suser_name(),charindex('\',suser_name())+1,20),
+		FLEXGEN_DATE=@VALUE_DATE
+		FROM CCHECK cc
+		INNER JOIN CLIENT cl ON cc.CLIENT_CODE=cl.CLIENT_CODE		
+		WHERE cc.RTN_STATUS='P'	AND cc.[FILENAME] IS NULL
+		AND cl.BILLING_TYPE in ('1','2','3','4');
+
+	UPDATE GENPRM
+		SET BATCH_NO=@BATCH_NO, BATCH_DATE=GETDATE();     
+    
+	    
+                         
+	IF @@ERROR<>0 GOTO ErrorHandler              
+               
+               
+	RETURN 0;            
+                         
+    ErrorHandler:              
+	            
+	             
+	RETURN 1;
+	
+	
+END
+
+GO
+
+
+

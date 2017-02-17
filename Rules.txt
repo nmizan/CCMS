@@ -1,0 +1,48 @@
+Value Date-> Schedule Date
+
+Cash/Speed Credit Type
+----------------------
+Type L (Location)
+Location Wise sum
+Instrument -> ''
+
+Addition Text-> LOCATION_NAME + VALUE_DATE
+
+----------------------
+Type R (Referance)
+Instrument -> Cash Ref/Check Ref
+
+Addition Text-> 
+Cash->Deposit On + VALUE_DATE + DS NO "D_CODE"+ REF "CUSTOMER_REF"
+Check->Location_name + VALUE_DATE + DS NO "D_CODE"+ REF "CUSTOMER_REF"
+
+----------------------
+Type C (Check)
+Instrument -> Check No 
+
+Addition Text-> LOCATION_NAME + VALUE_DATE + DS NO "D_CODE" + REF "CUSTOMER_REF"
+
+-------------------------
+Type T (Total)
+--> Cash -> Instrument -> CTR_REF 
+--> Check -> Instrument -> Value Date
+
+Addition Text->
+Cash-> Deposit On + VALUE_DATE+ SLIPCOUNT "" 
+Check-> Deposit On + VALUE_DATE
+
+-----------------------------
+Type D (Deposit)
+Instrument ->D_CODE
+
+Addition Text->
+Cash-> LOCATION_NAME + VALUE_DATE+ DS NO "" + REF ""
+Check-> LOCATION_NAME + VALUE_DATE+ DS NO "" 
+
+
+
+
+
+
+
+

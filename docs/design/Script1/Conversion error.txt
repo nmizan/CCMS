@@ -1,0 +1,31 @@
+1)Branch 
+
+(0 row(s) affected)
+Msg 245, Level 16, State 1, Line 4
+Conversion failed when converting the varchar value 'N' to data type bit.
+
+
+2)ccheck 
+
+(27 row(s) affected)
+
+(88 row(s) affected)
+Msg 2627, Level 14, State 1, Line 4
+Violation of PRIMARY KEY constraint 'PK__CCHECK__52E34C9D'. Cannot insert duplicate key in object 'dbo.CCHECK'.
+The statement has been terminated.
+
+
+3)CSD_DET
+Msg 2627, Level 14, State 1, Line 1
+Violation of PRIMARY KEY constraint 'PK__CSD_DET__373B3228'. Cannot insert duplicate key in object 'dbo.CSD_DET'.
+The statement has been terminated.
+
+
+4)SCHEDULE_STOCK
+
+(2 row(s) affected)
+
+(2 row(s) affected)
+Msg 2627, Level 14, State 1, Line 4
+Violation of PRIMARY KEY constraint 'PK__SCHEDULE_STOCK__02C769E9'. Cannot insert duplicate key in object 'dbo.SCHEDULE_STOCK'.
+The statement has been terminated.

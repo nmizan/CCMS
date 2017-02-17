@@ -1,0 +1,1933 @@
+USE [CCMS]
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 15-Jul-13
+-- Description:	Get detail to CheckTotal table
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_CheckTotal_GetDetailList]		
+	@DEL_FLAG	int	,
+	@AUTH_FLAG	bit,
+	@OPR_DATE	datetime,
+	@ENTRY_LOC	varchar(3)
+AS
+BEGIN	
+		
+	SET NOCOUNT ON;
+
+
+	IF @AUTH_FLAG=0
+		BEGIN						
+			SELECT ch.*,'S' = 'U',cb.BRANCH_NAME
+				FROM CHECKTOTAL_HIST ch
+				LEFT OUTER JOIN CITIBANK_BRANCH cb
+				ON cb.BRANCH_CODE=ch.ENTRY_LOC
+				WHERE ch.IS_AUTH=0 AND ch.ENTRY_LOC=@ENTRY_LOC
+				ORDER BY ch.DS_CODE;			
+		END;
+	ELSE
+		BEGIN
+			IF @DEL_FLAG=0
+				BEGIN
+					SELECT *,1,'S' = 'A',cb.BRANCH_NAME				
+						FROM CHECKTOTAL ct
+						LEFT OUTER JOIN CITIBANK_BRANCH cb
+						ON cb.BRANCH_CODE=ct.ENTRY_LOC
+						WHERE ct.STATUS ='L' AND ct.ENTRY_LOC=@ENTRY_LOC
+						AND ct.OPR_DATE=@OPR_DATE
+						ORDER BY ct.DS_CODE;
+				END;
+			ELSE
+				BEGIN
+					SELECT *,1,'S' = 
+						CASE  
+							WHEN ct.STATUS = 'D' THEN 'D'                    
+							ELSE 'A'
+						END ,cb.BRANCH_NAME	
+						FROM CHECKTOTAL ct
+						LEFT OUTER JOIN CITIBANK_BRANCH cb
+						ON cb.BRANCH_CODE=ct.ENTRY_LOC
+						WHERE ct.STATUS IN ('L','D')
+						AND ct.ENTRY_LOC=@ENTRY_LOC
+						AND ct.OPR_DATE=@OPR_DATE
+						ORDER BY DS_CODE;
+				END;
+		END;	
+	   
+END
+
+
+GO
+
+
+GRANT EXECUTE ON [dbo].[CMS_CheckTotal_GetDetailList] TO [ccms_sp_only]
+
+GO
+
+
+
+CREATE view [dbo].[V_REVERSAL_CLEAR_CHECK]      
+AS    
+(
+	SELECT rc.AMOUNT, rc.VALUE_DATE, rc.FLEX_FILENAME, rc.REV_DATE,  
+		rc.ACC_NO, rc.ENTRY_LOC, rc.VALUE_TYPE, cc.ACC_NAME FROM 
+		TMP_REVERSAL_CLEARING rc
+		LEFT OUTER JOIN CLEARING_CLIENT cc
+		ON rc.ACC_NO=cc.ACC_NO
+)
+
+GO
+
+GRANT SELECT ON [dbo].[V_REVERSAL_CLEAR_CHECK] TO [ccms_sp_only]
+GO
+
+
+
+
+
+CREATE view [dbo].[V_REVERSAL_CLEAR_FINAL]      
+AS    
+(
+	SELECT rc.AMOUNT, rc.VALUE_DATE, rc.FLEX_FILENAME, rc.REV_DATE,  
+		rc.ACC_NO, rc.ENTRY_LOC, rc.VALUE_TYPE, cc.ACC_NAME FROM 
+		REVERSAL_HIST_CLEARING rc
+		LEFT OUTER JOIN CLEARING_CLIENT cc
+		ON rc.ACC_NO=cc.ACC_NO
+)
+
+GO
+
+GRANT SELECT ON [dbo].[V_REVERSAL_CLEAR_FINAL] TO [ccms_sp_only]
+GO
+
+
+
+CREATE view [dbo].[V_HOLIDAY]
+AS    
+(
+	SELECT HOLI_DAY,HOLI_TYPE FROM HOLIDAY
+		WHERE [STATUS]='L'
+)
+
+GO
+
+GRANT SELECT ON [dbo].[V_HOLIDAY] TO [ccms_sp_only]
+GO
+
+
+
+CREATE view [dbo].[V_CLEAR_CHECK]
+AS    
+(
+	SELECT  OPR_DATE, PAYEE_NAME,  CHECK_NUMBER, CHECK_TYPE,  DEBIT_CREDIT, REMARK,  
+		ENTRY_LOC, ct.CHECKTYPE_NAME
+		FROM CLEARINGTAB cl
+		LEFT OUTER JOIN CHECKTYPE ct
+		ON ct.CHECKTYPE_CODE=cl.CHECK_TYPE
+)
+
+GO
+
+GRANT SELECT ON [dbo].[V_CLEAR_CHECK] TO [ccms_sp_only]
+GO
+
+
+
+CREATE view [dbo].[V_CLEAR_CHECK_BANK]
+AS    
+(
+		SELECT  OPR_DATE, ISSUE_DATE, cl.NIKBRANCH_CODE, CHECK_NUMBER, CHECK_TYPE,  DEBIT_CREDIT,  
+		ENTRY_LOC, ct.CHECKTYPE_NAME,cb.BANK_CODE,cb.BANK_NAME
+		FROM CLEARINGTAB cl
+		LEFT OUTER JOIN CHECKTYPE ct
+		ON ct.CHECKTYPE_CODE=cl.CHECK_TYPE
+		LEFT OUTER JOIN CLEARING_BRANCH cbr
+		ON cbr.NIKBRANCH_CODE=cl.NIKBRANCH_CODE
+		LEFT OUTER JOIN CLEARING_BANK cb
+		ON cb.BANK_CODE=cbr.BANK_CODE
+)
+
+GO
+
+GRANT SELECT ON [dbo].[V_CLEAR_CHECK_BANK] TO [ccms_sp_only]
+GO
+
+
+CREATE view [dbo].[V_CLEAR_CHECK_HIGH]
+AS    
+(
+	SELECT  OPR_DATE, ISSUE_DATE, cl.NIKBRANCH_CODE, PAYEE_NAME,CHECK_NUMBER, CHECK_TYPE, 
+	DEBIT_CREDIT, REMARK ,
+		ENTRY_LOC, VALUE_TYPE,ct.CHECKTYPE_NAME,cbr.BRANCH_NAME,cb.BANK_CODE,cb.BANK_NAME
+		FROM CLEARINGTAB cl
+		LEFT OUTER JOIN CHECKTYPE ct
+		ON ct.CHECKTYPE_CODE=cl.CHECK_TYPE
+		LEFT OUTER JOIN CLEARING_BRANCH cbr
+		ON cbr.NIKBRANCH_CODE=cl.NIKBRANCH_CODE
+		LEFT OUTER JOIN CLEARING_BANK cb
+		ON cb.BANK_CODE=cbr.BANK_CODE
+		WHERE cl.VALUE_TYPE=2
+)
+
+GO
+
+GRANT SELECT ON [dbo].[V_CLEAR_CHECK_HIGH] TO [ccms_sp_only]
+GO
+
+
+
+CREATE view [dbo].[V_CLEAR_DEPOSIT]
+AS    
+(
+	SELECT ct.TOTAL_CHKNO, ct.TOTAL_CHKAMT, ISNULL(ct.CUSTOMER_REF,'') CUSTOMER_REF,
+		cl.OPR_DATE, cl.NIKBRANCH_CODE,cl.PAYEE_NAME, cl.CHECK_NUMBER, 
+		cl.CHECK_TYPE, cl.DEBIT_CREDIT, cl.REMARK,cl.CHECK_REF,cl.DS_CODE, 
+		cl.RTN_STATUS,cl.ENTRY_LOC,cl.IS_PDC,
+		cbr.BRANCH_NAME,cb.BANK_CODE,cb.BANK_NAME
+		FROM CHECKTOTAL ct
+		INNER JOIN CLEARINGTAB cl
+		ON ct.DS_CODE=cl.DS_CODE AND ct.OPR_DATE=cl.OPR_DATE 
+		AND ct.ENTRY_LOC=cl.ENTRY_LOC
+		LEFT OUTER JOIN CLEARING_BRANCH cbr
+		ON cbr.NIKBRANCH_CODE=cl.NIKBRANCH_CODE
+		LEFT OUTER JOIN CLEARING_BANK cb
+		ON cb.BANK_CODE=cbr.BANK_CODE
+)
+
+
+GO
+
+GRANT SELECT ON [dbo].[V_CLEAR_DEPOSIT] TO [ccms_sp_only]
+GO
+
+
+
+
+CREATE view [dbo].[V_CLEAR_RETURN]
+AS    
+(
+		SELECT ct.TOTAL_CHKNO, ct.TOTAL_CHKAMT, ISNULL(ct.CUSTOMER_REF,'') CUSTOMER_REF,
+		cl.OPR_DATE, cl.NIKBRANCH_CODE,cl.PAYEE_NAME, cl.CHECK_NUMBER, 
+		cl.CHECK_TYPE, cl.DEBIT_CREDIT, cl.REMARK,cl.DS_CODE, 
+		cl.RTN_STATUS,cl.ENTRY_LOC,
+		cbr.BRANCH_NAME,cb.BANK_CODE,cb.BANK_NAME,rr.REJECT_REASON
+		FROM CHECKTOTAL ct
+		INNER JOIN CLEARINGTAB cl
+		ON ct.DS_CODE=cl.DS_CODE AND ct.OPR_DATE=cl.OPR_DATE 
+		AND ct.ENTRY_LOC=cl.ENTRY_LOC
+		LEFT OUTER JOIN CLEARING_BRANCH cbr
+		ON cbr.NIKBRANCH_CODE=cl.NIKBRANCH_CODE
+		LEFT OUTER JOIN CLEARING_BANK cb
+		ON cb.BANK_CODE=cbr.BANK_CODE
+		LEFT OUTER JOIN RETURN_REJECT rr
+		ON rr.REJECT_CODE=cl.RTN_CODE
+		WHERE cl.RTN_STATUS='R'
+)
+
+
+GO
+
+GRANT SELECT ON [dbo].[V_CLEAR_RETURN] TO [ccms_sp_only]
+GO
+
+
+
+-- =============================================
+-- Author:		Fahad Khan
+-- Create date: 20-FEB-13
+-- Description:	get list records of corr. Branch and NIKBRANCH by bank
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_Branch_GetCorrNikBranchListByBank]
+	@BANK_CODE	varchar(4)
+AS
+BEGIN		
+	SET NOCOUNT ON;
+	
+	SELECT NIKBRANCH_CODE,BRANCH_NAME
+	FROM BRANCH		
+	WHERE STATUS='L' 
+	AND CORRBANK=1 AND (NIKBRANCH_CODE IS NOT NULL) 
+	AND LTRIM(RTRIM(NIKBRANCH_CODE))<>''
+	AND BANK_CODE=@BANK_CODE
+	ORDER BY BRANCH_NAME;	
+	   
+END
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 26-May-13
+-- Description:	get list records of Nikash Branch from Branch by bank
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_Branch_GetNikBranchListByBank]
+	@BANK_CODE	varchar(4)
+AS
+BEGIN		
+	SET NOCOUNT ON;
+	
+	SELECT NIKBRANCH_CODE,BRANCH_NAME
+	FROM BRANCH		
+	WHERE [STATUS]='L' 
+	AND (NIKBRANCH_CODE IS NOT NULL) 
+	AND LTRIM(RTRIM(NIKBRANCH_CODE))<>''
+	AND BANK_CODE=@BANK_CODE
+	ORDER BY BRANCH_NAME;
+	   
+END
+
+GO
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 03-May-13
+-- Description:	Get detail from DD table
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_DD_GetDetailList]	
+	@AUTH_FLAG	bit
+AS
+BEGIN	
+		
+	SET NOCOUNT ON;
+
+	IF @AUTH_FLAG=0
+		BEGIN						
+			SELECT DD.*,'S' = 'U',b.BANK_NAME AS DRAWER_BANKNAME,
+				br.BRANCH_NAME AS DRAWER_BRANCHNAME,
+				l.LOCATION_NAME AS DRAWER_LOCATIONNAME,nbr.BRANCH_NAME AS DRAWEE			 
+				FROM DD_HIST DD
+				LEFT OUTER JOIN BANK b 
+				ON b.BANK_CODE=dd.DRAWER_BANKCODE
+				LEFT OUTER JOIN BRANCH br 
+				ON br.BANK_CODE=dd.DRAWER_BANKCODE AND br.BRANCH_CODE=dd.DRAWER_BRANCHCODE
+				LEFT OUTER JOIN LOCATION l
+				ON l.LOCATION_CODE=dd.DRAWER_LOCATION
+				LEFT OUTER JOIN (SELECT * FROM BRANCH WHERE NIKBRANCH_CODE IS NOT NULL 
+					AND LTRIM(RTRIM(NIKBRANCH_CODE))<>'') nbr
+				ON nbr.BANK_CODE=dd.DRAWER_BANKCODE AND nbr.NIKBRANCH_CODE=dd.NIKBRANCH_CODE 
+				WHERE DD.IS_AUTH=0
+				ORDER BY DD.D_CODE,DD.SLNO;
+		END;
+	ELSE
+		BEGIN
+			
+			SELECT DD.*,'S' = 'A',b.BANK_NAME AS DRAWER_BANKNAME,
+				br.BRANCH_NAME AS DRAWER_BRANCHNAME,
+				l.LOCATION_NAME AS DRAWER_LOCATIONNAME,nbr.BRANCH_NAME AS DRAWEE			 
+				FROM DD DD
+				LEFT OUTER JOIN BANK b 
+				ON b.BANK_CODE=dd.DRAWER_BANKCODE
+				LEFT OUTER JOIN BRANCH br 
+				ON br.BANK_CODE=dd.DRAWER_BANKCODE AND br.BRANCH_CODE=dd.DRAWER_BRANCHCODE
+				LEFT OUTER JOIN LOCATION l
+				ON l.LOCATION_CODE=dd.DRAWER_LOCATION
+				LEFT OUTER JOIN (SELECT * FROM BRANCH WHERE NIKBRANCH_CODE IS NOT NULL 
+					AND LTRIM(RTRIM(NIKBRANCH_CODE))<>'') nbr
+				ON nbr.BANK_CODE=dd.DRAWER_BANKCODE AND nbr.NIKBRANCH_CODE=dd.NIKBRANCH_CODE 
+				ORDER BY DD.D_CODE,DD.SLNO;
+									
+		END;	
+	   
+END
+
+GO
+
+
+
+CREATE TABLE [dbo].[PDCTAB](
+	[OPR_DATE] [datetime] NOT NULL,
+	[ISSUE_DATE] [datetime] NULL,	
+	[NIKBRANCH_CODE] [varchar](7) NOT NULL,
+	[PAYEE_NAME] [varchar](40) NULL,
+	[CHECK_SERIES] [varchar](4) NULL,
+	[CHECK_NUMBER] [varchar](15) NOT NULL,
+	[CHECK_NO] [varchar](8) NULL,
+	[BOOK_NO] [varchar](8) NULL,
+	[CHECK_TYPE] [varchar](8) NULL,
+	[ACC_NO] [varchar](15) NULL,
+	[DEBIT_CREDIT] numeric(14,2) NOT NULL,	
+	[REMARK] [varchar](15) NOT NULL,
+	[BATCH_NO] [varchar](8) NULL,	
+	[CHECK_REF] [varchar](40) NULL,
+	[ENTRY_LOC] [varchar](3) NOT NULL,
+	[DS_CODE] [varchar](8) NOT NULL,	
+	[MOD_NO] [numeric](3, 0) NOT NULL,
+	VALUE_TYPE numeric(1, 0) NULL,
+	PRIMARY KEY
+(
+	[OPR_DATE] ,
+	[NIKBRANCH_CODE],
+	[CHECK_NUMBER],
+	[DEBIT_CREDIT],
+	[REMARK],
+	[DS_CODE],[ENTRY_LOC]
+))
+
+GO
+
+CREATE TABLE [dbo].[PDCTAB_HIST](
+	[OPR_DATE] [datetime] NOT NULL,
+	[ISSUE_DATE] [datetime] NULL,	
+	[NIKBRANCH_CODE] [varchar](7) NOT NULL,
+	[PAYEE_NAME] [varchar](40) NULL,
+	[CHECK_SERIES] [varchar](4) NULL,
+	[CHECK_NUMBER] [varchar](15) NOT NULL,
+	[CHECK_NO] [varchar](8) NULL,
+	[BOOK_NO] [varchar](8) NULL,
+	[CHECK_TYPE] [varchar](8) NULL,
+	[ACC_NO] [varchar](15) NULL,
+	[DEBIT_CREDIT] numeric(14,2) NOT NULL,	
+	[REMARK] [varchar](15) NOT NULL,
+	[BATCH_NO] [varchar](8) NULL,	
+	[CHECK_REF] [varchar](40) NULL,
+	[ENTRY_LOC] [varchar](3) NOT NULL,
+	[DS_CODE] [varchar](8) NOT NULL,	
+	[MOD_NO] [numeric](3, 0) NOT NULL,
+	IS_AUTH bit NOT NULL,
+	VALUE_TYPE numeric(1, 0) NULL,
+	PRIMARY KEY
+(
+	[OPR_DATE] ,
+	[NIKBRANCH_CODE],
+	[CHECK_NUMBER],
+	[DEBIT_CREDIT],
+	[REMARK],
+	[DS_CODE],[ENTRY_LOC],[MOD_NO]
+))
+
+GO
+
+
+
+
+CREATE TABLE [dbo].[PDCTOTAL](
+	[DS_CODE] [varchar](8) NOT NULL,
+	[TOTAL_CHKNO] [int] NULL,
+	[TOTAL_CHKAMT] numeric(14,2) NULL,
+	[OPR_DATE] [datetime] NOT NULL,
+	[CUSTOMER_REF][varchar](50) NULL,		
+	[ENTRY_LOC] [varchar](3) NOT NULL,
+	[INPUT_BY] [varchar](20) NULL,
+	[INPUT_DATETIME] [datetime] NULL,
+	[INPUT_FROM] [varchar](30) NULL,
+	[AUTH_BY] [varchar](20) NULL,
+	[AUTH_DATETIME] [datetime] NULL,
+	[AUTH_FROM] [varchar](30) NULL,
+	[MOD_NO] [numeric](3, 0) NOT NULL,
+	[STATUS] [char](1) NOT NULL,	
+  PRIMARY KEY(
+	[DS_CODE] ,
+	[OPR_DATE] ,
+	[ENTRY_LOC]))
+
+GO
+
+CREATE TABLE [dbo].[PDCTOTAL_HIST](
+	[DS_CODE] [varchar](8) NOT NULL,
+	[TOTAL_CHKNO] [int] NULL,
+	[TOTAL_CHKAMT] numeric(14,2) NULL,
+	[OPR_DATE] [datetime] NOT NULL,
+	[CUSTOMER_REF][varchar](50) NULL,		
+	[ENTRY_LOC] [varchar](3) NOT NULL,
+	[INPUT_BY] [varchar](20) NULL,
+	[INPUT_DATETIME] [datetime] NULL,
+	[INPUT_FROM] [varchar](30) NULL,
+	[AUTH_BY] [varchar](20) NULL,
+	[AUTH_DATETIME] [datetime] NULL,
+	[AUTH_FROM] [varchar](30) NULL,
+	[MOD_NO] [numeric](3, 0) NOT NULL,
+	[STATUS] [char](1) NOT NULL,	
+	IS_AUTH bit NOT NULL,
+  PRIMARY KEY(
+	[DS_CODE] ,
+	[OPR_DATE],[ENTRY_LOC],MOD_NO ))
+
+GO
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 21-Jul-13
+-- Description:	Add detail to PDCTotal
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_PDCTotal_Add]		
+	@DS_CODE		varchar(8), 
+	@TOTAL_CHKNO	int, 
+	@TOTAL_CHKAMT	numeric(14,2), 
+	@OPR_DATE		datetime, 
+	@CUSTOMER_REF	varchar(50), 
+	@ENTRY_LOC		varchar(3)
+AS
+BEGIN	
+	DECLARE @ErrorVar	int;
+	
+	SET NOCOUNT ON;
+	
+	IF EXISTS(SELECT DS_CODE FROM PDCTOTAL
+				WHERE DS_CODE=@DS_CODE AND OPR_DATE=@OPR_DATE
+				AND ENTRY_LOC=@ENTRY_LOC)
+		BEGIN
+			-- Duplicate Entry				
+			RETURN 2	
+		END
+	
+	DELETE PDCTOTAL_HIST WHERE 
+		DS_CODE=@DS_CODE AND OPR_DATE=@OPR_DATE
+		AND ENTRY_LOC=@ENTRY_LOC AND IS_AUTH=0;
+
+	SELECT @ErrorVar = @@ERROR;
+		
+	IF @ErrorVar <> 0
+		BEGIN			
+			RETURN 1;
+		END
+	
+	INSERT INTO PDCTOTAL_HIST(DS_CODE, TOTAL_CHKNO, TOTAL_CHKAMT, 
+		OPR_DATE, CUSTOMER_REF, ENTRY_LOC, 
+		INPUT_BY,INPUT_DATETIME,INPUT_FROM,MOD_NO,[STATUS],IS_AUTH)
+		VALUES(@DS_CODE, @TOTAL_CHKNO, @TOTAL_CHKAMT, 
+		@OPR_DATE, @CUSTOMER_REF, @ENTRY_LOC, 
+		substring(suser_name(),charindex('\',suser_name())+1,20),
+		GETDATE(),HOST_NAME(),1,'U',0);
+
+	SELECT @ErrorVar = @@ERROR;
+	
+	IF @ErrorVar <> 0
+		BEGIN			
+			RETURN 1;
+		END
+
+	DELETE PDCTAB_HIST WHERE DS_CODE=@DS_CODE AND OPR_DATE=@OPR_DATE
+		AND ENTRY_LOC=@ENTRY_LOC AND IS_AUTH=0;
+	
+	SELECT @ErrorVar = @@ERROR;
+	
+	IF @ErrorVar <> 0
+		BEGIN			
+			RETURN 1;
+		END	
+
+	RETURN 0;
+	
+   
+END
+
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_PDCTOTAL_Add] TO [ccms_sp_only]
+
+GO
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 21-Jul-13
+-- Description:	Add detail to PDCTab
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_PDCTab_Add]		
+	@OPR_DATE		datetime, 
+	@ISSUE_DATE		datetime, 
+	@NIKBRANCH_CODE	varchar(7), 
+	@PAYEE_NAME		varchar(40), 
+	@CHECK_SERIES	varchar(4), 
+	@CHECK_NUMBER	varchar(15), 
+	@CHECK_NO		varchar(8), 
+	@BOOK_NO		varchar(8), 
+	@CHECK_TYPE		varchar(8), 
+	@ACC_NO			varchar(15), 
+	@DEBIT_CREDIT	numeric(14,2), 
+	@REMARK			varchar(15), 
+	@BATCH_NO		varchar(8), 
+	@CHECK_REF		varchar(40), 
+	@ENTRY_LOC		varchar(3), 
+	@DS_CODE		varchar(8)
+	@VALUE_TYPE		numeric(1,0)
+AS
+BEGIN	
+
+	DECLARE @ErrorVar	int;
+		
+	SET NOCOUNT ON;
+			
+	INSERT INTO PDCTAB_HIST(OPR_DATE, ISSUE_DATE, NIKBRANCH_CODE, PAYEE_NAME, 
+		CHECK_SERIES, CHECK_NUMBER, CHECK_NO, BOOK_NO, CHECK_TYPE, ACC_NO, 
+		DEBIT_CREDIT, REMARK, BATCH_NO, CHECK_REF, ENTRY_LOC, DS_CODE, 		
+		MOD_NO,IS_AUTH,VALUE_TYPE)
+		VALUES(@OPR_DATE, @ISSUE_DATE, @NIKBRANCH_CODE, @PAYEE_NAME, 
+		@CHECK_SERIES, @CHECK_NUMBER, @CHECK_NO, @BOOK_NO, @CHECK_TYPE, @ACC_NO, 
+		@DEBIT_CREDIT, @REMARK, @BATCH_NO, @CHECK_REF, @ENTRY_LOC, @DS_CODE, 
+		1,0,@VALUE_TYPE);
+
+	SELECT @ErrorVar = @@ERROR;
+	
+	IF @ErrorVar <> 0
+		BEGIN			
+			RETURN 1;
+		END
+		
+	RETURN 0;
+	   
+END
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_PDCTab_Add] TO [ccms_sp_only]
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 21-Jul-13
+-- Description:	update detail to PDCTab
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_PDCTab_Update]		
+	@OPR_DATE		datetime, 
+	@ISSUE_DATE		datetime, 
+	@NIKBRANCH_CODE	varchar(7), 
+	@PAYEE_NAME		varchar(40), 
+	@CHECK_SERIES	varchar(4), 
+	@CHECK_NUMBER	varchar(15), 
+	@CHECK_NO		varchar(8), 
+	@BOOK_NO		varchar(8), 
+	@CHECK_TYPE		varchar(8), 
+	@ACC_NO			varchar(15), 
+	@DEBIT_CREDIT	numeric(14,2), 
+	@REMARK			varchar(15), 
+	@BATCH_NO		varchar(8), 
+	@CHECK_REF		varchar(40), 
+	@ENTRY_LOC		varchar(3), 
+	@DS_CODE		varchar(8),	
+	@MOD_NO			numeric(3,0),
+	@VALUE_TYPE		numeric(1,0)
+AS
+BEGIN	
+
+	DECLARE @ErrorVar	int;
+		
+	SET NOCOUNT ON;
+			
+	INSERT INTO PDCTAB_HIST(OPR_DATE, ISSUE_DATE, NIKBRANCH_CODE, PAYEE_NAME, 
+		CHECK_SERIES, CHECK_NUMBER, CHECK_NO, BOOK_NO, CHECK_TYPE, ACC_NO, 
+		DEBIT_CREDIT, REMARK, BATCH_NO, CHECK_REF, ENTRY_LOC, DS_CODE, 		
+		MOD_NO,IS_AUTH,VALUE_TYPE)
+		VALUES(@OPR_DATE, @ISSUE_DATE, @NIKBRANCH_CODE, @PAYEE_NAME, 
+		@CHECK_SERIES, @CHECK_NUMBER, @CHECK_NO, @BOOK_NO, @CHECK_TYPE, @ACC_NO, 
+		@DEBIT_CREDIT, @REMARK, @BATCH_NO, @CHECK_REF, @ENTRY_LOC, @DS_CODE,		
+		@MOD_NO,0,@VALUE_TYPE);
+
+	SELECT @ErrorVar = @@ERROR;
+	
+	IF @ErrorVar <> 0
+		BEGIN			
+			RETURN 1;
+		END
+		
+	RETURN 0;
+	   
+END
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_PDCTab_Update] TO [ccms_sp_only]
+
+GO
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 21-Jul-13
+-- Description:	update detail to PDCTotal
+-- =============================================
+
+CREATE PROCEDURE [dbo].[CMS_PDCTotal_Update]	
+	@DS_CODE		varchar(8), 
+	@TOTAL_CHKNO	int, 
+	@TOTAL_CHKAMT	numeric(14,2), 
+	@OPR_DATE		datetime, 
+	@CUSTOMER_REF	varchar(50), 
+	@ENTRY_LOC		varchar(3),
+	@MOD_NO			int,
+	@RET_MOD_NO		int output
+AS
+BEGIN	
+	DECLARE @ErrorVar INT;
+	
+	SET NOCOUNT ON;
+
+	IF EXISTS(SELECT DS_CODE FROM PDCTOTAL 
+				WHERE DS_CODE=@DS_CODE AND OPR_DATE=@OPR_DATE
+				AND ENTRY_LOC=@ENTRY_LOC AND MOD_NO=@MOD_NO)
+		BEGIN
+
+			DELETE PDCTOTAL_HIST WHERE DS_CODE=@DS_CODE AND OPR_DATE=@OPR_DATE
+				AND ENTRY_LOC=@ENTRY_LOC AND IS_AUTH=0;
+
+			SELECT @ErrorVar = @@ERROR;		
+
+			IF @ErrorVar <> 0
+				BEGIN					
+					RETURN 1;
+				END
+			
+			SELECT @RET_MOD_NO = @MOD_NO +1;
+			
+			INSERT INTO PDCTOTAL_HIST(DS_CODE, TOTAL_CHKNO, TOTAL_CHKAMT, 
+				OPR_DATE, CUSTOMER_REF, ENTRY_LOC, 
+				INPUT_BY,INPUT_DATETIME,INPUT_FROM,MOD_NO,[STATUS],IS_AUTH)
+				VALUES(@DS_CODE, @TOTAL_CHKNO, @TOTAL_CHKAMT, 
+				@OPR_DATE, @CUSTOMER_REF, @ENTRY_LOC, 
+				substring(suser_name(),charindex('\',suser_name())+1,20),
+				GETDATE(),HOST_NAME(),@RET_MOD_NO,'U',0);
+
+			SELECT @ErrorVar = @@ERROR;
+
+			IF @ErrorVar <> 0
+				BEGIN
+					RETURN 1;
+				END				
+			
+			DELETE PDCTAB_HIST
+				WHERE DS_CODE=@DS_CODE AND OPR_DATE=@OPR_DATE
+				AND ENTRY_LOC=@ENTRY_LOC AND IS_AUTH=0;
+
+			SELECT @ErrorVar = @@ERROR;
+
+			IF @ErrorVar <> 0
+				BEGIN
+					RETURN 1;
+				END
+			
+			RETURN 0;
+
+				
+		END
+	ELSE -- might be in hist table
+		BEGIN
+
+			IF EXISTS(SELECT DS_CODE from PDCTOTAL_HIST 
+						WHERE DS_CODE=@DS_CODE AND OPR_DATE=@OPR_DATE
+						AND ENTRY_LOC=@ENTRY_LOC AND MOD_NO=@MOD_NO AND IS_AUTH=0)
+				BEGIN
+
+					DELETE PDCTOTAL_HIST WHERE DS_CODE=@DS_CODE 
+						AND OPR_DATE=@OPR_DATE
+						AND ENTRY_LOC=@ENTRY_LOC AND IS_AUTH=0;
+
+					SELECT @ErrorVar = @@ERROR;		
+
+					IF @ErrorVar <> 0
+						BEGIN							
+							RETURN 1;
+						END
+
+					INSERT INTO PDCTOTAL_HIST(DS_CODE, TOTAL_CHKNO, TOTAL_CHKAMT, 
+						OPR_DATE, CUSTOMER_REF, ENTRY_LOC, 
+						INPUT_BY,INPUT_DATETIME,INPUT_FROM,MOD_NO,[STATUS],IS_AUTH)
+						VALUES(@DS_CODE, @TOTAL_CHKNO, @TOTAL_CHKAMT, 
+						@OPR_DATE, @CUSTOMER_REF, @ENTRY_LOC,
+						substring(suser_name(),charindex('\',suser_name())+1,20),
+						GETDATE(),HOST_NAME(),@MOD_NO,'U',0);
+
+					SELECT @ErrorVar = @@ERROR;
+		
+					IF @ErrorVar <> 0
+						BEGIN							
+							RETURN 1;
+						END
+					
+					SELECT @RET_MOD_NO=@MOD_NO;
+
+					DELETE PDCTAB_HIST
+						WHERE DS_CODE=@DS_CODE AND OPR_DATE=@OPR_DATE
+						AND ENTRY_LOC=@ENTRY_LOC AND IS_AUTH=0;
+
+					SELECT @ErrorVar = @@ERROR;
+
+					IF @ErrorVar <> 0
+						BEGIN
+							RETURN 1;
+						END			
+					
+					RETURN 0;
+			
+				END
+			ELSE
+				BEGIN
+					-- not exist
+					
+					RETURN 4;
+				END
+
+		END
+    
+END
+
+
+
+
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_PDCTotal_Update] TO [ccms_sp_only]
+
+GO
+
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 21-Jul-13
+-- Description:	Get detail of PDCTOTAL
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_PDCTotal_GetDetail]	
+	@DS_CODE	varchar(8),
+	@OPR_DATE	datetime,
+	@ENTRY_LOC	varchar(3),
+	@MOD_NO		int	
+AS
+BEGIN	
+	
+	SET NOCOUNT ON;
+
+	IF EXISTS( SELECT DS_CODE 
+				FROM PDCTOTAL 
+				WHERE DS_CODE=@DS_CODE AND OPR_DATE=@OPR_DATE
+				AND ENTRY_LOC=@ENTRY_LOC AND MOD_NO=@MOD_NO)
+		BEGIN
+			SELECT *,'IS_AUTH'=1 
+				FROM PDCTOTAL 
+				WHERE DS_CODE=@DS_CODE AND OPR_DATE=@OPR_DATE
+				AND ENTRY_LOC=@ENTRY_LOC AND MOD_NO = @MOD_NO
+		END	
+	ELSE
+		BEGIN
+			SELECT * 
+				FROM PDCTOTAL_HIST
+				WHERE DS_CODE=@DS_CODE AND OPR_DATE=@OPR_DATE
+				AND ENTRY_LOC=@ENTRY_LOC AND MOD_NO = @MOD_NO
+		END
+END
+
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_PDCTotal_GetDetail] TO [ccms_sp_only]
+
+GO
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 21-Jul-13
+-- Description:	Get Total # of modification of PDCTotal
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_PDCTotal_GetMaxMod]
+	@DS_CODE	varchar(8),
+	@OPR_DATE	datetime,
+	@ENTRY_LOC	varchar(3)
+AS
+BEGIN	
+
+	DECLARE @Max1	int,
+			@Max2	int;
+
+	SET NOCOUNT ON;
+	
+	SELECT @Max1=0,@Max2=0;
+
+	SELECT @Max1=ISNULL(MAX(MOD_NO),0) FROM PDCTOTAL_HIST 
+		WHERE DS_CODE=@DS_CODE AND OPR_DATE=@OPR_DATE
+				AND ENTRY_LOC=@ENTRY_LOC AND IS_AUTH=0;
+		
+	IF @Max1=0
+		BEGIN
+			SELECT @Max2=ISNULL(MAX(MOD_NO),0) FROM PDCTOTAL
+				WHERE DS_CODE=@DS_CODE AND OPR_DATE=@OPR_DATE
+				AND ENTRY_LOC=@ENTRY_LOC;
+			SELECT @Max2;
+			RETURN 0;			
+		END
+	
+	SELECT @Max1;
+	RETURN 0;
+
+END
+
+
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_PDCTotal_GetMaxMod] TO [ccms_sp_only]
+
+GO
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 21-Jul-13
+-- Description:	Get detail of PDCTab
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_PDCTab_GetDetails]	
+	@DS_CODE	varchar(8),
+	@OPR_DATE	datetime,
+	@ENTRY_LOC	varchar(3),
+	@MOD_NO		int
+AS
+BEGIN	
+	
+	SET NOCOUNT ON;
+
+	IF EXISTS( SELECT DS_CODE 
+			   FROM PDCTAB WHERE DS_CODE=@DS_CODE AND OPR_DATE=@OPR_DATE
+				AND ENTRY_LOC=@ENTRY_LOC AND MOD_NO=@MOD_NO)
+		BEGIN
+			SELECT ct.*,'IS_AUTH'=1,
+				cb.BRANCH_NAME AS 'ENTRY_LOC_NAME',br.BRANCH_NAME,
+				b.BANK_CODE,b.BANK_NAME,cl.ACC_NAME, ctp.CHECKTYPE_NAME
+			FROM PDCTAB ct
+				LEFT OUTER JOIN CITIBANK_BRANCH cb
+				ON cb.BRANCH_CODE=ct.ENTRY_LOC				
+				LEFT OUTER JOIN CLEARING_BRANCH br
+				ON br.NIKBRANCH_CODE=ct.NIKBRANCH_CODE
+				LEFT OUTER JOIN CLEARING_BANK b
+				ON b.BANK_CODE=br.BANK_CODE
+				LEFT OUTER JOIN CLEARING_CLIENT cl
+				ON cl.ACC_NO=ct.REMARK
+				LEFT OUTER JOIN CHECKTYPE ctp
+				ON ctp.CHECKTYPE_CODE=ct.CHECK_TYPE
+			WHERE ct.DS_CODE=@DS_CODE AND ct.OPR_DATE=@OPR_DATE
+				AND ct.ENTRY_LOC=@ENTRY_LOC AND ct.MOD_NO = @MOD_NO			
+		END	
+	ELSE
+		BEGIN
+			SELECT cth.* ,
+				cb.BRANCH_NAME AS 'ENTRY_LOC_NAME',br.BRANCH_NAME,
+				b.BANK_CODE,b.BANK_NAME,cl.ACC_NAME, ctp.CHECKTYPE_NAME
+			FROM PDCTAB_HIST cth
+				LEFT OUTER JOIN CITIBANK_BRANCH cb
+				ON cb.BRANCH_CODE=cth.ENTRY_LOC				
+				LEFT OUTER JOIN CLEARING_BRANCH br
+				ON br.NIKBRANCH_CODE=cth.NIKBRANCH_CODE
+				LEFT OUTER JOIN CLEARING_BANK b
+				ON b.BANK_CODE=br.BANK_CODE
+				LEFT OUTER JOIN CLEARING_CLIENT cl
+				ON cl.ACC_NO=cth.REMARK
+				LEFT OUTER JOIN CHECKTYPE ctp
+				ON ctp.CHECKTYPE_CODE=cth.CHECK_TYPE
+			WHERE cth.DS_CODE=@DS_CODE AND cth.OPR_DATE=@OPR_DATE
+				AND cth.ENTRY_LOC=@ENTRY_LOC AND cth.MOD_NO = @MOD_NO			
+		END
+END
+
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_PDCTab_GetDetails] TO [ccms_sp_only]
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 21-Jul-13
+-- Description:	Remove record from PDCTotal
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_PDCTotal_Remove]
+	@DS_CODE	varchar(8),
+	@OPR_DATE	datetime,
+	@ENTRY_LOC	varchar(3),
+	@MOD_NO		int,	
+	@RET_MOD_NO	int output
+AS
+BEGIN	
+	DECLARE @STATUS			char(1),
+			@TOTAL_CHKNO	int, 
+			@TOTAL_CHKAMT	numeric(14,2), 
+			@CUSTOMER_REF	varchar(50),
+			@INPUT_BY		varchar(20),
+			@INPUT_DATETIME datetime,
+			@INPUT_FROM		varchar(30);
+	
+	DECLARE @ErrorVar		int; 
+			
+	SET NOCOUNT ON;
+
+	SET @STATUS = '';
+
+	BEGIN TRANSACTION
+
+	IF EXISTS(SELECT DS_CODE from PDCTOTAL
+			  WHERE DS_CODE=@DS_CODE AND OPR_DATE=@OPR_DATE
+				AND ENTRY_LOC=@ENTRY_LOC AND MOD_NO=@MOD_NO)
+		BEGIN
+			SELECT @STATUS=[STATUS],
+				@TOTAL_CHKNO=TOTAL_CHKNO,@TOTAL_CHKAMT=TOTAL_CHKAMT,
+				@CUSTOMER_REF=CUSTOMER_REF,
+				@INPUT_BY=INPUT_BY,	@INPUT_DATETIME=INPUT_DATETIME,
+				@INPUT_FROM=INPUT_FROM
+				FROM PDCTOTAL
+				WHERE DS_CODE=@DS_CODE AND OPR_DATE=@OPR_DATE
+				AND ENTRY_LOC=@ENTRY_LOC AND MOD_NO=@MOD_NO;
+			
+			IF (@STATUS = 'D')
+				BEGIN
+					-- already deleted
+					ROLLBACK TRANSACTION;
+					RETURN 6;
+				END;
+
+			DELETE PDCTOTAL_HIST WHERE DS_CODE=@DS_CODE AND OPR_DATE=@OPR_DATE
+				AND ENTRY_LOC=@ENTRY_LOC AND IS_AUTH=0;
+
+			SELECT @ErrorVar = @@ERROR;		
+
+			IF @ErrorVar <> 0				
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+			SELECT @RET_MOD_NO = @MOD_NO + 1;
+
+			INSERT INTO 
+				PDCTOTAL_HIST (DS_CODE, TOTAL_CHKNO, TOTAL_CHKAMT, OPR_DATE, 
+				CUSTOMER_REF, ENTRY_LOC, 
+				INPUT_BY, INPUT_DATETIME, INPUT_FROM, MOD_NO, 
+				[STATUS], IS_AUTH)
+				VALUES(@DS_CODE, @TOTAL_CHKNO, @TOTAL_CHKAMT, @OPR_DATE, 
+				@CUSTOMER_REF, @ENTRY_LOC, 
+				substring(suser_name(),charindex('\',suser_name())+1,20), 
+				GETDATE(), HOST_NAME(), @RET_MOD_NO, 
+				'D', 0)
+
+			SELECT @ErrorVar = @@ERROR;		
+
+			IF @ErrorVar <> 0				
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+
+-----------
+
+			DELETE PDCTAB_HIST
+				WHERE DS_CODE=@DS_CODE AND OPR_DATE=@OPR_DATE
+				AND ENTRY_LOC=@ENTRY_LOC AND IS_AUTH=0 ;
+
+			SELECT @ErrorVar = @@error;
+
+			IF @ErrorVar <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+			INSERT INTO PDCTAB_HIST(OPR_DATE, ISSUE_DATE, NIKBRANCH_CODE, 
+				PAYEE_NAME, CHECK_SERIES, CHECK_NUMBER, CHECK_NO, BOOK_NO, 
+				CHECK_TYPE, ACC_NO, DEBIT_CREDIT, REMARK, BATCH_NO, CHECK_REF,
+				ENTRY_LOC, DS_CODE, MOD_NO, IS_AUTH, VALUE_TYPE)
+				SELECT OPR_DATE, ISSUE_DATE, NIKBRANCH_CODE, 
+				PAYEE_NAME, CHECK_SERIES, CHECK_NUMBER, CHECK_NO, BOOK_NO, 
+				CHECK_TYPE, ACC_NO, DEBIT_CREDIT, REMARK, BATCH_NO, CHECK_REF,
+				ENTRY_LOC, DS_CODE, @RET_MOD_NO, 0, VALUE_TYPE
+				FROM PDCTAB
+				WHERE DS_CODE=@DS_CODE AND OPR_DATE=@OPR_DATE
+				AND ENTRY_LOC=@ENTRY_LOC AND MOD_NO=@MOD_NO;
+			
+			SELECT @ErrorVar = @@error;
+
+			IF @ErrorVar <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+			
+-----------
+			
+
+			COMMIT TRANSACTION;
+			RETURN 0;
+				
+		END;
+	ELSE 
+		BEGIN			
+			-- item might exist in hist table
+			IF EXISTS(SELECT DS_CODE from PDCTOTAL_HIST 
+						WHERE DS_CODE=@DS_CODE AND OPR_DATE=@OPR_DATE
+						AND ENTRY_LOC=@ENTRY_LOC AND MOD_NO=@MOD_NO )
+				BEGIN
+					DELETE PDCTOTAL_HIST
+						WHERE DS_CODE=@DS_CODE AND OPR_DATE=@OPR_DATE
+						AND ENTRY_LOC=@ENTRY_LOC AND MOD_NO=@MOD_NO AND IS_AUTH=0;
+
+					SELECT @ErrorVar = @@ERROR;		
+
+					IF @ErrorVar <> 0				
+						BEGIN
+							ROLLBACK TRANSACTION;
+							RETURN 1;
+						END
+					
+					DELETE PDCTAB_HIST 
+						WHERE DS_CODE=@DS_CODE AND OPR_DATE=@OPR_DATE
+						AND ENTRY_LOC=@ENTRY_LOC AND MOD_NO=@MOD_NO AND IS_AUTH=0 ;
+					
+					SELECT @ErrorVar = @@ERROR;		
+
+					IF @ErrorVar <> 0				
+						BEGIN
+							ROLLBACK TRANSACTION;
+							RETURN 1;
+						END
+	
+					SELECT @RET_MOD_NO = @MOD_NO-1;
+
+					COMMIT TRANSACTION;
+					RETURN 0;			
+
+
+				END
+			ELSE
+				BEGIN
+					-- not exist
+					ROLLBACK TRANSACTION;
+					RETURN 4;
+				END
+			
+		END		
+    
+END
+
+
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_PDCTotal_Remove] TO [ccms_sp_only]
+
+GO
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 21-Jul-13
+-- Description:	Authorize record to PDCTOTAL
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_PDCTotal_Auth]	
+	@DS_CODE	varchar(8),
+	@OPR_DATE	datetime,
+	@ENTRY_LOC	varchar(3),	
+	@MOD_NO			int,
+	@MOD_DATETIME	datetime
+AS
+BEGIN	
+	DECLARE @STATUS			char(1),
+			@TOTAL_CHKNO	int, 
+			@TOTAL_CHKAMT	numeric(14,2), 
+			@CUSTOMER_REF	varchar(50),		
+			@INPUT_BY		varchar(20),
+			@INPUT_DATETIME datetime,
+			@INPUT_FROM		varchar(30),
+			@LAST_MOD_NO	int,
+			@IS_AUTH		bit;			
+	
+	DECLARE @ErrorVar1		int; 
+			
+	SET NOCOUNT ON;
+
+	SELECT @STATUS = '';
+
+	BEGIN TRANSACTION;
+
+	IF EXISTS(SELECT DS_CODE from PDCTOTAL_HIST 
+			  WHERE DS_CODE=@DS_CODE AND OPR_DATE=@OPR_DATE
+				AND ENTRY_LOC=@ENTRY_LOC AND MOD_NO=@MOD_NO)
+		BEGIN
+			SELECT @STATUS=[STATUS],
+				@TOTAL_CHKNO=TOTAL_CHKNO, 
+				@TOTAL_CHKAMT=TOTAL_CHKAMT,@CUSTOMER_REF=CUSTOMER_REF,
+				@INPUT_BY=INPUT_BY,	@INPUT_DATETIME=INPUT_DATETIME,
+				@INPUT_FROM=INPUT_FROM,@IS_AUTH=IS_AUTH
+				FROM PDCTOTAL_HIST 
+				WHERE DS_CODE=@DS_CODE AND OPR_DATE=@OPR_DATE
+				AND ENTRY_LOC=@ENTRY_LOC AND MOD_NO=@MOD_NO;
+			IF (@IS_AUTH = 1)
+				BEGIN
+					-- already authorized
+					ROLLBACK TRANSACTION;
+					RETURN 3;
+				END;
+			IF (@INPUT_BY = substring(suser_name(),charindex('\',suser_name())+1,20))
+				BEGIN
+					-- maker and checker same person
+					ROLLBACK TRANSACTION;
+					RETURN 5;
+				END;
+			IF (@INPUT_DATETIME <> @MOD_DATETIME)
+				BEGIN
+					-- Data hase been changed. Need notification
+					ROLLBACK TRANSACTION;
+					RETURN 7;
+				END;			
+		END;
+	ELSE
+		BEGIN			
+			-- not exist
+			ROLLBACK TRANSACTION;
+			RETURN 4;
+		END	;
+
+	IF @MOD_NO > 1
+		BEGIN	
+		
+			INSERT INTO PDCTOTAL_HIST 
+				SELECT *,1 FROM PDCTOTAL
+				WHERE DS_CODE=@DS_CODE AND OPR_DATE=@OPR_DATE
+				AND ENTRY_LOC=@ENTRY_LOC;
+			
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+
+			UPDATE PDCTOTAL_HIST
+				SET [STATUS] = 'O' 
+				WHERE DS_CODE=@DS_CODE AND OPR_DATE=@OPR_DATE
+				AND ENTRY_LOC=@ENTRY_LOC
+				AND [STATUS] = 'L';
+
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+			IF @STATUS='U'
+				BEGIN
+					SELECT @STATUS='L';
+				END
+
+			UPDATE PDCTOTAL
+				SET
+				TOTAL_CHKNO=@TOTAL_CHKNO,
+				TOTAL_CHKAMT=@TOTAL_CHKAMT,CUSTOMER_REF=@CUSTOMER_REF, 
+				INPUT_BY=@INPUT_BY,	INPUT_DATETIME=@INPUT_DATETIME,
+				INPUT_FROM=@INPUT_FROM,
+				AUTH_BY=substring(suser_name(),charindex('\',suser_name())+1,20),
+				AUTH_DATETIME=GETDATE(),AUTH_FROM=HOST_NAME(),
+				MOD_NO=@MOD_NO,[STATUS]=@STATUS
+			WHERE DS_CODE=@DS_CODE AND OPR_DATE=@OPR_DATE
+				AND ENTRY_LOC=@ENTRY_LOC;
+
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+			
+			DELETE PDCTOTAL_HIST WHERE DS_CODE=@DS_CODE AND OPR_DATE=@OPR_DATE
+				AND ENTRY_LOC=@ENTRY_LOC
+				AND IS_AUTH=0;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END	
+
+		END
+	ELSE -- first record
+		BEGIN  
+			INSERT INTO PDCTOTAL
+				SELECT DS_CODE, TOTAL_CHKNO, TOTAL_CHKAMT, OPR_DATE, 
+					CUSTOMER_REF, ENTRY_LOC,
+					INPUT_BY, INPUT_DATETIME, INPUT_FROM, 
+					substring(suser_name(),charindex('\',suser_name())+1,20), 
+					GETDATE(), HOST_NAME(), MOD_NO, 'L' 
+					FROM PDCTOTAL_HIST
+					WHERE DS_CODE=@DS_CODE AND OPR_DATE=@OPR_DATE
+				AND ENTRY_LOC=@ENTRY_LOC AND MOD_NO=@MOD_NO;
+			
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+			DELETE PDCTOTAL_HIST WHERE DS_CODE=@DS_CODE AND OPR_DATE=@OPR_DATE
+				AND ENTRY_LOC=@ENTRY_LOC
+				AND IS_AUTH=0;
+			
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END			
+					
+		END
+	
+	-- Now update PDCTAB
+
+	INSERT INTO PDCTAB_HIST(OPR_DATE, ISSUE_DATE, NIKBRANCH_CODE, 
+		PAYEE_NAME, CHECK_SERIES, CHECK_NUMBER, CHECK_NO, BOOK_NO, 
+		CHECK_TYPE, ACC_NO, DEBIT_CREDIT, REMARK, BATCH_NO, CHECK_REF, 
+		ENTRY_LOC, DS_CODE, MOD_NO, IS_AUTH, VALUE_TYPE)
+		SELECT OPR_DATE, ISSUE_DATE, NIKBRANCH_CODE, 
+		PAYEE_NAME, CHECK_SERIES, CHECK_NUMBER, CHECK_NO, BOOK_NO, 
+		CHECK_TYPE, ACC_NO, DEBIT_CREDIT, REMARK, BATCH_NO, CHECK_REF, 
+		ENTRY_LOC, DS_CODE, MOD_NO, 1, VALUE_TYPE
+		FROM PDCTAB
+		WHERE DS_CODE=@DS_CODE AND OPR_DATE=@OPR_DATE
+				AND ENTRY_LOC=@ENTRY_LOC;
+	
+	SELECT @ErrorVar1 = @@error;
+
+	IF @ErrorVar1 <> 0
+		BEGIN
+			ROLLBACK TRANSACTION;
+			RETURN 1;
+		END
+	
+	DELETE PDCTAB WHERE DS_CODE=@DS_CODE AND OPR_DATE=@OPR_DATE
+				AND ENTRY_LOC=@ENTRY_LOC;
+
+	SELECT @ErrorVar1 = @@error;
+
+	IF @ErrorVar1 <> 0
+		BEGIN
+			ROLLBACK TRANSACTION;
+			RETURN 1;
+		END
+
+	INSERT INTO PDCTAB(OPR_DATE, ISSUE_DATE, NIKBRANCH_CODE, 
+		PAYEE_NAME, CHECK_SERIES, CHECK_NUMBER, CHECK_NO, BOOK_NO, 
+		CHECK_TYPE, ACC_NO, DEBIT_CREDIT, REMARK, BATCH_NO, CHECK_REF, 
+		ENTRY_LOC, DS_CODE, MOD_NO,VALUE_TYPE)
+		SELECT OPR_DATE, ISSUE_DATE, NIKBRANCH_CODE, 
+		PAYEE_NAME, CHECK_SERIES, CHECK_NUMBER, CHECK_NO, BOOK_NO, 
+		CHECK_TYPE, ACC_NO, DEBIT_CREDIT, REMARK, BATCH_NO, CHECK_REF, 
+		ENTRY_LOC, DS_CODE, MOD_NO, VALUE_TYPE
+		FROM PDCTAB_HIST 
+		WHERE DS_CODE=@DS_CODE AND OPR_DATE=@OPR_DATE
+				AND ENTRY_LOC=@ENTRY_LOC AND MOD_NO=@MOD_NO;
+	
+	SELECT @ErrorVar1 = @@error;
+
+	IF @ErrorVar1 <> 0
+		BEGIN
+			ROLLBACK TRANSACTION;
+			RETURN 1;
+		END	
+
+	DELETE PDCTAB_HIST WHERE DS_CODE=@DS_CODE AND OPR_DATE=@OPR_DATE
+				AND ENTRY_LOC=@ENTRY_LOC AND MOD_NO=@MOD_NO;
+
+	SELECT @ErrorVar1 = @@error;
+
+	IF @ErrorVar1 <> 0
+		BEGIN
+			ROLLBACK TRANSACTION;
+			RETURN 1;
+		END
+	
+	COMMIT TRANSACTION;
+		
+	SELECT @ErrorVar1 = @@error;
+		
+	IF @ErrorVar1 = 0
+		BEGIN		
+			RETURN 0;
+		END
+	ELSE
+		BEGIN
+			RETURN 1;
+		END
+
+    
+END
+
+
+
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_PDCTotal_Auth] TO [ccms_sp_only]
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 21-Jul-13
+-- Description:	Get detail to PDCTotal table
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_PDCTotal_GetDetailList]		
+	@DEL_FLAG	int	,
+	@AUTH_FLAG	bit,
+	@OPR_DATE	datetime,
+	@ENTRY_LOC	varchar(3)
+AS
+BEGIN	
+		
+	SET NOCOUNT ON;
+
+
+	IF @AUTH_FLAG=0
+		BEGIN						
+			SELECT ch.*,'S' = 'U',cb.BRANCH_NAME
+				FROM PDCTOTAL_HIST ch
+				LEFT OUTER JOIN CITIBANK_BRANCH cb
+				ON cb.BRANCH_CODE=ch.ENTRY_LOC
+				WHERE ch.IS_AUTH=0 AND ch.ENTRY_LOC=@ENTRY_LOC
+				ORDER BY ch.DS_CODE;			
+		END;
+	ELSE
+		BEGIN
+			IF @DEL_FLAG=0
+				BEGIN
+					SELECT *,1,'S' = 'A',cb.BRANCH_NAME				
+						FROM PDCTOTAL ct
+						LEFT OUTER JOIN CITIBANK_BRANCH cb
+						ON cb.BRANCH_CODE=ct.ENTRY_LOC
+						WHERE ct.STATUS ='L' AND ct.ENTRY_LOC=@ENTRY_LOC
+						AND ct.OPR_DATE=@OPR_DATE
+						ORDER BY ct.DS_CODE;
+				END;
+			ELSE
+				BEGIN
+					SELECT *,1,'S' = 
+						CASE  
+							WHEN ct.STATUS = 'D' THEN 'D'                    
+							ELSE 'A'
+						END ,cb.BRANCH_NAME	
+						FROM PDCTOTAL ct
+						LEFT OUTER JOIN CITIBANK_BRANCH cb
+						ON cb.BRANCH_CODE=ct.ENTRY_LOC
+						WHERE ct.STATUS IN ('L','D')
+						AND ct.ENTRY_LOC=@ENTRY_LOC
+						AND ct.OPR_DATE=@OPR_DATE
+						ORDER BY DS_CODE;
+				END;
+		END;	
+	   
+END
+
+
+GO
+
+
+GRANT EXECUTE ON [dbo].[CMS_PDCTotal_GetDetailList] TO [ccms_sp_only]
+
+GO
+
+
+
+
+
+CREATE view [dbo].[V_CLEAR_PDC]
+AS    
+(
+	SELECT ct.TOTAL_CHKNO, ct.TOTAL_CHKAMT, ISNULL(ct.CUSTOMER_REF,'') CUSTOMER_REF,
+		cl.OPR_DATE,cl.ISSUE_DATE, cl.NIKBRANCH_CODE,cl.PAYEE_NAME, cl.CHECK_NUMBER, 
+		cl.DEBIT_CREDIT, cl.REMARK,cl.DS_CODE, cl.ENTRY_LOC,
+		cbr.BRANCH_NAME,cb.BANK_CODE,cb.BANK_NAME
+		FROM PDCTOTAL ct
+		INNER JOIN PDCTAB cl
+		ON ct.DS_CODE=cl.DS_CODE AND ct.OPR_DATE=cl.OPR_DATE 
+		AND ct.ENTRY_LOC=cl.ENTRY_LOC
+		LEFT OUTER JOIN CLEARING_BRANCH cbr
+		ON cbr.NIKBRANCH_CODE=cl.NIKBRANCH_CODE
+		LEFT OUTER JOIN CLEARING_BANK cb
+		ON cb.BANK_CODE=cbr.BANK_CODE
+)
+
+
+GO
+
+GRANT SELECT ON [dbo].[V_CLEAR_PDC] TO [ccms_sp_only]
+GO
+
+
+ALTER TABLE PDCTOTAL
+ADD PDC_TRANS bit;
+
+GO
+
+ALTER TABLE PDCTOTAL_HIST
+ADD PDC_TRANS bit;
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 22-Jul-13
+-- Description: Process for PDC Transfer
+-- =============================================
+
+CREATE PROCEDURE [dbo].[CMS_Process_PDCTransfer]
+	@OPR_DATE	datetime,
+	@ENTRY_LOC	varchar(3)	
+AS
+BEGIN
+
+	SET NOCOUNT ON;
+
+	DECLARE 
+		@v_DS_CODE	varchar(8);
+	
+
+	DECLARE tmpcursor1 CURSOR FOR
+		SELECT DS_CODE
+			FROM PDCTotal 
+			WHERE OPR_DATE=@OPR_DATE AND ENTRY_LOC=@ENTRY_LOC
+			AND (PDC_TRANS IS NULL OR PDC_TRANS=0) AND [STATUS]='L';
+
+	OPEN tmpcursor1;
+	FETCH NEXT FROM tmpcursor1 
+        INTO @v_DS_CODE;
+
+	WHILE @@FETCH_STATUS=0 
+ 	BEGIN
+
+		INSERT INTO CHECKTOTAL(DS_CODE, TOTAL_CHKNO, TOTAL_CHKAMT, OPR_DATE, 
+			CUSTOMER_REF, ENTRY_LOC, INPUT_BY, INPUT_DATETIME, INPUT_FROM, 
+			AUTH_BY, AUTH_DATETIME, AUTH_FROM, MOD_NO, [STATUS])
+			SELECT DS_CODE, TOTAL_CHKNO, TOTAL_CHKAMT, OPR_DATE, 
+			CUSTOMER_REF, ENTRY_LOC, INPUT_BY, INPUT_DATETIME, INPUT_FROM, 
+			AUTH_BY, AUTH_DATETIME, AUTH_FROM, 1, [STATUS]
+			FROM PDCTOTAL
+			WHERE OPR_DATE=@OPR_DATE AND ENTRY_LOC=@ENTRY_LOC
+			AND DS_CODE=@v_DS_CODE;
+
+
+		INSERT INTO CLEARINGTAB(OPR_DATE, ISSUE_DATE, NIKBRANCH_CODE, PAYEE_NAME, 
+			CHECK_SERIES, CHECK_NUMBER, CHECK_NO, BOOK_NO, CHECK_TYPE, ACC_NO, 
+			DEBIT_CREDIT, REMARK, BATCH_NO, CHECK_REF, ENTRY_LOC, DS_CODE, 
+			RTN_STATUS, IS_PDC,	MOD_NO, VALUE_TYPE)
+			SELECT OPR_DATE, ISSUE_DATE, NIKBRANCH_CODE, PAYEE_NAME, 
+			CHECK_SERIES, CHECK_NUMBER, CHECK_NO, BOOK_NO, CHECK_TYPE, ACC_NO, 
+			DEBIT_CREDIT, REMARK, BATCH_NO, CHECK_REF, ENTRY_LOC, DS_CODE, 
+			'O', 1,1, VALUE_TYPE
+			FROM PDCTAB
+			WHERE OPR_DATE=@OPR_DATE AND ENTRY_LOC=@ENTRY_LOC
+			AND DS_CODE=@v_DS_CODE;
+
+		UPDATE PDCTOTAL SET PDC_TRANS=1
+			WHERE OPR_DATE=@OPR_DATE AND ENTRY_LOC=@ENTRY_LOC
+			AND DS_CODE=@v_DS_CODE;
+
+		
+
+		FETCH NEXT FROM tmpcursor1 
+			INTO @v_DS_CODE;
+
+	END
+
+	CLOSE tmpcursor1;	
+	DEALLOCATE tmpcursor1;
+
+
+	RETURN 0;
+	
+    
+END   
+
+
+
+GO
+
+
+GRANT EXECUTE ON [dbo].[CMS_Process_PDCTransfer] TO [ccms_sp_only]
+
+GO
+
+
+ALTER TABLE dbo.GENPRM
+ADD NONZONE_REF_FROM varchar(7),
+NONZONE_REF_TO varchar(7);
+
+GO
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 02-June-13
+-- Description: Collection Process for CitiAnywhere Check
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_Process_CollectionCitiAny]	
+AS
+BEGIN	
+	DECLARE 
+		@ErrorVar		INT,
+		@v_D_CODE		varchar(12),
+		@v_SLNO			numeric(3,0),
+		@maxNONZONE_REF	numeric(7,0),
+		@v_Ref_From		numeric(7,0),
+		@v_Flag_Ref		bit;
+		
+	
+	SET NOCOUNT ON;
+
+	BEGIN TRANSACTION;
+
+	SET @v_Flag_Ref=0;
+
+	DECLARE tmpcursor1 CURSOR FOR
+		SELECT DISTINCT ct.D_CODE FROM CCHECKTOTAL as ct INNER JOIN CCHECK as cc 
+			ON ct.D_CODE=cc.D_CODE AND ct.MOD_NO=cc.MOD_NO
+			WHERE cc.RTN_STATUS ='O' AND cc.REMINDER_DATE is null
+			AND ct.[STATUS]='L';
+
+	OPEN tmpcursor1;
+	FETCH NEXT FROM tmpcursor1 
+        INTO @v_D_CODE;
+
+	WHILE @@FETCH_STATUS=0 
+ 	BEGIN
+		
+		SET @v_Flag_Ref=1;
+
+		DELETE CCHECKTOTAL_HIST
+			WHERE D_CODE=@v_D_CODE AND IS_AUTH=0;
+
+		INSERT INTO CCHECKTOTAL_HIST
+			SELECT *,1 FROM CCHECKTOTAL WHERE D_CODE=@v_D_CODE;
+
+		UPDATE CCHECKTOTAL_HIST
+			SET [STATUS]='O'
+			WHERE D_CODE=@v_D_CODE AND [STATUS]='L';
+
+		UPDATE CCHECKTOTAL
+			SET MOD_NO=MOD_NO+1,
+				INPUT_BY=substring(suser_name(),charindex('\',suser_name())+1,20),	
+				INPUT_DATETIME=GETDATE(),INPUT_FROM=HOST_NAME(),
+				AUTH_BY=substring(suser_name(),charindex('\',suser_name())+1,20),
+				AUTH_DATETIME=GETDATE(),AUTH_FROM=HOST_NAME()
+			WHERE D_CODE=@v_D_CODE;
+		
+		DELETE CCHECK_HIST
+			WHERE D_CODE=@v_D_CODE AND IS_AUTH=0;
+
+		INSERT INTO CCHECK_HIST(SLNO, D_CODE, CLIENT_CODE, DLOCATION_CODE, 
+			CUSTOMER_REF, SLIP_DATE, VALUE_DATE, CHECK_NO, AMOUNT, CHECK_DATE, 
+			CHECK_TYPE, DRAWER, DRAWEE_BANK_CODE, LOCATION_CODE, BRANCH_CODE, 
+			CHECK_REF, RTN_STATUS, NONZONE_REF, MOD_NO, IS_AUTH, REMINDER_DATE, 
+			REMINDER_NO, RTN_CODE)
+			SELECT SLNO, D_CODE, CLIENT_CODE, DLOCATION_CODE, 
+			CUSTOMER_REF, SLIP_DATE, VALUE_DATE, CHECK_NO, AMOUNT, CHECK_DATE, 
+			CHECK_TYPE, DRAWER, DRAWEE_BANK_CODE, LOCATION_CODE, BRANCH_CODE, 
+			CHECK_REF, RTN_STATUS, NONZONE_REF, MOD_NO,1, REMINDER_DATE, 
+			REMINDER_NO , RTN_CODE
+			FROM CCHECK	
+			WHERE D_CODE=@v_D_CODE
+		
+		UPDATE CCHECK
+			SET MOD_NO=MOD_NO+1 
+			WHERE D_CODE=@v_D_CODE
+
+		FETCH NEXT FROM tmpcursor1 
+				INTO @v_D_CODE;
+
+	END
+
+	CLOSE tmpcursor1;	
+	DEALLOCATE tmpcursor1;
+----2----------------------
+	SELECT @maxNONZONE_REF=ISNULL(MAX(NONZONE_REF),0) FROM CCHECK
+		WHERE NONZONE_REF IS NOT NULL;
+	
+	SELECT @v_Ref_From=@maxNONZONE_REF+1;
+		
+	DECLARE tmpcursor2 CURSOR FOR
+		SELECT DISTINCT ct.D_CODE,cc.SLNO
+			FROM CCHECKTOTAL as ct INNER JOIN CCHECK as cc 
+			ON ct.D_CODE=cc.D_CODE AND ct.MOD_NO=cc.MOD_NO
+			WHERE cc.RTN_STATUS ='O' AND cc.REMINDER_DATE is null
+			AND ct.[STATUS]='L';
+
+	OPEN tmpcursor2;
+	FETCH NEXT FROM tmpcursor2 
+        INTO @v_D_CODE,@v_SLNO;
+
+	WHILE @@FETCH_STATUS=0 
+ 	BEGIN
+		SELECT @maxNONZONE_REF=@maxNONZONE_REF+1;
+
+		UPDATE CCHECK
+			SET NONZONE_REF=RIGHT('0000000' + convert(varchar,@maxNONZONE_REF), 7),
+			REMINDER_DATE=CONVERT(datetime,CONVERT(varchar(12), GETDATE())),
+			REMINDER_NO=1
+			WHERE D_CODE=@v_D_CODE AND SLNO=@v_SLNO;
+
+		INSERT NCOLLECTION(NONZONE_REF, 
+			REF_DATE, 
+			INPUT_BY, INPUT_DATETIME, INPUT_FROM, 
+			AUTH_BY, AUTH_DATETIME, AUTH_FROM, 
+			MOD_NO, RTN_STATUS, [STATUS])
+			VALUES(RIGHT('0000000' + convert(varchar,@maxNONZONE_REF), 7),
+			CONVERT(datetime,CONVERT(varchar(12), GETDATE())),
+			substring(suser_name(),charindex('\',suser_name())+1,20),
+			GETDATE(),HOST_NAME(),
+			substring(suser_name(),charindex('\',suser_name())+1,20),
+			GETDATE(),HOST_NAME(),
+			1,'O','L');
+
+
+		FETCH NEXT FROM tmpcursor2 
+        INTO @v_D_CODE,@v_SLNO;
+
+	END
+
+	CLOSE tmpcursor2;	
+	DEALLOCATE tmpcursor2;
+
+-----------------------------------
+	IF @v_Flag_Ref=1
+	BEGIN
+		UPDATE GENPRM 
+			SET  NONZONE_REF_FROM=RIGHT('0000000' + convert(varchar,@v_Ref_From), 7),
+			NONZONE_REF_TO=RIGHT('0000000' + convert(varchar,@maxNONZONE_REF), 7);
+
+	END
+
+	SELECT @ErrorVar = @@error;			
+
+	IF @ErrorVar <> 0
+		BEGIN
+			ROLLBACK TRANSACTION;
+			RETURN 1;
+		END
+
+	COMMIT TRANSACTION;
+         
+END
+
+GO
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 22-Jul-12
+-- Description:	Get detail of GENPRM table
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_GenPrm_GetDetail]	
+AS
+BEGIN	
+	
+	SET NOCOUNT ON;
+	
+	SELECT * FROM GENPRM;
+ 
+END
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_GenPrm_GetDetail] TO [ccms_sp_only]
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 13-Feb-13
+-- Description:	Update return status of CCheck
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_CCheck_UpdateStatus]
+	@D_CODE		varchar(12),
+	@SLNO		int,
+	@RTN_STATUS char(1)
+AS
+BEGIN	
+	DECLARE @STATUS			char(1),
+			@TOTAL_CHKNO	numeric(4,0),
+			@TOTAL_CHKAMT	numeric(12,2),
+			@MOD_NO			numeric(3,0);			
+	
+	DECLARE @ErrorVar		int; 
+			
+	SET NOCOUNT ON;
+
+	SET @STATUS = '';
+
+	BEGIN TRANSACTION;
+
+	IF EXISTS(SELECT D_CODE from CCHECK
+			  WHERE D_CODE=@D_CODE AND SLNO=@SLNO)
+		BEGIN
+			SELECT @STATUS=[STATUS],
+				@TOTAL_CHKNO=TOTAL_CHKNO, @TOTAL_CHKAMT=TOTAL_CHKAMT,
+				@MOD_NO=MOD_NO
+				FROM CCHECKTOTAL
+				WHERE D_CODE=@D_CODE;
+			
+			IF (@STATUS = 'D')
+				BEGIN
+					-- already deleted
+					ROLLBACK TRANSACTION;
+					RETURN 6;
+				END;
+
+			DELETE CCHECKTOTAL_HIST WHERE D_CODE=@D_CODE AND IS_AUTH=0;
+
+			SELECT @ErrorVar = @@ERROR;		
+
+			IF @ErrorVar <> 0				
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+			--SELECT @RET_MOD_NO = @MOD_NO + 1;
+
+			INSERT INTO 
+				CCHECKTOTAL_HIST (D_CODE,
+				TOTAL_CHKNO,TOTAL_CHKAMT,
+				INPUT_BY, INPUT_DATETIME, INPUT_FROM, MOD_NO, 
+				[STATUS], IS_AUTH)
+				VALUES(@D_CODE,
+				@TOTAL_CHKNO,@TOTAL_CHKAMT,
+				substring(suser_name(),charindex('\',suser_name())+1,20),
+				GETDATE(), HOST_NAME(), @MOD_NO + 1,
+				'U', 0)
+
+			SELECT @ErrorVar = @@ERROR;		
+
+			IF @ErrorVar <> 0				
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+
+-----------
+
+			DELETE CCHECK_HIST
+				WHERE D_CODE=@D_CODE AND IS_AUTH=0 ;
+
+			SELECT @ErrorVar = @@error;
+
+			IF @ErrorVar <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+			INSERT INTO CCHECK_HIST(SLNO, D_CODE, CLIENT_CODE, DLOCATION_CODE, CUSTOMER_REF, 
+				SLIP_DATE, VALUE_DATE, CHECK_NO, AMOUNT, CHECK_DATE, 
+				CHECK_TYPE, DRAWER, DRAWEE_BANK_CODE, LOCATION_CODE, 
+				BRANCH_CODE, CHECK_REF, RTN_STATUS,	NONZONE_REF, MOD_NO, 
+				IS_AUTH, REMINDER_DATE, REMINDER_NO, RTN_CODE, 
+				[FILENAME], FILE_USER_ID, FLEXGEN_DATE)
+				SELECT SLNO, D_CODE, CLIENT_CODE, DLOCATION_CODE, CUSTOMER_REF, 
+					SLIP_DATE, VALUE_DATE, CHECK_NO, AMOUNT, CHECK_DATE, 
+					CHECK_TYPE, DRAWER, DRAWEE_BANK_CODE, LOCATION_CODE, 
+					BRANCH_CODE, CHECK_REF, RTN_STATUS, NONZONE_REF,@MOD_NO + 1,
+					0,REMINDER_DATE, REMINDER_NO, RTN_CODE, 
+					[FILENAME], FILE_USER_ID, FLEXGEN_DATE
+				FROM CCHECK
+				WHERE D_CODE=@D_CODE AND MOD_NO=@MOD_NO;
+			
+			SELECT @ErrorVar = @@error;
+
+			IF @ErrorVar <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+			
+			UPDATE CCHECK_HIST
+				SET RTN_STATUS=@RTN_STATUS
+				WHERE D_CODE=@D_CODE AND MOD_NO=@MOD_NO+1 AND SLNO=@SLNO
+
+			SELECT @ErrorVar = @@error;
+
+			IF @ErrorVar <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+			
+-----------
+			
+
+			COMMIT TRANSACTION;
+			RETURN 0;
+				
+		END;
+		
+		ROLLBACK TRANSACTION;
+		RETURN 4; -- not exist
+	
+END
+
+GO
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

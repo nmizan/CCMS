@@ -1,0 +1,3 @@
+alter table GenPRM add Last_UCN_No varchar(14)
+alter table Client add Direct_Debit_Customer bit
+alter table Client_Hist add Direct_Debit_Customer bit

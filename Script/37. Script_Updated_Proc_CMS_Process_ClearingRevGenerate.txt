@@ -1,0 +1,195 @@
+USE [CCMS]
+GO
+/****** Object:  StoredProcedure [dbo].[CMS_Process_ClearingRevGenerate]    Script Date: 08/09/2015 11:12:56 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 21-Apr-13
+-- Modified by: Mohammad Yasir Arafat	
+-- Modify Date: 08 Sept 15
+-- Description: Process for reversal deposit update
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_Process_ClearingRevGenerate]
+	@REV_DATE	datetime,	
+	@ENTRY_LOC	varchar(3),
+	@REFACC_NO	varchar(16),
+	@VALUE_TYPE	numeric(1,0)
+AS
+BEGIN	
+	
+	DELETE FROM TMP_REVERSAL_CLEARING 
+		WHERE REV_DATE=@REV_DATE AND ENTRY_LOC=@ENTRY_LOC AND VALUE_TYPE=@VALUE_TYPE;
+
+
+	INSERT INTO TMP_REVERSAL_CLEARING( CR_TYPE,VALUE_DATE,ENTRY_LOC,REV_DATE,
+		ACC_NO,REFACC_NO,CLIENT_CODE,AMOUNT,
+		DS_CODE,
+		CHECK_NUMBER,
+		SEQ_NO,ADD_TEXT,VALUE_TYPE)
+                          
+------By Total                                  
+	SELECT c.SPEED_CR_TYPE,a.OPR_DATE VALUE_DATE, a.ENTRY_LOC,a.OPR_DATE,
+		c.ACC_NO,@REFACC_NO AS REFACC_NO,a.REMARK,sum(a.DEBIT_CREDIT) as total,
+		substring(CONVERT(varchar(12), a.OPR_DATE,112),3,8) as DS_CODE,
+		substring(CONVERT(varchar(12), a.OPR_DATE,112),3,8) CHECK_NUMBER,
+		COUNT(a.REMARK),'' ADD_TEXT,@VALUE_TYPE
+	FROM CLEARINGTAB a, CLEARING_CLIENT c                                  
+	WHERE 
+		a.[STATUS]='L'
+		AND a.DEBIT_CREDIT>0                                  
+		AND a.OPR_DATE=@REV_DATE AND a.ENTRY_LOC=@ENTRY_LOC
+		AND a.VALUE_TYPE=@VALUE_TYPE
+		AND a.REMARK=c.ACC_NO
+		AND a.FLEX_FILENAME IS NULL
+		AND c.SPEED_CR_TYPE='T'
+	GROUP BY 
+		a.OPR_DATE,a.ENTRY_LOC,c.SPEED_CR_TYPE,                                  
+		c.ACC_NO ,a.REMARK                
+
+	UNION ALL
+            
+------By Deposit code
+	SELECT c.SPEED_CR_TYPE,a.OPR_DATE valueDate,a.ENTRY_LOC,a.OPR_DATE,
+		c.ACC_NO,@REFACC_NO AS REFACC_NO,a.REMARK,sum(a.DEBIT_CREDIT) as total,
+		a.DS_CODE ,
+		a.DS_CODE CHECK_NUMBER,
+		count(a.REMARK),'' ADD_TEXT,@VALUE_TYPE
+	FROM CLEARINGTAB a, CLEARING_CLIENT c
+	WHERE
+		a.[STATUS]='L'
+		AND a.DEBIT_CREDIT>0 
+		AND a.OPR_DATE=@REV_DATE AND a.ENTRY_LOC=@ENTRY_LOC
+		AND a.VALUE_TYPE=@VALUE_TYPE
+		AND a.REMARK=c.ACC_NO
+		AND a.FLEX_FILENAME IS NULL
+		AND c.SPEED_CR_TYPE='D'
+	GROUP BY a.OPR_DATE,a.ENTRY_LOC,c.SPEED_CR_TYPE,
+		c.ACC_NO ,a.REMARK,a.DS_CODE
+	                                  
+                                  
+	UNION ALL
+--\\\\\\\\\\\\\\\By Check\\\\\\\\                                  
+                                
+                                
+	SELECT  c.SPEED_CR_TYPE,a.OPR_DATE,a.ENTRY_LOC,a.OPR_DATE,
+		a.REMARK,@REFACC_NO REFACC_NO,a.REMARK,a.DEBIT_CREDIT,
+		a.DS_CODE,
+		a.CHECK_NUMBER,
+		1  ,'' ADD_TEXT,@VALUE_TYPE
+	FROM CLEARINGTAB a, CLEARING_CLIENT c
+	WHERE                    
+		a.[STATUS]='L'
+		AND a.DEBIT_CREDIT>0
+		AND a.OPR_DATE=@REV_DATE AND a.ENTRY_LOC=@ENTRY_LOC
+		AND a.VALUE_TYPE=@VALUE_TYPE
+		AND a.REMARK=c.ACC_NO
+		AND a.FLEX_FILENAME IS NULL
+		AND c.SPEED_CR_TYPE='C'
+                      
+	UNION ALL                
+                
+	SELECT  c.SPEED_CR_TYPE,a.OPR_DATE,a.ENTRY_LOC,a.OPR_DATE,
+		a.REMARK,@REFACC_NO REFACC_NO,a.REMARK,a.DEBIT_CREDIT,
+		b.CUSTOMER_REF , 
+		a.CHECK_NUMBER,
+		1 ,'' ADD_TEXT,@VALUE_TYPE
+		FROM CLEARINGTAB a, CHECKTOTAL b, CLEARING_CLIENT c
+	WHERE 
+		a.MID=b.MID AND b.[STATUS]='L'
+		AND a.DS_CODE=b.DS_CODE AND a.ENTRY_LOC=b.ENTRY_LOC AND a.OPR_DATE=b.OPR_DATE
+		AND a.VALUE_TYPE=@VALUE_TYPE
+		AND a.DEBIT_CREDIT>0
+		AND a.OPR_DATE=@REV_DATE AND a.ENTRY_LOC=@ENTRY_LOC
+		AND c.ACC_NO=a.REMARK
+		AND a.FLEX_FILENAME IS NULL
+		AND c.SPEED_CR_TYPE='R'
+        
+	UNION ALL                
+                
+	SELECT  c.SPEED_CR_TYPE,a.OPR_DATE,a.ENTRY_LOC,a.OPR_DATE,
+		a.REMARK,@REFACC_NO REFACC_NO,a.REMARK,a.DEBIT_CREDIT,
+		b.CUSTOMER_REF , 
+		a.DS_CODE ,
+		1  ,'Chq:'+ a.CHECK_NUMBER +'  ' + e.BANK_NAME +space(2)+ ' ' + d.BRANCH_NAME ADD_TEXT,@VALUE_TYPE
+	FROM CLEARINGTAB a,CHECKTOTAL b, CLEARING_CLIENT c, CLEARING_BRANCH d ,CLEARING_BANK e                    
+	WHERE
+		a.MID=b.MID AND b.[STATUS]='L'
+		AND a.DS_CODE=b.DS_CODE AND a.ENTRY_LOC=b.ENTRY_LOC AND a.OPR_DATE=b.OPR_DATE
+		AND a.VALUE_TYPE=@VALUE_TYPE
+		AND a.DEBIT_CREDIT>0
+		AND a.OPR_DATE=@REV_DATE AND a.ENTRY_LOC=@ENTRY_LOC   
+		AND c.ACC_NO=a.REMARK                        
+		AND a.FLEX_FILENAME IS NULL                                  
+		AND c.SPEED_CR_TYPE='B'        
+		AND a.NIKBRANCH_CODE=d.NIKBRANCH_CODE        
+		AND d.BANK_CODE=e.BANK_CODE 
+
+	UNION ALL
+
+------By DepositRef
+	SELECT c.SPEED_CR_TYPE,a.OPR_DATE valueDate,a.ENTRY_LOC,a.OPR_DATE,
+		c.ACC_NO ,@REFACC_NO REFACC_NO,a.REMARK,sum(a.DEBIT_CREDIT) as total,
+		a.DS_CODE ,
+		b.CUSTOMER_REF,
+		count(a.REMARK),'' Add_text,@VALUE_TYPE
+	FROM CLEARINGTAB a, CLEARING_CLIENT c  , checktotal  b
+	WHERE
+		a.MID=b.MID AND b.[STATUS]='L'
+		AND a.DS_CODE=b.DS_CODE AND a.ENTRY_LOC=b.ENTRY_LOC AND a.OPR_DATE=b.OPR_DATE
+		AND a.VALUE_TYPE=@VALUE_TYPE
+		AND a.DEBIT_CREDIT>0
+		AND a.OPR_DATE=@REV_DATE AND a.ENTRY_LOC=@ENTRY_LOC
+		AND a.REMARK=c.ACC_NO
+		AND a.FLEX_FILENAME IS NULL		
+		AND c.SPEED_CR_TYPE='DR'
+	GROUP BY a.OPR_DATE,a.ENTRY_LOC,c.SPEED_CR_TYPE,
+		c.ACC_NO ,a.REMARK,a.DS_CODE ,b.CUSTOMER_REF
+
+		UNION ALL
+            
+	SELECT c.SPEED_CR_TYPE,a.OPR_DATE valueDate,a.ENTRY_LOC,a.OPR_DATE,
+		c.ACC_NO,@REFACC_NO AS REFACC_NO,a.REMARK,sum(a.DEBIT_CREDIT) as total,
+		a.DS_CODE ,
+		cs.CUSTOMER_REF CHECK_NUMBER, count(a.REMARK),
+		'Checks Deposited on '+'Date: '+d.SCHEDULE_DATE + 'DS NO' + d.D_CODE ADD_TEXT,@VALUE_TYPE
+	FROM CLEARINGTAB a, CLEARING_CLIENT c, DSCHEDULE d, CSD cs
+	WHERE
+		a.[STATUS]='L'
+		AND a.DEBIT_CREDIT>0 
+		AND a.OPR_DATE=@REV_DATE AND a.ENTRY_LOC=@ENTRY_LOC
+		AND a.VALUE_TYPE=@VALUE_TYPE
+		AND a.REMARK=c.ACC_NO
+		AND a.FLEX_FILENAME IS NULL
+		AND c.SPEED_CR_TYPE='RD'
+		AND a.DS_CODE = d.DS_CODE		
+		AND d.D_CODE = cs.D_CODE
+	GROUP BY a.OPR_DATE,a.ENTRY_LOC,c.SPEED_CR_TYPE,
+		c.ACC_NO ,a.REMARK,a.DS_CODE,cs.CUSTOMER_REF,d.SCHEDULE_DATE,d.D_CODE
+
+			UNION ALL
+            
+	SELECT c.SPEED_CR_TYPE,a.OPR_DATE valueDate,a.ENTRY_LOC,a.OPR_DATE,
+		c.ACC_NO,@REFACC_NO AS REFACC_NO,a.REMARK,sum(a.DEBIT_CREDIT) as total,
+		a.DS_CODE ,
+		a.CHECK_REF CHECK_NUMBER, count(a.REMARK),
+		'1 Check Deposited on '+'Date: '+d.SCHEDULE_DATE + 'DS NO' + d.D_CODE ADD_TEXT,@VALUE_TYPE
+	FROM CLEARINGTAB a, CLEARING_CLIENT c, DSCHEDULE d
+	WHERE
+		a.[STATUS]='L'
+		AND a.DEBIT_CREDIT>0 
+		AND a.OPR_DATE=@REV_DATE AND a.ENTRY_LOC=@ENTRY_LOC
+		AND a.VALUE_TYPE=@VALUE_TYPE
+		AND a.REMARK=c.ACC_NO
+		AND a.FLEX_FILENAME IS NULL
+		AND c.SPEED_CR_TYPE='RC'
+		AND a.DS_CODE = d.DS_CODE		
+	GROUP BY a.OPR_DATE,a.ENTRY_LOC,c.SPEED_CR_TYPE,
+		c.ACC_NO ,a.REMARK,a.DS_CODE,a.CHECK_REF,d.SCHEDULE_DATE,d.D_CODE
+	                                  
+         
+END

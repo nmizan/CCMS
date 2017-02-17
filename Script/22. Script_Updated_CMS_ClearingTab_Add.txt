@@ -1,0 +1,68 @@
+USE [CCMS]
+GO
+/****** Object:  StoredProcedure [dbo].[CMS_ClearingTab_Add]    Script Date: 01/09/2015 11:10:02 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 17-Apr-13
+-- Modify Date: 01 Sept 15
+-- Modified by: Mohammad Yasir Arafat
+-- Description:	Add detail to ClearingTab
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_ClearingTab_Add]	
+	@MID			numeric(10,0),
+	@DSL			numeric(4,0),	
+	@OPR_DATE		datetime, 
+	@ISSUE_DATE		datetime, 
+	@NIKBRANCH_CODE	varchar(7), 
+	@PAYEE_NAME		varchar(40), 
+	@CHECK_SERIES	varchar(4), 
+	@CHECK_NUMBER	varchar(15), 
+	@CHECK_NO		varchar(8), 
+	@BOOK_NO		varchar(8), 
+	@CHECK_TYPE		varchar(8), 
+	@ACC_NO			varchar(15), 
+	@DEBIT_CREDIT	numeric(14,2), 
+	@REMARK			varchar(15), 
+	@BATCH_NO		varchar(8), 
+	@CHECK_REF		varchar(40), 
+	@ENTRY_LOC		varchar(3), 
+	@DS_CODE		varchar(8),
+	@VALUE_TYPE		numeric(1,0),
+	@IS_ROW_CHG		bit,
+	@GOV_CHQ		bit,
+	@IQA_FAILED		bit,
+	@AddCheckText varchar(150)
+AS
+BEGIN	
+
+	DECLARE @ErrorVar	int;
+		
+	SET NOCOUNT ON;
+			
+	INSERT INTO CLEARINGTAB_HIST(MID,DSL,OPR_DATE, ISSUE_DATE, NIKBRANCH_CODE, PAYEE_NAME, 
+		CHECK_SERIES, CHECK_NUMBER, CHECK_NO, BOOK_NO, CHECK_TYPE, ACC_NO, 
+		DEBIT_CREDIT, REMARK, BATCH_NO, CHECK_REF, ENTRY_LOC, DS_CODE, 
+		RTN_STATUS, IS_PDC,
+		MOD_NO,IS_AUTH,VALUE_TYPE,IS_ROW_CHG,GOV_CHQ,IQA_FAILED,AddCheckText)
+		VALUES(@MID,@DSL,@OPR_DATE, @ISSUE_DATE, @NIKBRANCH_CODE, @PAYEE_NAME, 
+		@CHECK_SERIES, @CHECK_NUMBER, @CHECK_NO, @BOOK_NO, @CHECK_TYPE, @ACC_NO, 
+		@DEBIT_CREDIT, @REMARK, @BATCH_NO, @CHECK_REF, @ENTRY_LOC, @DS_CODE, 
+		'O', 0,
+		1,0,@VALUE_TYPE,@IS_ROW_CHG,@GOV_CHQ,@IQA_FAILED,@AddCheckText);
+
+	SELECT @ErrorVar = @@ERROR;
+	
+	IF @ErrorVar <> 0
+		BEGIN			
+			RETURN 1;
+		END
+		
+	RETURN 0;
+	   
+END
+

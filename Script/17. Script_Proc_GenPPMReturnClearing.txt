@@ -1,0 +1,40 @@
+USE [CCMS]
+GO
+/****** Object:  StoredProcedure [dbo].[CMS_Process_GenPPMReturnClearing]    Script Date: 31/08/2015 10:32:25 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Mohammad Yasir Arafat
+-- Create date: 31-Aug-2015
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_Process_GenPPMReturnClearing]
+AS
+BEGIN
+	
+	SET NOCOUNT ON;
+
+	(select '', CSD_DET.CHECK_NO, '', CSD_DET.CHECK_NO, 
+	CSD_DET.AMOUNT, '', '', '', '', '', '', CSD_DET.UNIQUE_COLLECTION_NO, RETURN_CSD.RTN_CODE, ''
+	 from RETURN_CSD, CSD_DET
+	where RETURN_CSD.D_CODE = CSD_DET.D_CODE AND RETURN_CSD.SLNO=CSD_DET.SLNO AND CSD_DET.SLIP_DATE=convert(date,getdate()))
+
+	union
+
+		(select '', CCHECK.CHECK_NO, '', CCHECK.CHECK_NO, 
+	NCOLLECTION.AMOUNT, '', '', '', '', '', '', CCHECK.UNIQUE_COLLECTION_NO, NCOLLECTION.RTN_CODE, ''
+	 from NCOLLECTION, CCHECK
+	where NCOLLECTION.NONZONE_REF = CCHECK.NONZONE_REF AND CCHECK.SLIP_DATE=convert(date,getdate()))
+
+	union
+
+	(select '', RETURN_CLEARING.CHECK_NUMBER, '', RETURN_CLEARING.CHECK_NUMBER, 
+	RETURN_CLEARING.AMOUNT, '', '', '', '', '', '', CLEARINGTAB.UNIQUE_COLLECTION_NO, RETURN_CLEARING.RTN_CODE, ''
+	 from RETURN_CLEARING,CLEARINGTAB
+	where RETURN_CLEARING.CHECK_NUMBER = CLEARINGTAB.CHECK_NUMBER AND CLEARINGTAB.OPR_DATE=CONVERT(date,getdate()))
+	
+	
+
+END

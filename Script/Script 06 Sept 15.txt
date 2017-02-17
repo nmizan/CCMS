@@ -1,0 +1,7 @@
+alter table DSCHEDULE add PPM_GenDate datetime null
+
+alter table CCHECK add PPM_GenDate datetime null
+
+alter table CLEARINGTAB add PPM_GenDate datetime null
+
+update Client set Direct_Debit_Customer=0

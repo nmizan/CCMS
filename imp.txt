@@ -1,0 +1,164 @@
+
+
+manifold - > Citianywher funding DD Deposit Manifold
+which dd? paid or all?
+-----------
+
+cash credit type -	R T
+speed credittype - 	T
+
+Citibank12
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 9-May-13
+-- Description:	try login
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_Users_TryLogin]	
+AS
+BEGIN	
+	
+	DECLARE @USERS_ID		varchar(20),
+			@USERS_NAME		varchar(50),
+			@DEPT_SLNO		numeric(3,0) ,
+			@DOMAIN			varchar(30),
+			@USER_STAT		char(1); 	
+
+	DECLARE @ErrorVar INT;
+
+	
+	
+	SET NOCOUNT ON;
+
+	BEGIN TRANSACTION;
+
+	SELECT @DOMAIN=substring(suser_name(),1,charindex('\',suser_name())-1);
+
+	SELECT @USERS_ID=substring(suser_name(),charindex('\',suser_name())+1,20);
+
+	IF NOT EXISTS(SELECT USERS_ID FROM USERS WHERE USERS_ID=@USERS_ID AND
+		DOMAIN=@DOMAIN)
+		BEGIN
+			-- Not Exists
+			ROLLBACK TRANSACTION;		
+			RETURN 4;
+		END
+
+	SELECT @USER_STAT=USER_STAT FROM USERS WHERE USERS_ID=@USERS_ID;
+	
+
+	IF @USER_STAT ='D'
+		BEGIN
+			ROLLBACK TRANSACTION;
+			RETURN 1;
+		END
+	ELSE
+
+	INSERT INTO USERS_HIST(USERS_ID, USERS_NAME,DEPT_SLNO,DOMAIN,USER_STAT,
+		INPUT_BY,INPUT_DATETIME,INPUT_FROM,MOD_NO,[STATUS],IS_AUTH)
+		VALUES(@USERS_ID, @USERS_NAME,@DEPT_SLNO,@DOMAIN,@USER_STAT,
+		substring(suser_name(),charindex('\',suser_name())+1,20),
+		GETDATE(),HOST_NAME(),1,'U',0);
+
+	SELECT @ErrorVar = @@ERROR;
+	
+	IF @ErrorVar <> 0
+		BEGIN
+			ROLLBACK TRANSACTION;
+			RETURN 1;
+		END
+	
+	COMMIT TRANSACTION;
+	RETURN 0;
+	   
+END
+
+## option to update return status on citispeed
+
+## dschedule entry or speed detail entry serial should be same as entry
+
+## Question on PDC - How pdc will be unite with ->clearing check and if both deposit is same then what?
+
+## Citi clearing lookup field should be validated before leaving and get the appropriate value
+
+## citi anywhere detail -> delete script update
+
+## check collection schedule bank location all field lost focus options validation
+
+## client code: 999999
+
+## write search button code. few search button are left
+
+## implement desposit schedule item edit mechanism into citianywhere check  detail
+
+## replace the 'key enter' method with with 'validating' on those field that can poputalte data from code
+so that user must have to throught the validation and there is no option to enter wrong code
+
+## date validation
+
+## what field should be the primary key of CCMSREF_TAB;
+
+## all validation procedure in booking form should check those data which filename is null
+
+## in cash or speed detail deposit shedule code should be load again with other data to correct case sensitive issue
+
+## Exception Handling for data entry on every form
+
+
+## check dddetail branch name should be load with given value of both bank and branch code.
+
+## schdeul stock validation
+## check dd_ccheck_hist table unnecessary field 
+
+## cannot make alter script for dd primary key change
+
+## summary form grid column should be non editable except the selection filed
+
+
+## if zoneref is neccessary in ccheck then check its effect with collection form.
+
+
+## distinct in select query
+
+## BBK code and routing code data size upadte on all procedure
+
+## query form needed
+
+
+## Citispeed detail need more work with grid
+
+## all text box max size should not cross the db data type size
+
+## schedule check with numeric or non-numeric
+
+
+## forms seems to try connection when loading - if it is then code have to rewrite so that it dont do
+
+## reset status on data change for every form
+
+## After Saving/Updating all Form should be in locked mode
+
+## version history for all summary form
+
+## mdi main form version history
+
+## FG permission form need enable disable field when viewing records using history
+
+## unuthorize button enable/disable is not working properly (follow bank)
+
+## list form raise error when select empty item from the grid
+
+---------------------
+
+## Cash credit type -> L,D,T,R -> NAme???
+speed credit type -> L, R, C, T, D
+Customer Billing Type in Client Form???
+
+------------------------
+use [CCMS]
+GO
+GRANT EXECUTE ON [dbo].[CMS_DSchedule_GetCheckSlip] TO [ccms_sp_only]
+GO

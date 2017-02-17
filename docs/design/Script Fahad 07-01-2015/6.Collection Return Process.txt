@@ -1,0 +1,317 @@
+CREATE TABLE [dbo].[TMP_RETURN_CSD](
+	[RTN_DATE] [datetime] NOT NULL,
+	[CLIENT_CODE] [varchar](6) NOT NULL,
+	[AC_NO] [varchar](16) NOT NULL,
+	[LOCATION_CODE] [varchar](4) NULL,
+	[LOCATION_NAME] [varchar](35) NULL,
+	[AMOUNT] [numeric](14, 2) NULL,
+	[DS_CODE] [varchar](12) NULL,
+	[D_CODE] [varchar](12) NULL,
+	[SLNO] [numeric](3, 0) NULL,
+	[BANK_ACC_NO] [varchar](16) NULL,
+	[INSTRUMENT_NO] [varchar](15) NULL,
+	[SCHEDULE_DATE] [datetime] NULL
+) ON [PRIMARY]
+
+GO
+
+
+-- =============================================
+-- Author:		FAHAD KHAN
+-- Create date: 3-Nov-14
+-- Description: Process for PDC Transfer
+-- =============================================
+
+CREATE PROCEDURE [dbo].[CMS_Process_ReturnGenerate]
+	@RTN_DATE	datetime
+	
+AS
+BEGIN
+
+	SET NOCOUNT ON;
+
+	DECLARE 
+		@D_CODE		varchar(12),
+		@SLNO       numeric(3,0),
+		@RTN_CODE   varchar(2) ;
+		
+    DELETE FROM TMP_RETURN_CSD WHERE RTN_DATE = @RTN_DATE ;
+    
+    DECLARE @ErrorVar	int;
+	
+	SELECT @ErrorVar = @@ERROR;
+	
+	IF @ErrorVar <> 0
+		BEGIN			
+			RETURN 1;
+		END
+		
+
+	DECLARE tmpcursor1 CURSOR FOR
+	
+		SELECT D_CODE, SLNO, RTN_CODE FROM RETURN_CSD WHERE RTN_STATUS ='R' AND RTN_DATE = @RTN_DATE AND [STATUS]='L';
+
+	OPEN tmpcursor1;
+	FETCH NEXT FROM tmpcursor1 INTO @D_CODE,@SLNO , @RTN_CODE;
+
+	WHILE @@FETCH_STATUS=0 
+ 	BEGIN
+ 	
+ 	
+ 	    INSERT INTO TMP_RETURN_CSD( RTN_DATE, CLIENT_CODE, AC_NO, LOCATION_CODE, LOCATION_NAME, AMOUNT, 
+ 	    DS_CODE, D_CODE, SLNO, BANK_ACC_NO, INSTRUMENT_NO, SCHEDULE_DATE )  
+		SELECT @RTN_DATE ,ds.CLIENT_CODE,c.ACC_NO , ds.LOCATION_CODE, l.LOCATION_NAME, csd.AMOUNT ,
+		ds.DS_CODE, csd.D_CODE, csd.SLNO, b.ACC_NO , csd.CHECK_NO , ds.SCHEDULE_DATE    FROM CSD_DET csd 
+		INNER JOIN DSCHEDULE ds ON csd.D_CODE = ds .D_CODE AND csd.RTN_STATUS ='R' 
+		INNER JOIN CLIENT c ON c.CLIENT_CODE = ds.CLIENT_CODE 
+		INNER JOIN LOCATION l ON ds.LOCATION_CODE = l.LOCATION_CODE 
+		INNER JOIN BANK b ON b.BANK_CODE = csd.DRAWEE_BANK_CODE 
+		WHERE csd.D_CODE = @D_CODE AND csd.SLNO = @SLNO AND csd.RTN_CODE = @RTN_CODE ;
+		
+		
+
+		FETCH NEXT FROM tmpcursor1 
+			INTO @D_CODE,@SLNO , @RTN_CODE;
+
+	END
+
+	CLOSE tmpcursor1;	
+	DEALLOCATE tmpcursor1;
+	
+	SELECT @ErrorVar = @@ERROR;
+	
+	IF @ErrorVar <> 0
+		BEGIN			
+			RETURN 1;
+		END
+
+
+	RETURN 0;
+	
+    
+END   
+
+GO
+
+
+-- =============================================
+-- Author:		Fahd Khan
+-- Create date: 05-Feb-14
+-- Description: Process for return check by batch code
+-- =============================================
+
+CREATE PROCEDURE [dbo].[CMS_Process_ReturnBatch]	
+	@BATCH_NO	VARCHAR(4) output	
+AS
+BEGIN	
+	DECLARE @ErrorVar INT;
+			
+	SET NOCOUNT ON;
+		
+	SELECT @BATCH_NO = ISNULL(MAX(BATCH_NO),'5600')+1		
+		FROM GENPRM
+		WHERE DATEDIFF(d,GETDATE(),BATCH_DATE)=0;
+    
+END
+
+GO
+
+
+-- =============================================
+-- Author:		FAHAD KHAN
+-- Create date: 05-Nov-14
+-- Description:	Get detail of TMP_RETURN_CSD Credit Flex Data
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_TmpReturnCSD_GetFlexCrDetail]	
+	@RTN_DATE	datetime
+AS
+BEGIN	
+	
+	SET NOCOUNT ON;
+
+	SELECT BANK_ACC_NO , LOCATION_NAME, SCHEDULE_DATE, sum(AMOUNT)as credtotal,
+		   INSTRUMENT_NO ,RTN_DATE
+		   FROM TMP_RETURN_CSD
+		   WHERE RTN_DATE=@RTN_DATE
+		   GROUP BY  BANK_ACC_NO,LOCATION_NAME,SCHEDULE_DATE, INSTRUMENT_NO,RTN_DATE
+END
+
+GO
+
+
+-- =============================================
+-- Author:		FAHAD KHAN
+-- Create date: 05-Nov-14
+-- Description:	Get detail of TMP_RETURN_CSD Debit Flex Data
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_TmpReturnCSD_GetFlexDrDetail]	
+	@RTN_DATE	datetime
+AS
+BEGIN	
+	
+	SET NOCOUNT ON;
+
+	SELECT *  FROM TMP_RETURN_CSD  WHERE RTN_DATE=@RTN_DATE
+
+END
+
+GO
+
+-- =============================================
+-- Author:		Fahd Khan
+-- Create date: 05-Nov-14
+-- Description: Process for Return update reference
+-- =============================================
+
+CREATE PROCEDURE [dbo].[CMS_Process_ReturnUpdateRef]
+	@FILENAME		varchar(15),	      
+	@RTN_DATE		datetime ,	      
+	@BATCH_NO		varchar(10) 
+AS
+BEGIN	
+	DECLARE @ErrorVar		INT;			 
+	
+	SET NOCOUNT ON;
+
+	UPDATE GENPRM
+		SET BATCH_NO=@BATCH_NO, BATCH_DATE=GETDATE(); 
+
+	UPDATE RETURN_CSD
+		SET RTN_FILENAME=@FILENAME,RTN_FILE_USERID=substring(suser_name(),charindex('\',suser_name())+1,20)
+		WHERE  RTN_DATE=@RTN_DATE
+		AND [STATUS]='L';
+
+	RETURN 0;
+	
+END
+
+GO
+
+
+ALTER TABLE TMP_RETURN_CSD ADD CS_CODE varchar(12)
+
+GO
+
+ALTER TABLE TMP_RETURN_CSD ADD REASON varchar(100)
+
+GO
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 22-Jul-13
+-- Description: Process for PDC Transfer
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_Process_ReturnGenerate]
+	@RTN_DATE	datetime
+	
+AS
+BEGIN
+
+	SET NOCOUNT ON;
+
+	DECLARE 
+		@D_CODE		varchar(12),
+		@SLNO       numeric(3,0),
+		@RTN_CODE   varchar(2) ;
+		
+    DELETE FROM TMP_RETURN_CSD WHERE RTN_DATE = @RTN_DATE ;
+    
+    DECLARE @ErrorVar	int;
+	
+	SELECT @ErrorVar = @@ERROR;
+	
+	IF @ErrorVar <> 0
+		BEGIN			
+			RETURN 1;
+		END
+		
+
+	DECLARE tmpcursor1 CURSOR FOR
+	
+		SELECT D_CODE, SLNO, RTN_CODE FROM RETURN_CSD WHERE RTN_STATUS ='R' AND RTN_DATE = @RTN_DATE AND [STATUS]='L';
+
+	OPEN tmpcursor1;
+	FETCH NEXT FROM tmpcursor1 INTO @D_CODE,@SLNO , @RTN_CODE;
+
+	WHILE @@FETCH_STATUS=0 
+ 	BEGIN
+ 	
+ 	
+ 	    INSERT INTO TMP_RETURN_CSD( RTN_DATE, CLIENT_CODE, AC_NO, LOCATION_CODE, LOCATION_NAME, AMOUNT, 
+ 	    DS_CODE, D_CODE, SLNO, BANK_ACC_NO, INSTRUMENT_NO, SCHEDULE_DATE, CS_CODE, REASON )  
+		SELECT @RTN_DATE ,ds.CLIENT_CODE,c.ACC_NO , ds.LOCATION_CODE, l.LOCATION_NAME, csd.AMOUNT ,
+		ds.DS_CODE, csd.D_CODE, csd.SLNO, b.ACC_NO , csd.CHECK_NO , ds.SCHEDULE_DATE,csc.CS_CODE , rr.REJECT_REASON FROM CSD_DET csd 
+		INNER JOIN CSD cs ON cs.D_CODE = csd.D_CODE and csd.MOD_NO = cs.MOD_NO and cs.STATUS ='L' 
+		INNER JOIN DSCHEDULE ds ON csd.D_CODE = ds .D_CODE AND csd.RTN_STATUS ='R'  
+		INNER JOIN DCOLLECTED dc ON dc.DS_CODE = ds.DS_CODE AND ds.MOD_NO = dc.MOD_NO AND dc.STATUS = 'L' 
+		INNER JOIN CLIENT c ON c.CLIENT_CODE = ds.CLIENT_CODE 
+		INNER JOIN LOCATION l ON ds.LOCATION_CODE = l.LOCATION_CODE 
+		INNER JOIN BANK b ON b.BANK_CODE = csd.DRAWEE_BANK_CODE 
+		INNER JOIN RETURN_REJECT rr ON rr.REJECT_CODE = @RTN_CODE AND rr.STATUS = 'L' 
+		INNER JOIN CSCHEDULE csc ON csc.DS_CODE = ds.DS_CODE 
+		WHERE csd.D_CODE = @D_CODE AND csd.SLNO = @SLNO AND csd.RTN_CODE = @RTN_CODE ;
+		
+		
+
+		FETCH NEXT FROM tmpcursor1 
+			INTO @D_CODE,@SLNO , @RTN_CODE;
+
+	END
+
+	CLOSE tmpcursor1;	
+	DEALLOCATE tmpcursor1;
+	
+	SELECT @ErrorVar = @@ERROR;
+	
+	IF @ErrorVar <> 0
+		BEGIN			
+			RETURN 1;
+		END
+
+
+	RETURN 0;
+	
+    
+END   
+
+
+GO
+
+-- =============================================
+-- Author:		FAHAD KHAN
+-- Create date: 05-Nov-14
+-- Description:	Get detail of TMP_RETURN_CSD Credit Flex Data
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_TmpReturnCSD_GetFlexCrDetail]	
+	@RTN_DATE	datetime
+AS
+BEGIN	
+	
+	SET NOCOUNT ON;
+
+	SELECT BANK_ACC_NO , LOCATION_NAME, SCHEDULE_DATE, sum(AMOUNT)as credtotal,
+		   INSTRUMENT_NO ,RTN_DATE, CS_CODE
+		   FROM TMP_RETURN_CSD
+		   WHERE RTN_DATE=@RTN_DATE
+		   GROUP BY  BANK_ACC_NO,LOCATION_NAME,SCHEDULE_DATE, INSTRUMENT_NO,RTN_DATE, CS_CODE
+END
+
+GO
+
+
+ALTER VIEW [dbo].[V_SPEED_RETURN]
+AS
+SELECT     ds.DS_CODE, ds.D_CODE, ds.DEPOSIT_TYPE, ds.CITICASH_AMOUNT, ds.CITICHECK_AMOUNT, ds.SCHEDULE_DATE, ds.NO_CHECK, ds.CLIENT_CODE, 
+                      ds.LOCATION_CODE, ds.CORR_BANK_CODE, ds.CORR_BRANCH_CODE, ds.REF_NO, cdd.SLNO, cdd.AMOUNT, cdd.CHECK_NO, cdd.CHECK_REF, cdd.DRAWER, 
+                      cdd.SLIP_DATE, rr.REJECT_REASON, cl.ACC_NO, cl.ACC_NAME, l.LOCATION_NAME, rc.RTN_DATE
+FROM         dbo.DSCHEDULE AS ds INNER JOIN
+                      dbo.DCOLLECTED AS dc ON dc.DS_CODE = ds.DS_CODE INNER JOIN
+                      dbo.CSD_DET AS cdd ON cdd.D_CODE = ds.D_CODE INNER JOIN
+                      dbo.RETURN_REJECT AS rr ON rr.REJECT_CODE = cdd.RTN_CODE LEFT OUTER JOIN
+                      dbo.CLIENT AS cl ON ds.CLIENT_CODE = cl.CLIENT_CODE LEFT OUTER JOIN
+                      dbo.LOCATION AS l ON l.LOCATION_CODE = ds.LOCATION_CODE LEFT OUTER JOIN
+                      dbo.RETURN_CSD AS rc ON ds.D_CODE = rc.D_CODE AND rc.STATUS = 'L'
+WHERE     (cdd.RTN_STATUS = 'R') AND (dc.STATUS = 'L')
+
+GO

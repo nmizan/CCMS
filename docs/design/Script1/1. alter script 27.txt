@@ -1,0 +1,266 @@
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 27-Apr-13
+-- Description: Get unchecked clearingtab records
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_ClearingTab_GetUnchecked]
+	@OPR_DATE	datetime,	
+	@ENTRY_LOC	varchar(3),
+	@VALUE_TYPE	numeric(1,0)
+AS
+BEGIN	
+	
+	SELECT * FROM CLEARINGTAB		
+		WHERE (CHECKED IS NULL OR CHECKED=0)
+			AND OPR_DATE=@OPR_DATE AND ENTRY_LOC=@ENTRY_LOC
+			AND VALUE_TYPE=@VALUE_TYPE
+	         
+END
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 24-Jan-13
+-- Description:	Get outstanding of ClearingTab
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_ClearingTab_GetOutstandings]		
+	@OPR_DATE	datetime,
+	@ENTRY_LOC	varchar(3)	
+AS
+BEGIN	
+	
+	SET NOCOUNT ON;
+
+	SELECT * 
+	FROM CLEARINGTAB 
+	WHERE FLEX_FILENAME IS NULL
+	AND OPR_DATE =@OPR_DATE AND ENTRY_LOC=@ENTRY_LOC
+	ORDER BY OPR_DATE,DS_CODE,CHECK_NUMBER
+	
+END
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 21-Apr-13
+-- Description: Update Clearing Data Final
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_Process_ClearingDataFinalUpdate]
+	@REV_DATE		datetime,	
+	@ENTRY_LOC		varchar(3),
+	@VALUE_TYPE		numeric(1,0),
+	@FLEX_FILENAME	varchar(15)
+AS
+BEGIN
+
+	UPDATE CLEARINGTAB 
+		SET FLEX_FILENAME=@FLEX_FILENAME
+	WHERE FLEX_FILENAME IS NULL 
+		AND OPR_DATE=@REV_DATE AND ENTRY_LOC=@ENTRY_LOC
+		AND VALUE_TYPE=@VALUE_TYPE;
+
+	UPDATE TMP_REVERSAL_CLEARING
+		SET FLEX_FILENAME=@FLEX_FILENAME,
+			USERID=substring(suser_name(),charindex('\',suser_name())+1,20)
+	WHERE FLEX_FILENAME IS NULL 
+		AND REV_DATE=@REV_DATE AND ENTRY_LOC=@ENTRY_LOC
+		AND VALUE_TYPE=@VALUE_TYPE;
+
+	INSERT INTO REVERSAL_HIST_CLEARING
+		SELECT * FROM TMP_REVERSAL_CLEARING
+			WHERE FLEX_FILENAME IS NOT NULL 
+			AND REV_DATE=@REV_DATE AND ENTRY_LOC=@ENTRY_LOC
+			AND VALUE_TYPE=@VALUE_TYPE;
+
+	DELETE FROM TMP_REVERSAL_CLEARING
+		WHERE FLEX_FILENAME IS NOT NULL 
+			AND REV_DATE=@REV_DATE AND ENTRY_LOC=@ENTRY_LOC
+			AND VALUE_TYPE=@VALUE_TYPE;
+
+END
+
+GO
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 21-Apr-13
+-- Description: Process for reversal deposit update
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_Process_ClearingRevGenerate]
+	@REV_DATE	datetime,	
+	@ENTRY_LOC	varchar(3),
+	@REFACC_NO	varchar(16),
+	@VALUE_TYPE	numeric(1,0)
+AS
+BEGIN	
+	
+	DELETE FROM TMP_REVERSAL_CLEARING 
+		WHERE REV_DATE=@REV_DATE AND ENTRY_LOC=@ENTRY_LOC AND VALUE_TYPE=@VALUE_TYPE;
+
+
+	INSERT INTO TMP_REVERSAL_CLEARING( CR_TYPE,VALUE_DATE,ENTRY_LOC,REV_DATE,
+		ACC_NO,REFACC_NO,CLIENT_CODE,AMOUNT,
+		DS_CODE,
+		CHECK_NUMBER,
+		SEQ_NO,ADD_TEXT,VALUE_TYPE)
+                          
+------By Total                                  
+	SELECT c.SPEED_CR_TYPE,a.OPR_DATE VALUE_DATE, a.ENTRY_LOC,a.OPR_DATE,
+		c.ACC_NO,@REFACC_NO AS REFACC_NO,a.REMARK,sum(a.DEBIT_CREDIT) as total,
+		substring(CONVERT(varchar(12), OPR_DATE,112),3,8) as DS_CODE,
+		substring(CONVERT(varchar(12), OPR_DATE,112),3,8) CHECK_NUMBER,
+		COUNT(a.REMARK),'' ADD_TEXT,@VALUE_TYPE
+	FROM CLEARINGTAB a, CLEARING_CLIENT c                                  
+	WHERE 
+		a.DEBIT_CREDIT>0                                  
+		AND a.OPR_DATE=@REV_DATE AND a.ENTRY_LOC=@ENTRY_LOC
+		AND a.VALUE_TYPE=@VALUE_TYPE
+		AND a.REMARK=c.ACC_NO
+		AND a.FLEX_FILENAME IS NULL
+		AND c.SPEED_CR_TYPE='T'
+	GROUP BY 
+		a.OPR_DATE,a.ENTRY_LOC,c.SPEED_CR_TYPE,                                  
+		c.ACC_NO ,a.REMARK                
+
+	UNION ALL
+            
+------By Deposit code
+	SELECT c.SPEED_CR_TYPE,OPR_DATE valueDate,a.ENTRY_LOC,a.OPR_DATE,
+		c.ACC_NO,@REFACC_NO AS REFACC_NO,a.REMARK,sum(a.DEBIT_CREDIT) as total,
+		a.DS_CODE ,
+		a.DS_CODE CHECK_NUMBER,
+		count(a.REMARK),'' ADD_TEXT,@VALUE_TYPE
+	FROM CLEARINGTAB a, CLEARING_CLIENT c
+	WHERE
+
+		a.DEBIT_CREDIT>0 
+		AND a.OPR_DATE=@REV_DATE AND a.ENTRY_LOC=@ENTRY_LOC
+		AND a.VALUE_TYPE=@VALUE_TYPE
+		AND a.REMARK=c.ACC_NO
+		AND a.FLEX_FILENAME IS NULL
+		AND c.SPEED_CR_TYPE='D'
+	GROUP BY a.OPR_DATE,a.ENTRY_LOC,c.SPEED_CR_TYPE,
+		c.ACC_NO ,a.REMARK,a.DS_CODE
+	                                  
+                                  
+	UNION ALL
+--\\\\\\\\\\\\\\\By Check\\\\\\\\                                  
+                                
+                                
+	SELECT  c.SPEED_CR_TYPE,a.OPR_DATE,a.ENTRY_LOC,a.OPR_DATE,
+		a.REMARK,@REFACC_NO REFACC_NO,a.REMARK,a.DEBIT_CREDIT,
+		DS_CODE,
+		a.CHECK_NUMBER,
+		1  ,'' ADD_TEXT,@VALUE_TYPE
+	FROM CLEARINGTAB a,CLEARING_CLIENT c
+	WHERE                    
+
+		a.DEBIT_CREDIT>0
+		AND a.OPR_DATE=@REV_DATE AND a.ENTRY_LOC=@ENTRY_LOC
+		AND a.VALUE_TYPE=@VALUE_TYPE
+		AND a.REMARK=c.ACC_NO
+		AND a.FLEX_FILENAME IS NULL
+		AND c.SPEED_CR_TYPE='C'
+                      
+	UNION ALL                
+                
+	SELECT  c.SPEED_CR_TYPE,a.OPR_DATE,a.ENTRY_LOC,a.OPR_DATE,
+		a.REMARK,@REFACC_NO REFACC_NO,a.REMARK,a.DEBIT_CREDIT,
+		b.CUSTOMER_REF , 
+		a.CHECK_NUMBER,
+		1 ,'' ADD_TEXT,@VALUE_TYPE
+		FROM CLEARINGTAB a, CHECKTOTAL b, CLEARING_CLIENT c
+	WHERE 
+		a.DS_CODE=b.DS_CODE AND a.ENTRY_LOC=b.ENTRY_LOC AND a.OPR_DATE=b.OPR_DATE
+		AND a.VALUE_TYPE=@VALUE_TYPE
+		AND a.DEBIT_CREDIT>0
+		AND a.OPR_DATE=@REV_DATE AND a.ENTRY_LOC=@ENTRY_LOC
+		AND c.ACC_NO=a.REMARK
+		AND a.FLEX_FILENAME IS NULL
+		AND c.SPEED_CR_TYPE='R'
+        
+	UNION ALL                
+                
+	SELECT  c.SPEED_CR_TYPE,a.OPR_DATE,a.ENTRY_LOC,a.OPR_DATE,
+		a.REMARK,@REFACC_NO REFACC_NO,a.REMARK,a.DEBIT_CREDIT,
+		b.CUSTOMER_REF , 
+		a.DS_CODE ,
+		1  ,'Chq:'+ a.CHECK_NUMBER +'  ' + e.BANK_NAME +space(2)+ ' ' + d.BRANCH_NAME ADD_TEXT,@VALUE_TYPE
+	FROM CLEARINGTAB a,CHECKTOTAL b, CLEARING_CLIENT c, CLEARING_BRANCH d ,CLEARING_BANK e                    
+	WHERE
+		a.DS_CODE=b.DS_CODE AND a.ENTRY_LOC=b.ENTRY_LOC AND a.OPR_DATE=b.OPR_DATE
+		AND a.VALUE_TYPE=@VALUE_TYPE
+		AND a.DEBIT_CREDIT>0
+		AND a.OPR_DATE=@REV_DATE AND a.ENTRY_LOC=@ENTRY_LOC   
+		AND c.ACC_NO=a.REMARK                        
+		AND a.FLEX_FILENAME IS NULL                                  
+		AND c.SPEED_CR_TYPE='B'        
+		AND a.NIKBRANCH_CODE=d.NIKBRANCH_CODE        
+		AND d.BANK_CODE=e.BANK_CODE 
+
+	UNION ALL
+
+------By DepositRef
+	SELECT c.SPEED_CR_TYPE,a.OPR_DATE valueDate,a.ENTRY_LOC,a.OPR_DATE,
+		c.ACC_NO ,@REFACC_NO REFACC_NO,a.REMARK,sum(a.DEBIT_CREDIT) as total,
+		a.DS_CODE ,
+		b.CUSTOMER_REF,
+		count(a.REMARK),'' Add_text,@VALUE_TYPE
+	FROM CLEARINGTAB a, CLEARING_CLIENT c  , checktotal  b
+	WHERE
+		a.DS_CODE=b.DS_CODE AND a.ENTRY_LOC=b.ENTRY_LOC AND a.OPR_DATE=b.OPR_DATE
+		AND a.VALUE_TYPE=@VALUE_TYPE
+		AND a.DEBIT_CREDIT>0
+		AND a.OPR_DATE=@REV_DATE AND a.ENTRY_LOC=@ENTRY_LOC
+		AND a.REMARK=c.ACC_NO
+		AND a.FLEX_FILENAME IS NULL		
+		AND c.SPEED_CR_TYPE='DR'
+	GROUP BY a.OPR_DATE,a.ENTRY_LOC,c.SPEED_CR_TYPE,
+		c.ACC_NO ,a.REMARK,a.DS_CODE ,b.CUSTOMER_REF
+         
+END
+
+GO
+
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 21-Apr-13
+-- Description: Process for making Clearing data checked
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_Process_ClearingDataChecked]
+	@OPR_DATE	datetime,	
+	@ENTRY_LOC	varchar(3),
+	@VALUE_TYPE	numeric(1,0)
+AS
+BEGIN	
+	
+	UPDATE CLEARINGTAB
+		SET CHECKED=1
+		WHERE (CHECKED IS NULL OR CHECKED=0)
+			AND OPR_DATE=@OPR_DATE AND ENTRY_LOC=@ENTRY_LOC
+			AND VALUE_TYPE=@VALUE_TYPE
+	         
+END
+
+GO
+
+
+

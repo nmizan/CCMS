@@ -1,0 +1,90 @@
+-- fix branch query in citianywhere search as location need to be set
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 22-Jul-13
+-- Description: Process for PDC Transfer
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_Process_ReturnGenerate]
+	@RTN_DATE	datetime
+	
+AS
+BEGIN
+
+	SET NOCOUNT ON;
+
+	DECLARE 
+		@D_CODE		varchar(12),
+		@SLNO       numeric(3,0),
+		@RTN_CODE   varchar(2) ;
+		
+    DELETE FROM TMP_RETURN_CSD WHERE RTN_DATE = @RTN_DATE ;
+    
+    DECLARE @ErrorVar	int;
+	
+	SELECT @ErrorVar = @@ERROR;
+	
+	IF @ErrorVar <> 0
+		BEGIN			
+			RETURN 1;
+		END
+		
+
+	DECLARE tmpcursor1 CURSOR FOR
+	
+		SELECT D_CODE, SLNO, RTN_CODE FROM RETURN_CSD WHERE RTN_STATUS ='R' AND RTN_DATE = @RTN_DATE AND [STATUS]='L';
+
+	OPEN tmpcursor1;
+	FETCH NEXT FROM tmpcursor1 INTO @D_CODE,@SLNO , @RTN_CODE;
+
+	WHILE @@FETCH_STATUS=0 
+ 	BEGIN
+ 	
+ 	
+ 	    INSERT INTO TMP_RETURN_CSD( RTN_DATE, CLIENT_CODE, AC_NO, LOCATION_CODE, 
+ 	    LOCATION_NAME, AMOUNT, DS_CODE, D_CODE, SLNO, BANK_ACC_NO, INSTRUMENT_NO, 
+ 	    SCHEDULE_DATE, CS_CODE, REASON )  
+		SELECT @RTN_DATE ,ds.CLIENT_CODE,c.ACC_NO , ds.LOCATION_CODE, l.LOCATION_NAME, 
+		csd.AMOUNT ,ds.DS_CODE, csd.D_CODE, csd.SLNO, b.ACC_NO , csd.CHECK_NO , 
+		ds.SCHEDULE_DATE,csc.CS_CODE , rr.REJECT_REASON FROM CSD_DET csd 
+		--INNER JOIN CSD cs ON cs.D_CODE = csd.D_CODE and csd.MOD_NO = cs.MOD_NO and cs.STATUS ='L' 
+		INNER JOIN DSCHEDULE ds ON csd.D_CODE = ds.D_CODE AND ds.[STATUS]='L'
+		--INNER JOIN DCOLLECTED dc ON dc.DS_CODE = ds.DS_CODE AND ds.MOD_NO = dc.MOD_NO AND dc.STATUS = 'L' 
+		INNER JOIN CLIENT c ON c.CLIENT_CODE = ds.CLIENT_CODE 
+		INNER JOIN LOCATION l ON ds.LOCATION_CODE = l.LOCATION_CODE 
+		INNER JOIN BANK b ON b.BANK_CODE = csd.DRAWEE_BANK_CODE 
+		INNER JOIN RETURN_REJECT rr ON rr.REJECT_CODE = @RTN_CODE  
+		INNER JOIN CSCHEDULE csc ON csc.DS_CODE = ds.DS_CODE 
+		WHERE csd.[STATUS]='L' AND csd.RTN_STATUS ='R' AND csd.D_CODE = @D_CODE 
+		AND csd.SLNO = @SLNO AND csd.RTN_CODE = @RTN_CODE ;
+		
+		
+
+		FETCH NEXT FROM tmpcursor1 
+			INTO @D_CODE,@SLNO , @RTN_CODE;
+
+	END
+
+	CLOSE tmpcursor1;	
+	DEALLOCATE tmpcursor1;
+	
+	SELECT @ErrorVar = @@ERROR;
+	
+	IF @ErrorVar <> 0
+		BEGIN			
+			RETURN 1;
+		END
+
+
+	RETURN 0;
+	
+    
+END   
+
+GO
+
+

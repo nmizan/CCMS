@@ -1,0 +1,15 @@
+DETB_UPLOAD_DETAIL,,,,,,,,,,,,,,,,,,,,,,,,
+BATCH_NO,BRANCH_CODE,DEPARTMENT_CODE,SOURCE_CODE,CURR_NO,CCY_CD,INITIATION_DATE,AMOUNT,ACCOUNT,ACCOUNT_BRANCH,TXN_CODE,DR_CR,LCY_EQUIVALENT,EXCH_RATE,VALUE_DATE,INSTRUMENT_NO,REL_CUST,ADDL_TEXT,comp_mis_1,comp_mis_2,txn_mis_1,txn_mis_3,txn_mis_4,txn_mis_6,~~END~~
+tRC,G01,056,G01tRC,000001,BDT,19- October - 15,200,G010000200023013,G01,451,C,200,1,18- October - 15,cust_refRD,,2 Checks Deposited on Date: 2015-10-18 DS NO dsRD18 INV Code slip RD  d,,,,,,,~~END~~
+tRC,G01,056,G01tRC,000002,BDT,19- October - 15,200,G010000200023013,G01,451,C,200,1,18- October - 15,cust_refRD,,2 Checks Deposited on Date: 2015-10-19 DS NO dsRD2 INV Code slip inv RD RD,,,,,,,~~END~~
+tRC,G01,056,G01tRC,000003,BDT,19- October - 15,200,G010000200282019,G01,451,C,200,1,18- October - 15,dsD18,,2 Checks Deposited on Date: 19- October - 15 DsCode dsD18 Ref: INV Code  INV Code slip D D,,,,,,,~~END~~
+tRC,G01,056,G01tRC,000004,BDT,19- October - 15,100,G123456789,G12,451,C,100,1,18- October - 15,checkRefRc1,,1 Check Deposited on Date: 2015-10-18 DS NO dsRC18 INV Code chi inv Rc1 rc1 ,,,,,,,~~END~~
+tRC,G01,056,G01tRC,000005,BDT,19- October - 15,100,G123456789,G12,451,C,100,1,18- October - 15,chkRefRC2,,1 Check Deposited on Date: 2015-10-18 DS NO dsRC18 INV Code chk inv RC2 rc2 ,,,,,,,~~END~~
+tRC,G01,056,G01tRC,000006,BDT,19- October - 15,100,G123456789,G12,451,C,100,1,18- October - 15,checkREf2RC,,1 Check Deposited on Date: 2015-10-19 DS NO dsRC2 INV Code ,,,,,,,~~END~~
+tRC,G01,056,G01tRC,000007,BDT,19- October - 15,100,G123456789,G12,451,C,100,1,18- October - 15,chkRef1RC,,1 Check Deposited on Date: 2015-10-19 DS NO dsRC2 INV Code chk inv1 RC RC,,,,,,,~~END~~
+tRC,G01,056,G01tRC,000008,BDT,19- October - 15,100,GcliecntAccNoC,Gcl,451,C,100,1,18- October - 15,00chkC1,,1 Checks Deposited on Date: 19- October - 15 DsCode dsC Ref:cust_RefC INV Code  INV Code chk inv C inv C,,,,,,,~~END~~
+tRC,G01,056,G01tRC,000009,BDT,19- October - 15,100,GcliecntAccNoC,Gcl,451,C,100,1,18- October - 15,0chkRC2,,1 Checks Deposited on Date: 19- October - 15 DsCode dsC Ref:cust_RefC INV Code  INV Code chk inv RC2 rc2,,,,,,,~~END~~
+tRC,G01,056,G01tRC,000010,BDT,19- October - 15,100,GcliecntAccNoC,Gcl,451,C,100,1,18- October - 15,0chk1C2,,1 Checks Deposited on Date: 19- October - 15 DsCode dsC2 Ref:cust_refC2 INV Code  INV Code chk inv chk1 C2  c2,,,,,,,~~END~~
+tRC,G01,056,G01tRC,000011,BDT,19- October - 15,100,GcliecntAccNoC,Gcl,451,C,100,1,18- October - 15,0chk2C2,,1 Checks Deposited on Date: 19- October - 15 DsCode dsC2 Ref:cust_refC2 INV Code  INV Code chk inv chk2 C2  c2,,,,,,,~~END~~
+tRC,G01,056,G01tRC,000012,BDT,19- October - 15,1400,G010009198050161,G01,13,D,1400,1,18- October - 15,181015,,OUTWARD TOTAL CHECK :14,,,,,,,~~END~~
+~~END~~,~~END~~

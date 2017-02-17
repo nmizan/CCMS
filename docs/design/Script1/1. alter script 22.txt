@@ -1,0 +1,53 @@
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 14-Jan-13
+-- Description:	get list records of location by bank code
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_Location_GetListByBank]
+	@BANK_CODE	varchar(4)
+AS
+BEGIN	
+		
+	SET NOCOUNT ON;
+
+	SELECT distinct l.LOCATION_CODE,l.LOCATION_NAME 
+	FROM BRANCH br 
+	INNER JOIN LOCATION l on l.LOCATION_CODE=br.LOCATION_CODE
+	WHERE br.BANK_CODE=@BANK_CODE AND l.STATUS='L'
+	ORDER BY LOCATION_NAME;
+	
+	   
+END
+
+GO
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 16-Sep-13
+-- Description:	get list records of location by bank Branch COde
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_Location_GetListByBankBranch]
+	@BANK_CODE		varchar(4),
+	@BRANCH_CODE	varchar(4)
+AS
+BEGIN	
+		
+	SET NOCOUNT ON;
+
+	SELECT distinct l.LOCATION_CODE,l.LOCATION_NAME 
+	FROM BRANCH br 
+	INNER JOIN LOCATION l on l.LOCATION_CODE=br.LOCATION_CODE
+	WHERE br.BANK_CODE=@BANK_CODE AND br.BRANCH_CODE=@BRANCH_CODE 
+	AND l.STATUS='L'
+	ORDER BY LOCATION_NAME;
+	
+	   
+END
+
+GO
+
+

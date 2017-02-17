@@ -1,0 +1,20 @@
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Mohammad Yasir Arafat
+-- Create date: 03 Dec 2015
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE CMS_Process_Update_Last_UCN_Clearing
+@Last_UCN_No_Clearing varchar(14) 	
+AS
+BEGIN
+
+	SET NOCOUNT ON;
+	update GenPRM set Last_UCN_No_Clearing=@Last_UCN_No_Clearing	
+  
+END
+GO

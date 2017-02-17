@@ -1,0 +1,8 @@
+DETB_UPLOAD_DETAIL,,,,,,,,,,,,,,,,,,,,,,,,
+BATCH_NO,BRANCH_CODE,DEPARTMENT_CODE,SOURCE_CODE,CURR_NO,CCY_CD,INITIATION_DATE,AMOUNT,ACCOUNT,ACCOUNT_BRANCH,TXN_CODE,DR_CR,LCY_EQUIVALENT,EXCH_RATE,VALUE_DATE,INSTRUMENT_NO,REL_CUST,ADDL_TEXT,comp_mis_1,comp_mis_2,txn_mis_1,txn_mis_3,txn_mis_4,txn_mis_6,~~END~~
+old,G01,056,G01old,000001,BDT,21- October - 15,100,G123456789,G12,451,C,100,1,04- September - 13,checkRefRC,,1 Check Deposited on Date: 2015-10-21 DS NO ds21101 INV Code chk inv RC,,,,,,,~~END~~
+old,G01,056,G01old,000002,BDT,21- October - 15,150,G123456789,G12,451,C,150,1,04- September - 13,check_refRC1,,1 Check Deposited on Date: 2015-10-18 DS NO dsRC INV Code chk inv RC1 rc1,,,,,,,~~END~~
+old,G01,056,G01old,000003,BDT,21- October - 15,150,G123456789,G12,451,C,150,1,04- September - 13,checkRefRc2,,1 Check Deposited on Date: 2015-10-18 DS NO dsRC INV Code chk inv RC2 rc2,,,,,,,~~END~~
+old,G01,056,G01old,000004,BDT,21- October - 15,100,G123456789,G12,451,C,100,1,04- September - 13,,,1 Check Deposited on Date: 2015-10-18 DS NO dsRC1810 INV Code chk inv RC RC,,,,,,,~~END~~
+old,G01,056,G01old,000005,BDT,21- October - 15,500,G010009198050161,G01,13,D,500,1,04- September - 13,040913,,OUTWARD TOTAL CHECK :4,,,,,,,~~END~~
+~~END~~,~~END~~

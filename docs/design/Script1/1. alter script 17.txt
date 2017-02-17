@@ -1,0 +1,334 @@
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 03-Jan-13
+-- Description:	Get detail of Dschedule
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_DSchedule_GetDetails]	
+	@DS_CODE	varchar(12),	
+	@MOD_NO		int	
+AS
+BEGIN	
+	
+	SET NOCOUNT ON;
+
+	IF EXISTS( SELECT DS_CODE 
+			   FROM DSCHEDULE WHERE DS_CODE=@DS_CODE AND MOD_NO=@MOD_NO)
+		BEGIN
+			SELECT ds.*,'IS_AUTH'=1,
+				l.LOCATION_NAME,b.BANK_NAME,br.BRANCH_NAME,cl.ACC_NO,cl.ACC_NAME
+			FROM DSCHEDULE ds
+				LEFT OUTER JOIN LOCATION l
+				ON l.LOCATION_CODE=ds.LOCATION_CODE
+				LEFT OUTER JOIN BANK b
+				ON b.BANK_CODE=ds.CORR_BANK_CODE
+				LEFT OUTER JOIN BRANCH br
+				ON br.BRANCH_CODE=ds.CORR_BRANCH_CODE
+				AND br.BANK_CODE=ds.CORR_BANK_CODE AND br.LOCATION_CODE=ds.LOCATION_CODE
+				LEFT OUTER JOIN CLIENT cl
+				ON cl.CLIENT_CODE=ds.CLIENT_CODE
+			WHERE ds.DS_CODE=@DS_CODE AND ds.MOD_NO = @MOD_NO
+			ORDER BY ds.SLNO
+		END	
+	ELSE
+		BEGIN
+			SELECT dsh.* ,
+				l.LOCATION_NAME,b.BANK_NAME,br.BRANCH_NAME,cl.ACC_NO,cl.ACC_NAME
+			FROM DSCHEDULE_HIST dsh
+				LEFT OUTER JOIN LOCATION l
+				ON l.LOCATION_CODE=dsh.LOCATION_CODE
+				LEFT OUTER JOIN BANK b
+				ON b.BANK_CODE=dsh.CORR_BANK_CODE
+				LEFT OUTER JOIN BRANCH br
+				ON br.BRANCH_CODE=dsh.CORR_BRANCH_CODE
+				AND br.BANK_CODE=dsh.CORR_BANK_CODE AND br.LOCATION_CODE=dsh.LOCATION_CODE
+				LEFT OUTER JOIN CLIENT cl
+				ON cl.CLIENT_CODE=dsh.CLIENT_CODE
+			WHERE dsh.DS_CODE=@DS_CODE AND dsh.MOD_NO = @MOD_NO
+			ORDER BY dsh.SLNO
+		END
+END
+
+GO
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 13-Nov-12
+-- Description:	Get Total # of modification of branch table
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_Branch_GetMaxMod]	
+	@BANK_CODE		varchar(4),
+	@BRANCH_CODE	varchar(4),
+	@LOCATION_CODE	varchar(4)	
+AS
+BEGIN	
+
+	DECLARE @Max1	int,
+			@Max2	int;
+
+	SET NOCOUNT ON;
+	
+	SELECT @Max1=0,@Max2=0;
+
+	SELECT @Max1=ISNULL(MAX(MOD_NO),0) FROM BRANCH_HIST 
+		WHERE BANK_CODE=@BANK_CODE 
+		AND BRANCH_CODE=@BRANCH_CODE 
+		AND LOCATION_CODE=@LOCATION_CODE AND IS_AUTH=0;
+		
+	IF @Max1=0
+		BEGIN
+			SELECT @Max2=ISNULL(MAX(MOD_NO),0) FROM BRANCH 
+				WHERE BANK_CODE=@BANK_CODE AND BRANCH_CODE=@BRANCH_CODE
+				AND LOCATION_CODE=@LOCATION_CODE;
+			SELECT @Max2;
+			RETURN 0;			
+		END
+	
+	SELECT @Max1;
+	RETURN 0;
+
+END
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 07-Jan-13
+-- Description:	Get cash slip detail of DSchedule
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_DSchedule_GetCashSlip]	
+	@D_CODE	varchar(12)
+AS
+BEGIN	
+	
+	SET NOCOUNT ON;
+
+	IF EXISTS(SELECT D_CODE 
+			FROM DSCHEDULE ds 
+			WHERE ds.D_CODE=@D_CODE AND ds.DEPOSIT_TYPE='Cash' )
+		BEGIN
+			SELECT ds.*,l.LOCATION_NAME,b.BANK_NAME,br.BRANCH_NAME,
+				c.ACC_NAME,C.ACC_NO
+			FROM DSCHEDULE ds
+				LEFT OUTER JOIN LOCATION l
+				ON l.LOCATION_CODE=ds.LOCATION_CODE
+				LEFT OUTER JOIN BANK b
+				on b.BANK_CODE=ds.CORR_BANK_CODE
+				LEFT OUTER JOIN BRANCH br
+				on br.BRANCH_CODE=ds.CORR_BRANCH_CODE
+				AND br.BANK_CODE=ds.CORR_BANK_CODE AND br.LOCATION_CODE=ds.LOCATION_CODE
+				LEFT OUTER JOIN CLIENT c
+				on c.CLIENT_CODE=ds.CLIENT_CODE
+			WHERE ds.D_CODE=@D_CODE AND ds.DEPOSIT_TYPE='Cash';
+		END;
+	ELSE
+		BEGIN
+			SELECT ds.*,l.LOCATION_NAME,b.BANK_NAME,br.BRANCH_NAME,
+				c.ACC_NAME,C.ACC_NO
+			FROM DSCHEDULE_HIST ds
+				LEFT OUTER JOIN LOCATION l
+				ON l.LOCATION_CODE=ds.LOCATION_CODE
+				LEFT OUTER JOIN BANK b
+				on b.BANK_CODE=ds.CORR_BANK_CODE
+				LEFT OUTER JOIN BRANCH br
+				on br.BRANCH_CODE=ds.CORR_BRANCH_CODE
+				AND br.BANK_CODE=ds.CORR_BANK_CODE AND br.LOCATION_CODE=ds.LOCATION_CODE
+				LEFT OUTER JOIN CLIENT c
+				on c.CLIENT_CODE=ds.CLIENT_CODE
+			WHERE ds.D_CODE=@D_CODE AND ds.DEPOSIT_TYPE='Cash' AND IS_AUTH=0;
+		END;
+
+END
+
+GO
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 08-Jan-13
+-- Description:	Get check slip detail of DSchedule
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_DSchedule_GetCheckSlip]	
+	@D_CODE	varchar(12)
+AS
+BEGIN	
+	
+	SET NOCOUNT ON;
+
+	IF EXISTS(SELECT D_CODE 
+			FROM DSCHEDULE ds 
+			WHERE ds.D_CODE=@D_CODE AND ds.DEPOSIT_TYPE='Check' )
+		BEGIN
+			SELECT ds.*,l.LOCATION_NAME,b.BANK_NAME,br.BRANCH_NAME,
+				c.ACC_NAME,C.ACC_NO
+			FROM DSCHEDULE ds
+				LEFT OUTER JOIN LOCATION l
+				ON l.LOCATION_CODE=ds.LOCATION_CODE
+				LEFT OUTER JOIN BANK b
+				on b.BANK_CODE=ds.CORR_BANK_CODE
+				LEFT OUTER JOIN BRANCH br
+				on br.BRANCH_CODE=ds.CORR_BRANCH_CODE
+				AND br.BANK_CODE=ds.CORR_BANK_CODE AND br.LOCATION_CODE=ds.LOCATION_CODE
+				LEFT OUTER JOIN CLIENT c
+				on c.CLIENT_CODE=ds.CLIENT_CODE
+			WHERE ds.D_CODE=@D_CODE AND ds.DEPOSIT_TYPE='Check';
+		END;
+	ELSE
+		BEGIN
+			SELECT ds.*,l.LOCATION_NAME,b.BANK_NAME,br.BRANCH_NAME,
+				c.ACC_NAME,C.ACC_NO
+			FROM DSCHEDULE_HIST ds
+				LEFT OUTER JOIN LOCATION l
+				ON l.LOCATION_CODE=ds.LOCATION_CODE
+				LEFT OUTER JOIN BANK b
+				on b.BANK_CODE=ds.CORR_BANK_CODE
+				LEFT OUTER JOIN BRANCH br
+				on br.BRANCH_CODE=ds.CORR_BRANCH_CODE
+				AND br.BANK_CODE=ds.CORR_BANK_CODE AND br.LOCATION_CODE=ds.LOCATION_CODE
+				LEFT OUTER JOIN CLIENT c
+				on c.CLIENT_CODE=ds.CLIENT_CODE
+			WHERE ds.D_CODE=@D_CODE AND ds.DEPOSIT_TYPE='Check' AND IS_AUTH=0;
+		END;
+
+
+END
+
+GO
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 24-Jan-13
+-- Description:	Get detail of Dschedule by code
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_DSchedule_GetDetailsByCode]	
+	@DS_CODE	varchar(12)	
+AS
+BEGIN	
+	
+	SET NOCOUNT ON;
+
+	
+	SELECT ds.*,
+		l.LOCATION_NAME,b.BANK_NAME,br.BRANCH_NAME
+	FROM DSCHEDULE ds
+		LEFT OUTER JOIN LOCATION l
+		ON l.LOCATION_CODE=ds.LOCATION_CODE
+		LEFT OUTER JOIN BANK b
+		ON b.BANK_CODE=ds.CORR_BANK_CODE
+		LEFT OUTER JOIN BRANCH br
+		ON br.BRANCH_CODE=ds.CORR_BRANCH_CODE
+		AND br.BANK_CODE=ds.CORR_BANK_CODE AND br.LOCATION_CODE=ds.LOCATION_CODE
+	WHERE ds.DS_CODE=@DS_CODE
+	ORDER BY ds.SLNO
+	
+	
+END
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 28-Jan-13
+-- Description:	Get detail of CSchedule
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_CSchedule_GetDetails]	
+	@CS_CODE	varchar(12),	
+	@MOD_NO		int	
+AS
+BEGIN	
+	
+	SET NOCOUNT ON;
+
+	IF EXISTS( SELECT CS_CODE 
+			   FROM CSCHEDULE WHERE CS_CODE=@CS_CODE AND MOD_NO=@MOD_NO)
+		BEGIN
+			SELECT cs.*,'IS_AUTH'=1,
+				l.LOCATION_NAME,b.BANK_NAME,br.BRANCH_NAME
+			FROM CSCHEDULE cs
+				LEFT OUTER JOIN LOCATION l
+				ON l.LOCATION_CODE=cs.LOCATION_CODE
+				LEFT OUTER JOIN BANK b
+				ON b.BANK_CODE=cs.CORR_BANK_CODE
+				LEFT OUTER JOIN BRANCH br
+				ON br.BRANCH_CODE=cs.CORR_BRANCH_CODE
+				AND br.BANK_CODE=cs.CORR_BANK_CODE AND br.LOCATION_CODE=cs.LOCATION_CODE
+			WHERE cs.CS_CODE=@CS_CODE AND cs.MOD_NO = @MOD_NO
+			ORDER BY DS_CODE
+		END	
+	ELSE
+		BEGIN
+			SELECT csh.* ,
+				l.LOCATION_NAME,b.BANK_NAME,br.BRANCH_NAME
+			FROM CSCHEDULE_HIST csh
+				LEFT OUTER JOIN LOCATION l
+				ON l.LOCATION_CODE=csh.LOCATION_CODE
+				LEFT OUTER JOIN BANK b
+				ON b.BANK_CODE=csh.CORR_BANK_CODE
+				LEFT OUTER JOIN BRANCH br
+				ON br.BRANCH_CODE=csh.CORR_BRANCH_CODE
+				AND br.BANK_CODE=csh.CORR_BANK_CODE AND br.LOCATION_CODE=csh.LOCATION_CODE
+			WHERE csh.CS_CODE=@CS_CODE AND csh.MOD_NO = @MOD_NO
+			ORDER BY DS_CODE
+		END
+END
+
+GO
+
+
+
+
+-- =============================================
+-- Author:		Fahad Khan
+-- Create date: 25-Feb-13
+-- Description:	Get detail of DD
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_DD_GetDetail]	
+	@D_CODE	varchar(12)
+AS
+BEGIN	
+	
+	SET NOCOUNT ON;
+
+	SELECT dm.*,bn.BANK_NAME,br.BRANCH_NAME,lc.LOCATION_NAME FROM 
+	(SELECT d.* FROM 
+		(SELECT *,'IS_AUTH'=1 FROM DD WHERE D_CODE=@D_CODE
+		UNION
+		SELECT *  FROM DD_HIST WHERE D_CODE=@D_CODE
+		) as d
+		WHERE d.MOD_NO=(SELECT MAX(MOD_NO) FROM (
+			SELECT SLNO,MOD_NO FROM DD WHERE D_CODE=@D_CODE
+			UNION
+			SELECT SLNO,MOD_NO FROM DD_HIST where D_CODE=@D_CODE) as m
+			WHERE m.SLNO=d.SLNO)
+		) as dm
+	LEFT OUTER JOIN BANK as bn ON dm.DRAWER_BANKCODE=bn.BANK_CODE 
+    LEFT OUTER JOIN BRANCH as br ON br.BRANCH_CODE= dm.DRAWER_BRANCHCODE
+    AND br.BANK_CODE=dm.DRAWER_BANKCODE AND br.LOCATION_CODE=dm.DRAWER_LOCATION
+    LEFT OUTER JOIN LOCATION as lc ON lc.LOCATION_CODE= dm.DRAWER_LOCATION
+	ORDER BY dm.SLNO	
+
+END
+
+GO
+
+
+
+
+
+
+
+
+
+

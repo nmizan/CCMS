@@ -1,0 +1,20 @@
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Mohammad Yasir Arafat
+-- Create date: 31-Aug-2015
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_Process_UpdateUniqueCollectionNo]
+	@UNIQUE_COLLECTION_NO varchar(14),	      
+	@CHECK_NO varchar(15)	
+AS
+BEGIN
+
+	SET NOCOUNT ON;
+	
+	UPDATE CSD_DET
+	set UNIQUE_COLLECTION_NO=@UNIQUE_COLLECTION_NO where CHECK_NO=@CHECK_NO
+    RETURN 0;
+END

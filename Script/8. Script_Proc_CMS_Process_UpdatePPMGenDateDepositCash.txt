@@ -1,0 +1,27 @@
+USE [CCMS]
+GO
+/****** Object:  StoredProcedure [dbo].[CMS_Process_UpdatePPMGenDateDepositCash]    Script Date: 06/09/2015 3:52:49 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Mohammad Yasir Arafat
+-- Create date: 06 Sept 2015
+-- Description:	Update PPM_GenDate from DepositCash
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_Process_UpdatePPMGenDateDepositCash]
+	
+AS
+BEGIN
+	
+	SET NOCOUNT ON;
+
+   update DSCHEDULE set PPM_GenDate=getdate()
+    from DSCHEDULE,CCASH,BANK,BRANCH, Client 
+	where DSCHEDULE.D_CODE=CCASH.D_CODE and 
+			DSCHEDULE.CORR_BANK_CODE=BANK.BANK_CODE and DSCHEDULE.CORR_BRANCH_CODE=BRANCH.BRANCH_CODE and 
+			BRANCH.BANK_CODE=DSCHEDULE.CORR_BANK_CODE and DSCHEDULE.FLEXGEN_DATE is not NULL
+			 and DSCHEDULE.CLIENT_CODE=CLIENT.CLIENT_CODE and DSCHEDULE.PPM_GenDate is null
+			 and DSCHEDULE.SCHEDULE_DATE = getdate();							
+END

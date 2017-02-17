@@ -1,0 +1,36 @@
+USE [CCMS]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Mohammad Yasir Arafat
+-- Create date: 02-Sept-2015
+-- Description:	Procedure to get CSDAddSlipText
+-- =============================================
+CREATE PROCEDURE CMS_CSD_GetAddSlipText
+	@D_CODE	varchar(12)
+AS
+BEGIN
+	
+	SET NOCOUNT ON;
+	
+	IF EXISTS(SELECT D_CODE 
+			FROM CSD  
+			WHERE D_CODE=@D_CODE)
+		BEGIN
+			SELECT AddSlipText
+			FROM CSD 
+			WHERE D_CODE=@D_CODE;
+		END;
+	ELSE
+		BEGIN
+			SELECT AddSlipText
+			FROM CSD_HIST				
+			WHERE D_CODE=@D_CODE AND IS_AUTH=0;
+		END;
+
+   
+END
+GO

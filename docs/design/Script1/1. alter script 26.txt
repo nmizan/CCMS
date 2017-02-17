@@ -1,0 +1,62 @@
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 14-Jan-13
+-- Description:	Get detail of CCHECK by nonzone_ref
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_CCheck_GetDetailByRefNo]	
+	@NONZONE_REF	varchar(7)
+AS
+BEGIN	
+	
+	SET NOCOUNT ON;
+
+	SELECT cc.* ,
+		cl.ACC_NAME,cl.ACC_NO,
+		b.BANK_NAME,br.BRANCH_NAME
+	FROM CCHECK cc
+		LEFT OUTER JOIN CLIENT cl
+		ON cl.CLIENT_CODE=cc.CLIENT_CODE		
+		LEFT OUTER JOIN BANK b
+		ON b.BANK_CODE=cc.DRAWEE_BANK_CODE
+		LEFT OUTER JOIN BRANCH br
+		ON br.BRANCH_CODE=cc.BRANCH_CODE AND br.BANK_CODE=cc.DRAWEE_BANK_CODE
+		AND br.LOCATION_CODE=cc.LOCATION_CODE
+	WHERE cc.NONZONE_REF=@NONZONE_REF
+
+END
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 14-Jan-13
+-- Description:	Get detail of CCHECK by check no
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_CCheck_GetDetailByCheckNo]	
+	@CHECK_NO	varchar(15)
+AS
+BEGIN	
+	
+	SET NOCOUNT ON;
+
+	SELECT cc.* ,
+		cl.ACC_NAME,cl.ACC_NO,
+		b.BANK_NAME,br.BRANCH_NAME
+	FROM CCHECK cc
+		LEFT OUTER JOIN CLIENT cl
+		ON cl.CLIENT_CODE=cc.CLIENT_CODE		
+		LEFT OUTER JOIN BANK b
+		ON b.BANK_CODE=cc.DRAWEE_BANK_CODE
+		LEFT OUTER JOIN BRANCH br
+		ON br.BRANCH_CODE=cc.BRANCH_CODE AND br.BANK_CODE=cc.DRAWEE_BANK_CODE
+		AND br.LOCATION_CODE=cc.LOCATION_CODE		
+	WHERE cc.CHECK_NO=@CHECK_NO
+	ORDER BY D_CODE
+
+END
+
+GO
+

@@ -1,0 +1,3 @@
+alter table GenPrm add constraint unique_UCN unique(Last_UCN_No)
+
+alter table GenPrm add Last_UCN_No_Clearing varchar(14) unique

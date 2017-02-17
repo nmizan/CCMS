@@ -1,0 +1,1 @@
+alter table TMP_DR_BOOKING alter column REMARKS varchar(350)

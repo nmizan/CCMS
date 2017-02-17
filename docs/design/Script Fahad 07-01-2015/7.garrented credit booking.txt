@@ -1,0 +1,269 @@
+CREATE TABLE [dbo].[TMP_GUARANTEED_BOOKING](
+	[CLIENT_CODE] [varchar](6) NULL,
+	[ENTRY_DATE] [datetime] NOT NULL,
+	[SCHEDULE_DATE] [datetime] NULL,
+	[AMOUNT] [numeric](14, 2) NULL,
+	[GUARANTEED_CR_ACC] [varchar](16) NULL,
+	[GUARANTEED_CR_OFST_ACC] [varchar](16) NULL,
+	[ACC_NAME] [varchar](50) NULL,
+	[FLEXGEN_DATE] [datetime] NULL,
+	[FILE_USER_ID] [varchar](20) NULL,
+	[CLIENT_ACC_NO] [varchar](16) NULL,
+	[DS_CODE] [varchar](12) NULL,
+	[D_CODE] [varchar](12) NULL
+) ON [PRIMARY]
+
+GO
+
+
+
+-- =============================================
+-- Author:		FAHAD KHAN
+-- Create date: 06-Nov-14
+-- Description:	process guaranteed booking TMP_GUARANTEED_BOOKING 
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_Process_GuaranteedBooking]	
+	 @ENRTY_DATE	datetime
+AS
+BEGIN	
+
+	DECLARE @ErrorVar INT;
+
+	DECLARE @HOLI_DAY datetime,
+	        @WORK_DAY datetime,
+	        @NUMBER Int,
+	        @FLAG bit;
+	        
+	        SET NOCOUNT ON;
+	        
+	        DELETE FROM TMP_GUARANTEED_BOOKING WHERE ENTRY_DATE  = @ENRTY_DATE;
+	        
+	        -- working Day find
+	        
+	            
+					SET @FLAG = 0;
+					DECLARE GLTCURSOR CURSOR FOR
+						
+						SELECT HOLI_DAY FROM HOLIDAY WHERE   STATUS = 'L'
+
+					OPEN GLTCURSOR;
+					
+					FETCH NEXT FROM GLTCURSOR 
+						INTO @HOLI_DAY;
+
+					WHILE @@FETCH_STATUS=0 AND @FLAG = 0
+ 					BEGIN
+ 					      
+ 					      
+ 					      SELECT @WORK_DAY = (SELECT DATEADD(DAY,-1,  @ENRTY_DATE))
+					        
+							WHILE @FLAG=0
+							BEGIN
+								 IF EXISTS(SELECT HOLI_DAY FROM HOLIDAY WHERE   STATUS = 'L' AND HOLI_DAY=@WORK_DAY)
+								 BEGIN
+									SELECT @WORK_DAY = (SELECT DATEADD(DAY,-1,@WORK_DAY))
+									SET @FLAG = 0
+								 END
+								 ELSE
+									
+								 BEGIN
+								 
+								  SET @FLAG = 1
+									 BREAK; 
+								 END
+ 							END		 
+						
+
+						FETCH NEXT FROM GLTCURSOR 
+						INTO @HOLI_DAY
+					END
+					
+					CLOSE GLTCURSOR;
+					DEALLOCATE GLTCURSOR;
+					
+					
+					
+  
+              --   Check 0, 1 , customer
+  
+              DECLARE @DS_CODE varchar(12),
+	                  @D_CODE  varchar(12),
+	                  @CLIENT_CODE varchar(6),
+	                  @ACC_NO varchar(16),
+	                  @ACC_NAME varchar(60),
+	                  @GUARANTEED_CR_ACC varchar(16),
+	                  @GUARANTEED_CR_OFST_ACC varchar(16),
+	                  @AMOUNT numeric(14,2),
+	                  @SCHEDULE_DATE datetime,
+	                  @INSERT_DATE datetime,
+	                  @SPEED_DAYS Int;
+  
+								
+		       DECLARE Coursor1 CURSOR FOR
+						
+						SELECT ds.DS_CODE, ds.D_CODE,ds.CLIENT_CODE,  c.ACC_NO , c.ACC_NAME , c.GUARANTEED_CR_ACC , c.GUARANTEED_CR_OFST_ACC , ds.CITICHECK_AMOUNT ,
+						  ds.SCHEDULE_DATE, dc.ENTRY_DATE, COALESCE(clc.SPEED_DAYS, c.SPEED_DAYS) SPEED_DAYS  FROM DSCHEDULE ds
+						  INNER JOIN DCOLLECTED dc ON dc.DS_CODE = ds.DS_CODE   and dc.STATUS = 'L'
+						  inner join CLIENT c ON c.CLIENT_CODE = ds.CLIENT_CODE 
+						  left join CLIENT_LOC_CHARGE clc ON clc.CLIENT_CODE = ds.CLIENT_CODE and clc.LOCATION_CODE = ds.LOCATION_CODE WHERE ds.CITICHECK_AMOUNT > 0 AND dc.ENTRY_DATE = @ENRTY_DATE  and COALESCE(clc.SPEED_DAYS, c.SPEED_DAYS) in (0,1)
+
+					OPEN Coursor1;
+					
+					FETCH NEXT FROM Coursor1 
+						INTO @DS_CODE,@D_CODE, @CLIENT_CODE,@ACC_NO,@ACC_NAME,@GUARANTEED_CR_ACC,@GUARANTEED_CR_OFST_ACC,@AMOUNT,@SCHEDULE_DATE,@INSERT_DATE,@SPEED_DAYS
+
+					WHILE @@FETCH_STATUS=0 
+ 					BEGIN
+ 					      
+ 					     IF @SPEED_DAYS =0
+ 					       BEGIN
+ 					       
+ 					          IF @SCHEDULE_DATE = @ENRTY_DATE
+ 					           BEGIN
+ 					           
+ 					          
+ 					              INSERT INTO TMP_GUARANTEED_BOOKING (CLIENT_CODE, ENTRY_DATE, SCHEDULE_DATE, AMOUNT, GUARANTEED_CR_ACC, GUARANTEED_CR_OFST_ACC, ACC_NAME, CLIENT_ACC_NO, DS_CODE, D_CODE)
+ 					                                           VALUES(@CLIENT_CODE,@ENRTY_DATE ,@SCHEDULE_DATE,@AMOUNT ,@GUARANTEED_CR_ACC,@GUARANTEED_CR_OFST_ACC,@ACC_NAME, @ACC_NO,@DS_CODE,@D_CODE );
+ 					           END
+ 					       
+ 					       END
+ 					       
+ 					     ELSE IF @SPEED_DAYS =1
+ 					       BEGIN
+ 					       
+ 					           IF @SCHEDULE_DATE = @WORK_DAY 
+ 					           BEGIN
+ 					               INSERT INTO TMP_GUARANTEED_BOOKING (CLIENT_CODE, ENTRY_DATE, SCHEDULE_DATE, AMOUNT, GUARANTEED_CR_ACC, GUARANTEED_CR_OFST_ACC, ACC_NAME,  CLIENT_ACC_NO, DS_CODE, D_CODE)
+ 					                                           VALUES(@CLIENT_CODE,@ENRTY_DATE ,@SCHEDULE_DATE,@AMOUNT ,@GUARANTEED_CR_ACC,@GUARANTEED_CR_OFST_ACC,@ACC_NAME, @ACC_NO,@DS_CODE,@D_CODE );
+ 					           END
+ 					       
+ 					       END
+						
+
+						FETCH NEXT FROM Coursor1 
+						INTO @DS_CODE,@D_CODE, @CLIENT_CODE,@ACC_NO,@ACC_NAME,@GUARANTEED_CR_ACC,@GUARANTEED_CR_OFST_ACC,@AMOUNT,@SCHEDULE_DATE,@INSERT_DATE,@SPEED_DAYS
+					END
+					
+					CLOSE Coursor1;
+					DEALLOCATE Coursor1;
+					
+
+END
+
+
+
+
+GO
+
+-- =============================================
+-- Author:		Fahd Khan
+-- Create date: 10-Nov-14
+-- Description: Process for Guaranteed Credit Booking check by batch code
+-- =============================================
+
+CREATE PROCEDURE [dbo].[CMS_Process_GuaranteedCreditBookBatch]	
+	@BATCH_NO	VARCHAR(4) output	
+AS
+BEGIN	
+	DECLARE @ErrorVar INT;
+			
+	SET NOCOUNT ON;
+		
+	SELECT @BATCH_NO = ISNULL(MAX(BATCH_NO),'5600')+1		
+		FROM GENPRM
+		WHERE DATEDIFF(d,GETDATE(),BATCH_DATE)=0;
+    
+END
+
+GO
+
+
+-- =============================================
+-- Author:		Fahd Khan
+-- Create date: 10-Nov-14
+-- Description: Process for guaranteed Credit Booking update reference
+-- =============================================
+
+CREATE PROCEDURE [dbo].[CMS_Process_GuarantedCreditBookingUpdateRef]
+	@FILENAME		varchar(15),	      
+	@ENTRY_DATE		datetime ,	      
+	@BATCH_NO		varchar(10) 
+AS
+BEGIN	
+	DECLARE @ErrorVar		INT;			 
+	
+	SET NOCOUNT ON;
+
+	UPDATE GENPRM
+		SET BATCH_NO=@BATCH_NO, BATCH_DATE=GETDATE();
+
+	 UPDATE TMP_GUARANTEED_BOOKING 
+		SET FLEXGEN_DATE=GETDATE(),FILE_USER_ID=substring(suser_name(),charindex('\',suser_name())+1,20)
+		WHERE ENTRY_DATE=@ENTRY_DATE;
+
+	RETURN 0;
+	
+END
+
+
+GO
+
+-- =============================================
+-- Author:		Fahad Khan
+-- Create date: 11-Nov-14
+-- Description:	Get detail of TMP_Cuaranteed Credit Booking Debit Flex Data
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_TmpGuarantedBooking_GetFlexDrDetail]	
+	@ENTRY_DATE	datetime
+AS
+BEGIN	
+	
+	SET NOCOUNT ON;
+
+	SELECT ENTRY_DATE,SCHEDULE_DATE,CLIENT_ACC_NO, ACC_NAME, sum(AMOUNT)as Debittotal,
+		GUARANTEED_CR_ACC
+		FROM TMP_GUARANTEED_BOOKING
+		WHERE ENTRY_DATE=@ENTRY_DATE
+		GROUP BY  ENTRY_DATE,SCHEDULE_DATE,CLIENT_ACC_NO,ACC_NAME,GUARANTEED_CR_ACC
+
+END
+
+
+GO
+
+
+-- =============================================
+-- Author:		Fahad Khan
+-- Create date: 11-Nov-14
+-- Description:	Get detail of TMP_Cuaranteed Credit Booking Debit Flex Data
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_TmpGuarantedBooking_GetFlexCrDetail]	
+	@ENTRY_DATE	datetime
+AS
+BEGIN	
+	
+	SET NOCOUNT ON;
+
+	SELECT ENTRY_DATE,SCHEDULE_DATE,CLIENT_ACC_NO, ACC_NAME, sum(AMOUNT)as Credittotal,
+		GUARANTEED_CR_OFST_ACC
+		FROM TMP_GUARANTEED_BOOKING
+		WHERE ENTRY_DATE=@ENTRY_DATE
+		GROUP BY  ENTRY_DATE,SCHEDULE_DATE,CLIENT_ACC_NO,ACC_NAME,GUARANTEED_CR_OFST_ACC
+
+END
+
+
+GO
+
+CREATE VIEW [dbo].[V_GUARANTEED_CREDIT_BOOKING]
+AS
+SELECT     a.CLIENT_CODE, a.ENTRY_DATE, a.SCHEDULE_DATE, a.AMOUNT, a.GUARANTEED_CR_ACC, a.GUARANTEED_CR_OFST_ACC, a.ACC_NAME, a.FLEXGEN_DATE, 
+                      a.FILE_USER_ID, a.CLIENT_ACC_NO, a.DS_CODE, a.D_CODE, d.LOCATION_CODE, l.LOCATION_NAME, b.BANK_NAME, d.CORR_BANK_CODE, d.DEPOSIT_TYPE
+FROM         dbo.TMP_GUARANTEED_BOOKING AS a INNER JOIN
+                      dbo.DSCHEDULE AS d ON d.D_CODE = a.D_CODE INNER JOIN
+                      dbo.LOCATION AS l ON l.LOCATION_CODE = d.LOCATION_CODE AND l.STATUS = 'L' INNER JOIN
+                      dbo.BANK AS b ON b.BANK_CODE = d.CORR_BANK_CODE AND b.STATUS = 'L'
+
+GO
+
+

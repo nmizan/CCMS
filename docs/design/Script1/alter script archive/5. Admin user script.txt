@@ -1,0 +1,28 @@
+USE [CCMS]
+GO
+
+
+INSERT INTO USERS(USERS_ID, USERS_NAME, DEPT_SLNO, DOMAIN, 
+USER_STAT, INPUT_BY, INPUT_DATETIME, 
+MOD_NO, [STATUS], INV_ATTEMPT, IS_ADMIN)
+VALUES('LoginID1','User Full Name',4,'APAC','E',
+substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,
+'L',0,1
+);
+
+INSERT INTO USERS(USERS_ID, USERS_NAME, DEPT_SLNO, DOMAIN, 
+USER_STAT, INPUT_BY, INPUT_DATETIME, 
+MOD_NO, [STATUS], INV_ATTEMPT, IS_ADMIN)
+VALUES('LoginID2','User Full Name',4,'APAC','E',
+substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,
+'L',0,1
+);
+
+INSERT INTO USERS(USERS_ID, USERS_NAME, DEPT_SLNO, DOMAIN, 
+USER_STAT, INPUT_BY, INPUT_DATETIME, 
+MOD_NO, [STATUS], INV_ATTEMPT, IS_ADMIN)
+VALUES('LoginID3','User Full Name',4,'APAC','E',
+substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,
+'L',0,1
+);
+

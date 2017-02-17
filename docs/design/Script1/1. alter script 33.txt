@@ -1,0 +1,823 @@
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 14-Jan-13
+-- Description:	Get detail of CCHECK by check no
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_CCheck_GetDetailByCheckNo]	
+	@CHECK_NO	varchar(15)
+AS
+BEGIN	
+	
+	SET NOCOUNT ON;
+
+	SELECT cc.* ,
+		cl.ACC_NAME,cl.ACC_NO,
+		b.BANK_NAME,br.BRANCH_NAME
+	FROM CCHECK cc
+		LEFT OUTER JOIN CLIENT cl
+		ON cl.CLIENT_CODE=cc.CLIENT_CODE		
+		LEFT OUTER JOIN BANK b
+		ON b.BANK_CODE=cc.DRAWEE_BANK_CODE
+		LEFT OUTER JOIN BRANCH br
+		ON br.BRANCH_CODE=cc.BRANCH_CODE AND br.BANK_CODE=cc.DRAWEE_BANK_CODE
+		AND br.LOCATION_CODE=cc.LOCATION_CODE		
+	WHERE cc.CHECK_NO=@CHECK_NO AND NONZONE_REF IS NOT NULL
+	ORDER BY D_CODE
+
+END
+
+GO
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 29-May-13
+-- Description: Process for Monthly Bill
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_Process_MonthBill]			
+	@START_DATE	DATETIME,
+	@END_DATE	DATETIME
+AS
+BEGIN	
+				
+	SET NOCOUNT ON;
+
+	DELETE FROM TMP_MON_BILL;
+
+	INSERT INTO TMP_MON_BILL(DS_CODE, D_CODE, CITICASH_AMOUNT, CITICHECK_AMOUNT, 
+		SCHEDULE_DATE, NO_CHECK, CLIENT_CODE, LOCATION_CODE, LOCATION_NAME, 
+		ACC_NAME, CASH_CHARGE, SPEED_CHARGE, RETURN_CHARGE, CASH_STD_CHARGE, 
+		SPEED_STD_CHARGE, CASH_VAT, SPEED_VAT, RETURN_AMOUNT, NO_OF_RETURN)
+		SELECT ds.DS_CODE,ds.D_CODE,ISNULL(ds.CITICASH_AMOUNT,0) AS CITICASH_AMOUNT,
+			ISNULL(ds.CITICHECK_AMOUNT,0) AS CITICHECK_AMOUNT,ds.SCHEDULE_DATE,
+			ds.NO_CHECK,ds.CLIENT_CODE,ds.LOCATION_CODE,lo.LOCATION_NAME,
+			cl.ACC_NAME,ISNULL(clc.CASH_CHARGE,cl.CASH_CHARGE) AS CASH_CHARGE,
+			ISNULL(clc.SPEED_CHARGE,cl.SPEED_CHARGE) AS SPEED_CHARGE,cl.RETURN_CHARGE,
+			cl.CASH_STD_CHARGE,cl.SPEED_STD_CHARGE,cl.CASH_VAT,cl.SPEED_VAT,
+			ISNULL(rt.RETURN_AMOUNT,0) AS RETURN_AMOUNT,ISNULL(rt.NO_OF_RETURN,0) AS NO_OF_RETURN
+			FROM DSCHEDULE ds
+			INNER JOIN DCOLLECTED dc ON dc.DS_CODE=ds.DS_CODE AND dc.[STATUS]='L'
+			INNER JOIN LOCATION lo ON lo.LOCATION_CODE=ds.LOCATION_CODE
+			INNER JOIN CLIENT cl ON cl.CLIENT_CODE=ds.CLIENT_CODE
+			LEFT OUTER JOIN (SELECT * FROM CLIENT_LOC_CHARGE WHERE [STATUS]='L') clc 
+			ON clc.LOCATION_CODE=ds.LOCATION_CODE AND clc.CLIENT_CODE=ds.CLIENT_CODE
+			LEFT OUTER JOIN (SELECT D_CODE,SUM(AMOUNT) AS RETURN_AMOUNT, COUNT(D_CODE) AS NO_OF_RETURN
+			FROM CSD_DET WHERE RTN_STATUS='R'
+			GROUP BY D_CODE) rt
+			ON rt.D_CODE=ds.D_CODE
+			WHERE SCHEDULE_DATE BETWEEN @START_DATE AND @END_DATE;
+
+	         
+END
+
+GO
+
+
+
+
+
+ALTER VIEW [dbo].[V_ANY_RETURN]
+as
+(
+	SELECT cc.*,cl.ACC_NO,cl.ACC_NAME,cl.MAIL_ADD,l.LOCATION_NAME,rr.REJECT_REASON,
+		b.BANK_NAME, br.BRANCH_NAME, CONVERT(datetime,CONVERT(varchar(12),nc.INPUT_DATETIME))  AS RET_DATE
+		FROM CCHECK cc
+		INNER JOIN CCHECKTOTAL ct
+		ON cc.D_CODE=ct.D_CODE
+		INNER JOIN NCOLLECTION nc
+		ON nc.NONZONE_REF=cc.NONZONE_REF
+		LEFT OUTER JOIN RETURN_REJECT rr
+		ON cc.RTN_CODE=rr.REJECT_CODE
+		LEFT OUTER JOIN CLIENT cl
+		ON cc.CLIENT_CODE=cl.CLIENT_CODE
+		LEFT OUTER JOIN LOCATION l
+		ON l.LOCATION_CODE=cc.DLOCATION_CODE
+		LEFT OUTER JOIN BANK b 
+		ON b.BANK_CODE=cc.DRAWEE_BANK_CODE
+		LEFT OUTER JOIN BRANCH br
+		ON b.BANK_CODE=br.BANK_CODE AND br.BRANCH_CODE=cc.BRANCH_CODE
+		AND br.LOCATION_CODE=cc.LOCATION_CODE
+		WHERE CC.RTN_STATUS='R' AND ct.[STATUS]='L'
+)
+
+
+
+GO
+
+
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 03-Jul-13
+-- Description: Process for CitiAny Funding
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_Process_CitiAnyFunding]
+	@VALUE_DATE	datetime ,        	
+	@BATCH_NO	varchar(4) output	
+AS
+BEGIN
+
+	SET NOCOUNT ON;
+
+	DECLARE 
+		@v_CURR_NO		numeric(5,0),
+		@v_AMOUNT		numeric(12,2),		
+		@v_CNT			numeric(5),
+		@v_ACC_NO		varchar(16),
+		@v_VALUE_DATE	varchar(20),
+		@v_CHECK_NO		varchar(15),
+		@v_CHARGE		numeric(12,2),
+		@v_VATPER		numeric(12,2),
+		@v_VAT			numeric(12,2),
+		@v_COMM_ACC		varchar(16),--
+		@v_VAT_ACC		varchar(16),--
+		@v_SUS_ACC		varchar(16), --
+		@v_TotSuspence	numeric(12,2),
+		@v_DR_CHRG_VAT	numeric(12,2),
+		@v_D_CODE		varchar(12),
+		@v_T_DR_CHRG_VAT	numeric(12,2),
+		@v_T_CHARGE			numeric(12,2),
+		@v_T_VAT			numeric(12,2),
+		@v_T_CNT			numeric(5),
+		@v_T_VATPER			numeric(12,2),
+		@v_T2_CHARGE		numeric(12,2);
+		
+	SELECT @v_CURR_NO=1;
+	
+	SELECT @v_TotSuspence=0;
+	
+	SELECT @BATCH_NO = ISNULL(MAX(BATCH_NO),'5600')+1		
+		FROM GENPRM
+		WHERE DATEDIFF(d,GETDATE(),BATCH_DATE)=0;
+
+	SELECT @v_COMM_ACC = ACC_NO	
+		FROM FLEX_ACC
+		WHERE SLNO=1;
+
+	SELECT @v_VAT_ACC = ACC_NO	
+		FROM FLEX_ACC
+		WHERE SLNO=2;
+
+	SELECT @v_SUS_ACC = ACC_NO	
+		FROM FLEX_ACC
+		WHERE SLNO=3;
+
+	SELECT @v_VALUE_DATE= SUBSTRING(CONVERT(VARCHAR,@VALUE_DATE,3),1,2) + 
+		SUBSTRING(CONVERT(VARCHAR,@VALUE_DATE,3),4,2) +
+		SUBSTRING(CONVERT(VARCHAR,@VALUE_DATE,3),7,2);
+
+	DELETE FROM CITIANY_FUND;
+
+------ type 1
+
+	DECLARE tmpcursor1 CURSOR FOR
+		SELECT sum(nc.AMOUNT) AS COLLECTED_AMOUNT,  
+			COUNT(cc.NONZONE_REF) as CNT,cl.ACC_NO
+			FROM NCOLLECTION nc
+			INNER JOIN CCHECK cc
+			ON cc.NONZONE_REF=nc.NONZONE_REF
+			INNER JOIN CLIENT cl
+			ON cl.CLIENT_CODE=cc.CLIENT_CODE
+			WHERE cc.RTN_STATUS='P' AND cl.BILLING_TYPE='1'
+			AND CONVERT(datetime,CONVERT(varchar(12), nc.INPUT_DATETIME))=@VALUE_DATE
+			--AND cc.FILENAME IS NULL	
+			GROUP BY cl.ACC_NO;
+
+	OPEN tmpcursor1;
+	FETCH NEXT FROM tmpcursor1 
+        INTO @v_AMOUNT,@v_CNT,@v_ACC_NO;
+
+	WHILE @@FETCH_STATUS=0 
+ 	BEGIN
+		INSERT INTO CITIANY_FUND(CURR_NO, VALUE_DATE, AMOUNT, ACC_NO, DR_CR, 
+			INSTRUMENT_NO, REL_CUST, ADD_TEXT, MIS_CODE4)
+			VALUES(@v_CURR_NO,@VALUE_DATE,@v_AMOUNT,@v_ACC_NO,'C',
+			@v_VALUE_DATE,'',
+			'CITIANYWHERE FUNDING AGAINST '+ CONVERT(varchar,@v_CNT)
+			+' COLLECTED OUTSTATION CHECKS',''
+			)
+
+		SELECT @v_TotSuspence=@v_TotSuspence+@v_AMOUNT;
+
+		SELECT @v_CURR_NO=@v_CURR_NO+1;
+
+		FETCH NEXT FROM tmpcursor1 
+			INTO @v_AMOUNT,@v_CNT,@v_ACC_NO;
+
+	END
+
+	CLOSE tmpcursor1;	
+	DEALLOCATE tmpcursor1;
+
+------------- type 2
+	
+	DECLARE tmpcursor2 CURSOR FOR
+		SELECT cl.acc_no,
+			nc.AMOUNT-cl.CITIANY_CHARGE-(cl.CITIANY_STD_CHARGE*cl.CITIANY_VAT/100) AS PAYED_AMOUNT,
+			cc.CHECK_NO,cl.CITIANY_CHARGE,cl.CITIANY_VAT AS CITIVATPER,
+			(cl.CITIANY_STD_CHARGE*cl.CITIANY_VAT/100) AS CITIVAT
+			FROM NCOLLECTION nc
+			INNER JOIN CCHECK cc
+			ON cc.NONZONE_REF=nc.NONZONE_REF
+			INNER JOIN CLIENT cl
+			ON cl.CLIENT_CODE=cc.CLIENT_CODE
+			WHERE cc.RTN_STATUS='P' AND cl.BILLING_TYPE='2'
+			AND CONVERT(datetime,CONVERT(varchar(12), nc.INPUT_DATETIME))=@VALUE_DATE
+			--AND cc.FILENAME IS NULL	
+			ORDER BY cl.CLIENT_CODE;
+
+	OPEN tmpcursor2;
+	FETCH NEXT FROM tmpcursor2 
+        INTO @v_ACC_NO,@v_AMOUNT,@v_CHECK_NO,@v_CHARGE,@v_VATPER,@v_VAT;
+
+	WHILE @@FETCH_STATUS=0 
+ 	BEGIN
+
+		INSERT INTO CITIANY_FUND(CURR_NO, VALUE_DATE, AMOUNT, ACC_NO, DR_CR, 
+			INSTRUMENT_NO, REL_CUST, ADD_TEXT, MIS_CODE4)
+			VALUES(@v_CURR_NO,@VALUE_DATE,@v_AMOUNT,@v_ACC_NO,'C',
+			@v_CHECK_NO,'',
+			'CITIANYWHERE FUNDING LESS DRAWEE BANK CHARGES VAT AND OUR COLLECTION COMMISSION @ TK. '+ CONVERT(varchar,@v_CHARGE) 
+			+ ' INCLUDING ' + CONVERT(varchar,@v_VATPER) +'% VAT ON COMMISSION.',''
+			);		
+
+		SELECT @v_CURR_NO=@v_CURR_NO+1;
+		SELECT @v_TotSuspence=@v_TotSuspence+@v_AMOUNT;
+
+		IF @v_CHARGE<>0 
+		BEGIN
+			INSERT INTO CITIANY_FUND(CURR_NO, VALUE_DATE, AMOUNT, ACC_NO, DR_CR, 
+				INSTRUMENT_NO, REL_CUST, ADD_TEXT, MIS_CODE4)
+				VALUES(@v_CURR_NO,@VALUE_DATE,@v_CHARGE,@v_COMM_ACC,'C',
+				@v_CHECK_NO,'BD0'+ SUBSTRING(@v_ACC_NO,8,6),@v_ACC_NO,'1056'
+				);
+
+			SELECT @v_CURR_NO=@v_CURR_NO+1;
+			SELECT @v_TotSuspence=@v_TotSuspence+@v_CHARGE;
+		END
+
+		IF @v_VAT<>0 
+		BEGIN
+			INSERT INTO CITIANY_FUND(CURR_NO, VALUE_DATE, AMOUNT, ACC_NO, DR_CR, 
+				INSTRUMENT_NO, REL_CUST, ADD_TEXT, MIS_CODE4)
+				VALUES(@v_CURR_NO,@VALUE_DATE,@v_VAT,@v_VAT_ACC,'C',
+				@v_CHECK_NO,'BD0'+ SUBSTRING(@v_ACC_NO,8,6),@v_ACC_NO,'1602'
+				);
+			
+			SELECT @v_CURR_NO=@v_CURR_NO+1;
+			SELECT @v_TotSuspence=@v_TotSuspence+@v_VAT;
+		END
+
+		FETCH NEXT FROM tmpcursor2 
+			INTO @v_ACC_NO,@v_AMOUNT,@v_CHECK_NO,@v_CHARGE,@v_VATPER,@v_VAT;
+
+	END
+
+	CLOSE tmpcursor2;	
+	DEALLOCATE tmpcursor2;
+	
+------------- type 3
+
+	DECLARE tmpcursor3 CURSOR FOR
+		SELECT DISTINCT cl.ACC_NO
+			FROM  CCHECK cc
+			INNER JOIN NCOLLECTION nc 
+			ON nc.NONZONE_REF=cc.NONZONE_REF
+			INNER JOIN CLIENT cl
+			ON cl.CLIENT_CODE=cc.CLIENT_CODE
+			WHERE cc.RTN_STATUS='P' AND cl.BILLING_TYPE='3'
+			AND CONVERT(datetime,CONVERT(varchar(12), nc.INPUT_DATETIME))=@VALUE_DATE
+			--AND cc.FILENAME IS NULL	
+
+
+	OPEN tmpcursor3;
+	FETCH NEXT FROM tmpcursor3 
+        INTO @v_ACC_NO;
+
+	WHILE @@FETCH_STATUS=0 
+ 	BEGIN
+		
+		DECLARE tmpcursor3_1 CURSOR FOR
+			SELECT 
+				cc.AMOUNT AS CHECKAMOUNT,(cc.AMOUNT-nc.AMOUNT) AS DRAWEE_CRG_VAT,
+				cl.CITIANY_CHARGE,
+				(cl.CITIANY_STD_CHARGE*cl.CITIANY_VAT/100) AS CITIVAT,
+				cc.CHECK_NO,cc.D_CODE,
+				cl.CITIANY_VAT AS CITIVATPER
+				FROM NCOLLECTION nc
+				INNER JOIN CCHECK cc
+				ON cc.NONZONE_REF=nc.NONZONE_REF
+				INNER JOIN CLIENT cl
+				ON cl.CLIENT_CODE=cc.CLIENT_CODE
+				WHERE cc.RTN_STATUS='P' AND cl.BILLING_TYPE='3'
+				AND CONVERT(datetime,CONVERT(varchar(12), nc.INPUT_DATETIME))=@VALUE_DATE
+				--AND cc.FILENAME IS NULL	
+				AND cl.ACC_NO=@v_ACC_NO
+			
+		SELECT @v_T_DR_CHRG_VAT=0;
+		SELECT @v_T_CHARGE=0;
+		SELECT @v_T_VAT=0;
+		SELECT @v_T_CNT=0;
+		SELECT @v_T_VATPER=0;
+		SELECT @v_T2_CHARGE=0;
+
+		OPEN tmpcursor3_1;
+		FETCH NEXT FROM tmpcursor3_1 
+			INTO @v_AMOUNT,@v_DR_CHRG_VAT,
+			@v_CHARGE,@v_VAT,@v_CHECK_NO,@v_D_CODE,@v_VATPER;
+
+		WHILE @@FETCH_STATUS=0 
+ 		BEGIN
+			INSERT INTO CITIANY_FUND(CURR_NO, VALUE_DATE, AMOUNT, ACC_NO, DR_CR, 
+				INSTRUMENT_NO, REL_CUST, ADD_TEXT, MIS_CODE4)
+				VALUES(@v_CURR_NO,@VALUE_DATE,@v_AMOUNT,@v_ACC_NO,'C',
+				@v_CHECK_NO,'',
+				'1 OUTSTATION CHECK   CHECK NO  ' + @v_CHECK_NO 
+				+'   DS NO  '+ @v_D_CODE ,''
+				);
+
+			SELECT @v_T_DR_CHRG_VAT=@v_T_DR_CHRG_VAT+@v_DR_CHRG_VAT;
+			SELECT @v_T_CHARGE=@v_T_CHARGE+@v_CHARGE;
+			SELECT @v_T_VAT=@v_T_VAT+@v_VAT;
+			SELECT @v_T_CNT=@v_T_CNT+1;
+			SELECT @v_T_VATPER=@v_VATPER;
+			SELECT @v_T2_CHARGE=@v_CHARGE;
+	
+			
+			SELECT @v_TotSuspence=@v_TotSuspence+@v_AMOUNT;
+			SELECT @v_CURR_NO=@v_CURR_NO+1;
+
+
+			FETCH NEXT FROM tmpcursor3_1 
+				INTO @v_AMOUNT,@v_DR_CHRG_VAT,
+				@v_CHARGE,@v_VAT,@v_CHECK_NO,@v_D_CODE,@v_VATPER;
+		END
+
+		IF @v_T_DR_CHRG_VAT<>0 
+		BEGIN
+			INSERT INTO CITIANY_FUND(CURR_NO, VALUE_DATE, AMOUNT, ACC_NO, DR_CR, 
+				INSTRUMENT_NO, REL_CUST, ADD_TEXT, MIS_CODE4)
+				VALUES(@v_CURR_NO,@VALUE_DATE,@v_T_DR_CHRG_VAT,@v_ACC_NO,'D',
+				@v_VALUE_DATE,'',
+				'DEDUCTION FOR DRAWEE BANK CHARGES AND VAT FOR'+CONVERT(varchar,@v_T_CNT)
+				+' COLLECTION CHECKS' ,''
+				);
+
+			SELECT @v_CURR_NO=@v_CURR_NO+1;
+			SELECT @v_TotSuspence=@v_TotSuspence-@v_T_DR_CHRG_VAT;
+		END
+
+		IF @v_T_CHARGE + @v_T_VAT<>0 
+		BEGIN
+			INSERT INTO CITIANY_FUND(CURR_NO, VALUE_DATE, AMOUNT, ACC_NO, DR_CR, 
+				INSTRUMENT_NO, REL_CUST, ADD_TEXT, MIS_CODE4)
+				VALUES(@v_CURR_NO,@VALUE_DATE,@v_T_CHARGE + @v_T_VAT,@v_ACC_NO,'D',
+				@v_VALUE_DATE,'',
+				'DEDUCTION FOR OUR COLLECTION COMMISSION @ TK. '+ CONVERT(varchar,@v_T2_CHARGE) 
+				+' PER  CHECK INCLUDING '+CONVERT(varchar,@v_T_VATPER)+'% VAT FOR'+CONVERT(varchar,@v_T_CNT)
+				+'COLLECTION CHECKS' ,''
+				);
+
+			SELECT @v_CURR_NO=@v_CURR_NO+1;
+			SELECT @v_TotSuspence=@v_TotSuspence-@v_T_CHARGE-@v_T_VAT;
+		END
+
+		IF @v_T_CHARGE<>0 
+		BEGIN
+			INSERT INTO CITIANY_FUND(CURR_NO, VALUE_DATE, AMOUNT, ACC_NO, DR_CR, 
+				INSTRUMENT_NO, REL_CUST, ADD_TEXT, MIS_CODE4)
+				VALUES(@v_CURR_NO,@VALUE_DATE,@v_T_CHARGE,@v_COMM_ACC,'C',
+				@v_VALUE_DATE,'BD0'+ SUBSTRING(@v_ACC_NO,8,6),@v_ACC_NO,'1056'
+				);
+
+			SELECT @v_CURR_NO=@v_CURR_NO+1;
+			SELECT @v_TotSuspence=@v_TotSuspence+@v_T_CHARGE;
+		END
+
+		IF @v_T_VAT<>0 
+		BEGIN
+			INSERT INTO CITIANY_FUND(CURR_NO, VALUE_DATE, AMOUNT, ACC_NO, DR_CR, 
+				INSTRUMENT_NO, REL_CUST, ADD_TEXT, MIS_CODE4)
+				VALUES(@v_CURR_NO,@VALUE_DATE,@v_T_VAT,@v_VAT_ACC,'C',
+				@v_VALUE_DATE,'BD0'+ SUBSTRING(@v_ACC_NO,8,6),@v_ACC_NO,'1602'
+				);
+			
+			SELECT @v_CURR_NO=@v_CURR_NO+1;
+			SELECT @v_TotSuspence=@v_TotSuspence+@v_T_VAT;
+		END
+
+		CLOSE tmpcursor3_1;	
+		DEALLOCATE tmpcursor3_1;
+
+
+		FETCH NEXT FROM tmpcursor3 
+			INTO @v_ACC_NO;
+	END
+
+	CLOSE tmpcursor3;	
+	DEALLOCATE tmpcursor3;
+
+
+
+
+------------- type 4
+	
+	DECLARE tmpcursor4 CURSOR FOR
+		SELECT cl.acc_no,
+			cc.AMOUNT AS CHECKAMOUNT,(cc.AMOUNT-nc.AMOUNT)AS DRAWEE_CRG_VAT,
+			cl.CITIANY_CHARGE,(cl.CITIANY_STD_CHARGE*cl.CITIANY_VAT/100) AS CITIVAT,
+			cc.CHECK_NO,cc.D_CODE,
+			cl.CITIANY_VAT AS CITIVATPER
+			FROM NCOLLECTION nc
+			INNER JOIN CCHECK cc
+			ON cc.NONZONE_REF=nc.NONZONE_REF
+			INNER JOIN CLIENT cl
+			ON cl.CLIENT_CODE=cc.CLIENT_CODE
+			WHERE cc.RTN_STATUS='P' AND cl.BILLING_TYPE='4'
+			AND CONVERT(datetime,CONVERT(varchar(12), nc.INPUT_DATETIME))=@VALUE_DATE
+			--AND cc.FILENAME IS NULL	
+			ORDER BY cl.CLIENT_CODE
+
+
+	OPEN tmpcursor4;
+	FETCH NEXT FROM tmpcursor4 
+        INTO @v_ACC_NO,@v_AMOUNT,@v_DR_CHRG_VAT,
+			@v_CHARGE,@v_VAT,@v_CHECK_NO,@v_D_CODE,@v_VATPER;
+
+	WHILE @@FETCH_STATUS=0 
+ 	BEGIN
+
+		INSERT INTO CITIANY_FUND(CURR_NO, VALUE_DATE, AMOUNT, ACC_NO, DR_CR, 
+			INSTRUMENT_NO, REL_CUST, ADD_TEXT, MIS_CODE4)
+			VALUES(@v_CURR_NO,@VALUE_DATE,@v_AMOUNT,@v_ACC_NO,'C',
+			@v_CHECK_NO,'',
+			'1 OUTSTATION CHECK   CHECK NO  ' + @v_CHECK_NO 
+			+'   DS NO  '+ @v_D_CODE ,''
+			);
+
+		SELECT @v_CURR_NO=@v_CURR_NO+1;
+		SELECT @v_TotSuspence=@v_TotSuspence+@v_AMOUNT;
+
+-----------
+		IF @v_DR_CHRG_VAT<>0 
+		BEGIN
+			INSERT INTO CITIANY_FUND(CURR_NO, VALUE_DATE, AMOUNT, ACC_NO, DR_CR, 
+				INSTRUMENT_NO, REL_CUST, ADD_TEXT, MIS_CODE4)
+				VALUES(@v_CURR_NO,@VALUE_DATE,@v_DR_CHRG_VAT,@v_ACC_NO,'D',
+				@v_CHECK_NO,'',
+				'DEDUCTION FOR DRAWEE BANK CHARGES AND VAT' ,''
+				);
+
+			SELECT @v_CURR_NO=@v_CURR_NO+1;
+			SELECT @v_TotSuspence=@v_TotSuspence-@v_DR_CHRG_VAT;
+		END
+
+
+--------------
+		IF @v_VAT<>0 
+		BEGIN
+			INSERT INTO CITIANY_FUND(CURR_NO, VALUE_DATE, AMOUNT, ACC_NO, DR_CR, 
+				INSTRUMENT_NO, REL_CUST, ADD_TEXT, MIS_CODE4)
+				VALUES(@v_CURR_NO,@VALUE_DATE,@v_CHARGE + @v_VAT,@v_ACC_NO,'D',
+				@v_CHECK_NO,'',
+				'DEDUCTION FOR OUR COLLECTION COMMISSION OF TK. '+ CONVERT(varchar,@v_CHARGE) 
+				+' AND '+ CONVERT(varchar,@v_VATPER) +'% VAT ON CHARGES' ,''
+				);
+
+			SELECT @v_CURR_NO=@v_CURR_NO+1;
+			SELECT @v_TotSuspence=@v_TotSuspence-@v_CHARGE-@v_VAT;
+		END
+
+---------
+		
+		IF @v_CHARGE<>0 
+		BEGIN
+			INSERT INTO CITIANY_FUND(CURR_NO, VALUE_DATE, AMOUNT, ACC_NO, DR_CR, 
+				INSTRUMENT_NO, REL_CUST, ADD_TEXT, MIS_CODE4)
+				VALUES(@v_CURR_NO,@VALUE_DATE,@v_CHARGE,@v_COMM_ACC,'C',
+				@v_CHECK_NO,'BD0'+ SUBSTRING(@v_ACC_NO,8,6),@v_ACC_NO,'1056'
+				);
+
+			SELECT @v_CURR_NO=@v_CURR_NO+1;
+			SELECT @v_TotSuspence=@v_TotSuspence+@v_CHARGE;
+		END
+
+		IF @v_VAT<>0 
+		BEGIN
+			INSERT INTO CITIANY_FUND(CURR_NO, VALUE_DATE, AMOUNT, ACC_NO, DR_CR, 
+				INSTRUMENT_NO, REL_CUST, ADD_TEXT, MIS_CODE4)
+				VALUES(@v_CURR_NO,@VALUE_DATE,@v_VAT,@v_VAT_ACC,'C',
+				@v_CHECK_NO,'BD0'+ SUBSTRING(@v_ACC_NO,8,6),@v_ACC_NO,'1602'
+				);
+			
+			SELECT @v_CURR_NO=@v_CURR_NO+1;
+			SELECT @v_TotSuspence=@v_TotSuspence+@v_VAT;
+		END
+
+		FETCH NEXT FROM tmpcursor4 
+			INTO @v_ACC_NO,@v_AMOUNT,@v_DR_CHRG_VAT,
+				@v_CHARGE,@v_VAT,@v_CHECK_NO,@v_D_CODE,@v_VATPER;
+
+	END
+
+	CLOSE tmpcursor4;	
+	DEALLOCATE tmpcursor4;
+
+
+	IF @v_TotSuspence<>0
+	BEGIN
+		INSERT INTO CITIANY_FUND(CURR_NO, VALUE_DATE, AMOUNT, ACC_NO, DR_CR, 
+			INSTRUMENT_NO, REL_CUST, ADD_TEXT, MIS_CODE4)
+			VALUES(@v_CURR_NO,@VALUE_DATE,@v_TotSuspence,@v_SUS_ACC,'D',
+			'','','CITIANYWHERE FUNDING',''
+			);
+	END
+
+	RETURN 0;
+	
+    
+END   
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 4-Jul-13
+-- Description: Update CCHECK with CITYANY_FUND
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_Process_CitiAnyFundUpdateRef]
+	@FILENAME		varchar(15),	
+	@VALUE_DATE		datetime, 
+	@BATCH_NO		varchar(10)
+AS
+BEGIN	
+	DECLARE @ErrorVar	int;
+	
+	SET NOCOUNT ON;
+      
+    		
+	UPDATE CCHECK SET [FILENAME]=@FILENAME,
+		FILE_USER_ID=substring(suser_name(),charindex('\',suser_name())+1,20),
+		FLEXGEN_DATE=@VALUE_DATE	
+		FROM CCHECK cc
+		INNER JOIN NCOLLECTION nc ON nc.NONZONE_REF=cc.NONZONE_REF
+		INNER JOIN CLIENT cl ON cc.CLIENT_CODE=cl.CLIENT_CODE		
+		WHERE cc.RTN_STATUS='P'
+		AND CONVERT(datetime,CONVERT(varchar(12), nc.INPUT_DATETIME))=@VALUE_DATE	
+		AND cl.BILLING_TYPE in ('1','2','3','4');
+
+	UPDATE GENPRM
+		SET BATCH_NO=@BATCH_NO, BATCH_DATE=GETDATE();     
+    
+	    
+                         
+	IF @@ERROR<>0 GOTO ErrorHandler              
+               
+               
+	RETURN 0;            
+                         
+    ErrorHandler:              
+	            
+	             
+	RETURN 1;
+	
+	
+END
+
+
+GO
+
+
+
+CREATE TABLE TMP_RETURN_CLEARING
+(
+	OPR_DATE	datetime,
+	REMARK		varchar(15),
+	ACC_NO		varchar(15),
+	AMOUNT		numeric(14,2),
+	ENTRY_LOC	varchar(3),
+	INSTRUMENT	varchar(15),
+	ADDTEXT		varchar(100),
+	RULETYPE	varchar(1)		
+)
+
+GO
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 02-Oct-13
+-- Description: Process for clearing return 
+-- =============================================
+
+CREATE PROCEDURE [dbo].[CMS_Process_ClearingRetGenerate]
+	@OPR_DATE	datetime,	
+	@ENTRY_LOC	varchar(3)
+AS
+BEGIN	
+	
+	DELETE FROM TMP_RETURN_CLEARING 
+		WHERE ENTRY_LOC=@ENTRY_LOC ;
+
+
+	INSERT INTO TMP_RETURN_CLEARING(OPR_DATE, REMARK, ACC_NO, AMOUNT, ENTRY_LOC, 
+	INSTRUMENT, ADDTEXT, RULETYPE)            
+
+	SELECT ct.OPR_DATE,
+	ct.REMARK,ct.REMARK AS 'ACC_NO', SUM(rc.AMOUNT) AMOUNT,ct.ENTRY_LOC,
+	'' AS 'INSTRUMENT',
+	CONVERT(varchar(15),COUNT(ct.MID))  AS  'ADDTEXT', '1' AS 'RULETYPE'
+		FROM CLEARINGTAB ct
+		INNER JOIN CHECKTOTAL c ON c.MID=ct.MID
+		INNER JOIN RETURN_CLEARING rc
+		ON ct.MID=rc.MID AND ct.DSL=rc.DSL		
+		WHERE 
+		rc.[STATUS]='L'
+		AND ct.RTN_STATUS='R' AND c.[STATUS]='L'
+		AND ct.OPR_DATE =@OPR_DATE AND ct.ENTRY_LOC=@ENTRY_LOC
+		AND SUBSTRING(ct.REMARK,7,6) IN ('200282','200274')
+		GROUP BY ct.REMARK,ct.ENTRY_LOC,ct.OPR_DATE
+		
+	UNION ALL
+		
+	SELECT ct.OPR_DATE,
+	ct.REMARK,'010009155130005' AS 'ACC_NO',SUM(rc.AMOUNT) AMOUNT,ct.ENTRY_LOC,
+	'' AS 'INSTRUMENT',
+	CONVERT(varchar(15),COUNT(ct.MID))  AS  'ADDTEXT' ,'2' AS 'RULETYPE'
+		FROM CLEARINGTAB ct
+		INNER JOIN CHECKTOTAL c ON c.MID=ct.MID
+		INNER JOIN RETURN_CLEARING rc
+		ON ct.MID=rc.MID AND ct.DSL=rc.DSL		
+		WHERE 
+		rc.[STATUS]='L'
+		AND ct.RTN_STATUS='R' AND c.[STATUS]='L'
+		AND ct.OPR_DATE =@OPR_DATE AND ct.ENTRY_LOC=@ENTRY_LOC
+		AND ct.REMARK IN ('010001200038017','010001200038018')
+		GROUP BY ct.REMARK,ct.ENTRY_LOC,ct.OPR_DATE
+	
+	UNION ALL
+	
+	SELECT ct.OPR_DATE,
+	ct.REMARK,'010009155220004' AS 'ACC_NO',SUM(rc.AMOUNT) AMOUNT,ct.ENTRY_LOC,
+	'' AS 'INSTRUMENT',
+	CONVERT(varchar(15),COUNT(ct.MID))  AS  'ADDTEXT' ,'2' AS 'RULETYPE'
+		FROM CLEARINGTAB ct
+		INNER JOIN CHECKTOTAL c ON c.MID=ct.MID
+		INNER JOIN RETURN_CLEARING rc
+		ON ct.MID=rc.MID AND ct.DSL=rc.DSL		
+		WHERE 
+		rc.[STATUS]='L'
+		AND ct.RTN_STATUS='R' AND c.[STATUS]='L'
+		AND ct.OPR_DATE =@OPR_DATE AND ct.ENTRY_LOC=@ENTRY_LOC
+		AND ct.REMARK='010009275590007'
+		GROUP BY ct.REMARK,ct.ENTRY_LOC,ct.OPR_DATE
+		
+	UNION ALL
+		
+		SELECT ct.OPR_DATE,
+	ct.REMARK,ct.REMARK AS 'ACC_NO',rc.AMOUNT,ct.ENTRY_LOC,
+	ct.CHECK_NUMBER AS 'INSTRUMENT',
+	b.BANK_NAME + '(' + cb.BRANCH_NAME + ') ' + ISNULL(crr.REJECT_REASON,'') AS 'ADDTEXT' ,'3' AS 'RULETYPE'
+		FROM CLEARINGTAB ct
+		INNER JOIN CHECKTOTAL c ON c.MID=ct.MID
+		INNER JOIN RETURN_CLEARING rc		
+		ON ct.MID=rc.MID AND ct.DSL=rc.DSL
+		INNER JOIN CLEARING_BRANCH cb ON cb.NIKBRANCH_CODE=ct.NIKBRANCH_CODE
+		INNER JOIN CLEARING_BANK b ON b.BANK_CODE=cb.BANK_CODE
+		LEFT OUTER JOIN CLEARING_RETURN_REJECT crr ON crr.REJECT_CODE=ct.RTN_CODE
+		WHERE 
+		rc.[STATUS]='L'
+		AND ct.RTN_STATUS='R' AND c.[STATUS]='L'
+		AND ct.OPR_DATE =@OPR_DATE AND ct.ENTRY_LOC=@ENTRY_LOC
+		AND ct.REMARK NOT IN ('010001200038017','010001200038018','010009275590007')
+		AND SUBSTRING(ct.REMARK,7,6) NOT IN ('200282','200274')
+		                                 
+	
+         
+END
+
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_Process_ClearingRetGenerate] TO [ccms_sp_only]
+
+GO
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 21-Aug-13
+-- Description: Update Clearing Return  Final
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_Process_ClearingDataReturnUpdate]
+	@OPR_DATE		datetime,	
+	@ENTRY_LOC		varchar(3),
+	@FLEX_FILENAME	varchar(15)
+	--@REFACC_NO		varchar(16)
+AS
+BEGIN
+
+	--INSERT INTO REVERSAL_HIST_CLEARING_RET(AMOUNT, VALUE_DATE, 
+	--	USERID, 
+	--	FLEX_FILENAME, REFACC_NO, ACC_NO, ENTRY_LOC, DS_CODE, CHECK_NUMBER)
+	--	SELECT rc.AMOUNT,@OPR_DATE,
+	--		substring(suser_name(),charindex('\',suser_name())+1,20),
+	--		@FLEX_FILENAME,@REFACC_NO,ct.REMARK,@ENTRY_LOC,ct.DS_CODE,rc.CHECK_NUMBER
+	--		FROM CLEARINGTAB ct
+	--		INNER JOIN CHECKTOTAL c ON c.MID=ct.MID 
+	--		INNER JOIN RETURN_CLEARING rc
+	--		ON ct.MID=rc.MID AND ct.DSL=rc.DSL
+	--		WHERE c.[STATUS]='L' AND ct.RTN_STATUS='R' AND rc.[STATUS]='L'
+	--		AND rc.RTN_FILENAME IS NULL
+	--		AND ct.OPR_DATE =@OPR_DATE AND ct.ENTRY_LOC=@ENTRY_LOC;
+			
+	UPDATE RETURN_CLEARING 
+		SET RTN_FILENAME=@FLEX_FILENAME,
+		RTN_FILE_USERID=substring(suser_name(),charindex('\',suser_name())+1,20)
+		FROM RETURN_CLEARING rc
+		INNER JOIN CLEARINGTAB ct ON ct.MID=rc.MID AND ct.DSL=rc.DSL
+		INNER JOIN CHECKTOTAL c ON c.MID=ct.MID
+		WHERE c.[STATUS]='L' AND rc.[STATUS]='L' AND ct.RTN_STATUS='R'
+		--AND rc.RTN_FILENAME IS NULL
+		AND ct.OPR_DATE =@OPR_DATE AND ct.ENTRY_LOC=@ENTRY_LOC;
+		
+	
+END
+
+GO
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 02-Oct-13
+-- Description:	Get records of TMP_RETURN_CLEARING
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_TmpReturnClearing_GetDetail]		
+	@ENTRY_LOC	varchar(3)	
+AS
+BEGIN	
+	
+	SET NOCOUNT ON;
+
+	SELECT * 
+	FROM TMP_RETURN_CLEARING  
+	WHERE ENTRY_LOC=@ENTRY_LOC
+	
+	
+END
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_TmpReturnClearing_GetDetail] TO [ccms_sp_only]
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 21-Aug-13
+-- Description: Get detail for clearing return flexfile
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_ClearingTab_GetFlexReturn]
+	@OPR_DATE	datetime,	
+	@ENTRY_LOC	varchar(3)
+AS
+BEGIN
+
+	SELECT rc.OPR_DATE,SUM(rc.AMOUNT) AS AMOUNT, COUNT(rc.CHECK_NUMBER) AS TOTCHECK
+		FROM CLEARINGTAB ct
+		INNER JOIN CHECKTOTAL c ON c.MID=ct.MID
+		INNER JOIN RETURN_CLEARING rc
+		ON ct.MID=rc.MID AND ct.DSL=rc.DSL
+		WHERE c.[STATUS]='L' AND rc.[STATUS]='L' 
+		AND rc.OPR_DATE=@OPR_DATE AND ct.ENTRY_LOC=@ENTRY_LOC
+		--AND rc.RTN_FILENAME IS NULL 
+		AND ct.RTN_STATUS='R'
+		GROUP BY rc.OPR_DATE
+			         
+END
+
+GO
+
+
+

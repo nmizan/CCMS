@@ -1,0 +1,96 @@
+USE [CCMS]
+GO
+/****** Object:  StoredProcedure [dbo].[CMS_Client_Add]    Script Date: 03/09/2015 3:24:21 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 22-Nov-12
+-- Modify Date: 03 Sept 2015
+-- Modified by: Mohammad Yasir Arafat
+-- Description:	Add detail to Client table
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_Client_Add]	
+	@CLIENT_CODE		varchar(6), 
+	@ACC_NO				varchar(16),  
+	@ACC_NAME			varchar(50),
+	@MAIL_ADD			varchar(256), 
+	@CONTACT			varchar(50), 
+	@CASH_DAYS			numeric(2,0), 
+	@SPEED_DAYS			numeric(2,0), 
+	@CASH_CR_TYPE		varchar(25),
+	@SPEED_CR_TYPE		varchar(25),
+	@CASH_CHARGE		numeric(12,2), 
+	@SPEED_CHARGE		numeric(12,2), 
+	@RETURN_CHARGE		numeric(12,2), 
+	@CASH_STD_CHARGE	numeric(12,2), 
+	@SPEED_STD_CHARGE	numeric(12,2), 
+	@CASH_VAT			numeric(8,2), 
+	@SPEED_VAT			numeric(8,2), 
+	@CITIANY_CHARGE		numeric(12,2), 
+	@CITIANY_STD_CHARGE numeric(12,2), 
+	@CITIANY_VAT		numeric(8,2), 
+	@BILLING_TYPE		varchar(25),
+	@Direct_Debit_Customer bit,
+	@IS_DISABLE			bit,
+	@EMAIL			    varchar(60),
+	@GUARANTEED_CR_ACC	varchar(16),
+	@GUARANTEED_CR_OFST_ACC	varchar(16)
+AS
+BEGIN	
+	DECLARE @ErrorVar INT;
+	
+	SET NOCOUNT ON;
+
+	BEGIN TRANSACTION;
+
+	IF EXISTS(SELECT CLIENT_CODE FROM CLIENT WHERE CLIENT_CODE=@CLIENT_CODE)
+		BEGIN
+			-- Duplicate Entry
+			ROLLBACK TRANSACTION;		
+			RETURN 2	
+		END
+	
+	DELETE CLIENT_HIST WHERE 
+		CLIENT_CODE=@CLIENT_CODE AND IS_AUTH=0;
+
+	SELECT @ErrorVar = @@ERROR;
+		
+	IF @ErrorVar <> 0
+		BEGIN
+			ROLLBACK TRANSACTION;
+			RETURN 1;
+		END
+	ELSE
+
+	INSERT INTO CLIENT_HIST(CLIENT_CODE, ACC_NO, ACC_NAME,MAIL_ADD,
+		CONTACT, CASH_DAYS, SPEED_DAYS, CASH_CR_TYPE, SPEED_CR_TYPE,
+		CASH_CHARGE, SPEED_CHARGE, RETURN_CHARGE, CASH_STD_CHARGE,
+		SPEED_STD_CHARGE, CASH_VAT, SPEED_VAT, CITIANY_CHARGE, 
+		CITIANY_STD_CHARGE, CITIANY_VAT, BILLING_TYPE, IS_DISABLE,
+		INPUT_BY,INPUT_DATETIME,INPUT_FROM,MOD_NO,[STATUS],IS_AUTH, EMAIL, GUARANTEED_CR_ACC ,GUARANTEED_CR_OFST_ACC,Direct_Debit_Customer )
+		VALUES(@CLIENT_CODE, @ACC_NO, @ACC_NAME,@MAIL_ADD,
+		@CONTACT, @CASH_DAYS, @SPEED_DAYS, @CASH_CR_TYPE, @SPEED_CR_TYPE,
+		@CASH_CHARGE, @SPEED_CHARGE, @RETURN_CHARGE, @CASH_STD_CHARGE,
+		@SPEED_STD_CHARGE, @CASH_VAT, @SPEED_VAT, @CITIANY_CHARGE, 
+		@CITIANY_STD_CHARGE, @CITIANY_VAT, @BILLING_TYPE, @IS_DISABLE,
+		substring(suser_name(),charindex('\',suser_name())+1,20),
+		GETDATE(),HOST_NAME(),1,'U',0,@EMAIL, @GUARANTEED_CR_ACC ,@GUARANTEED_CR_OFST_ACC,@Direct_Debit_Customer);
+
+	SELECT @ErrorVar = @@ERROR;
+	
+	IF @ErrorVar <> 0
+		BEGIN
+			ROLLBACK TRANSACTION;
+			RETURN 1;
+		END
+	
+	COMMIT TRANSACTION;
+	RETURN 0;
+	   
+END
+

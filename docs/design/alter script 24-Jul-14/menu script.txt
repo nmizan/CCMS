@@ -1,0 +1,17 @@
+INSERT INTO  MENU_LIST(SLNO,MENU_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (115,'DepositExportGoAml','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+              
+GO
+
+INSERT INTO  FORM_LIST(SLNO,FORMS_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (110,'DepositExportGoAml','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+
+GO

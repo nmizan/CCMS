@@ -1,0 +1,9 @@
+alter table CCASH add ADD_TEXT varchar(150)
+
+alter table CSD add CUSTOMER_REF varchar(15)
+alter table CSD add AddSlipText varchar(150)
+
+alter table CSD_DET add AddCheckText varchar(150)
+
+alter table CHECKTOTAL add AddSlipText varchar(150)
+alter table CLEARINGTAB add AddCheckText varchar(150)

@@ -1,0 +1,180 @@
+INSERT INTO  MENU_LIST(SLNO,MENU_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (128,'MaintenanceClearingCharge','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+              
+GO
+
+INSERT INTO  MENU_LIST(SLNO,MENU_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (129,'MaintenanceClearingChargeDetail','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+              
+GO
+
+INSERT INTO  MENU_LIST(SLNO,MENU_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (130,'DepositCitiAnywhereSearch','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+              
+GO
+
+
+INSERT INTO  MENU_LIST(SLNO,MENU_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (131,'ClearingCheckSearch','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+              
+GO
+
+INSERT INTO  MENU_LIST(SLNO,MENU_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (132,'ClearingChargeFile','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+              
+GO
+
+INSERT INTO  MENU_LIST(SLNO,MENU_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (133,'ReportClearingChargeBBKReport','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+              
+GO
+
+INSERT INTO  MENU_LIST(SLNO,MENU_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (134,'ReportClearingChargeClientWiseBreakup','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+              
+GO
+
+INSERT INTO  MENU_LIST(SLNO,MENU_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (135,'ReportClearingChargeClientWiseBACHChargingSummary','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+              
+GO
+
+INSERT INTO  MENU_LIST(SLNO,MENU_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (136,'ReportClearingChargeCheckSummary','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+              
+GO
+
+INSERT INTO  MENU_LIST(SLNO,MENU_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (137,'ReportClearingChargeBACHChargeSummarySheet','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+              
+GO
+
+
+
+
+
+
+INSERT INTO  FORM_LIST(SLNO,FORMS_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (122,'MaintenanceClearingChargeDetail','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+
+GO
+
+
+INSERT INTO  FORM_LIST(SLNO,FORMS_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (123,'DepositCitiAnywhereSearch','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+
+GO
+
+INSERT INTO  FORM_LIST(SLNO,FORMS_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (124,'ClearingCheckSearch','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+
+GO
+
+INSERT INTO  FORM_LIST(SLNO,FORMS_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (125,'ClearingChargeFile','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+
+GO
+
+INSERT INTO  FORM_LIST(SLNO,FORMS_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (126,'ReportClearingChargeBBKReport','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+
+GO
+
+INSERT INTO  FORM_LIST(SLNO,FORMS_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (127,'ReportClearingChargeClientWiseBreakup','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+
+GO
+
+INSERT INTO  FORM_LIST(SLNO,FORMS_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (128,'ReportClearingChargeClientWiseBACHChargingSummary','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+
+GO
+
+INSERT INTO  FORM_LIST(SLNO,FORMS_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (129,'ReportClearingChargeCheckSummary','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+
+GO
+
+
+INSERT INTO  FORM_LIST(SLNO,FORMS_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (130,'ReportClearingChargeBACHChargeSummarySheet','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+
+GO
+
+

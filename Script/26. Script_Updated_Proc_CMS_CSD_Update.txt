@@ -1,0 +1,125 @@
+USE [CCMS]
+GO
+/****** Object:  StoredProcedure [dbo].[CMS_CSD_Update]    Script Date: 02/09/2015 1:26:34 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 09-Jan-13
+-- Modify Date: 31 Aug 15
+-- Modified by: Mohammad Yasir Arafat
+-- Description:	update detail to CSD
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_CSD_Update]	
+	@D_CODE		varchar(12), 
+	@MOD_NO			int,
+	@CUSTOMER_REF	varchar(15), 
+	@AddSlipText	varchar(150),
+	@RET_MOD_NO		int output
+AS
+BEGIN	
+	DECLARE @ErrorVar INT;
+	
+	SET NOCOUNT ON;
+
+	IF EXISTS(SELECT D_CODE FROM CSD 
+				WHERE D_CODE=@D_CODE AND MOD_NO=@MOD_NO)
+		BEGIN
+
+			DELETE CSD_HIST WHERE D_CODE=@D_CODE AND IS_AUTH=0;
+
+			SELECT @ErrorVar = @@ERROR;		
+
+			IF @ErrorVar <> 0
+				BEGIN					
+					RETURN 1;
+				END
+			
+			SELECT @RET_MOD_NO = @MOD_NO +1;
+			
+			INSERT INTO CSD_HIST(D_CODE, 
+				INPUT_BY,INPUT_DATETIME,INPUT_FROM,MOD_NO,[STATUS],IS_AUTH,CUSTOMER_REF,AddSlipText)
+				VALUES(@D_CODE, 
+				substring(suser_name(),charindex('\',suser_name())+1,20),
+				GETDATE(),HOST_NAME(),@RET_MOD_NO,'U',0,@CUSTOMER_REF,@AddSlipText);
+
+			SELECT @ErrorVar = @@ERROR;
+
+			IF @ErrorVar <> 0
+				BEGIN
+					RETURN 1;
+				END				
+			
+			DELETE CSD_DET_HIST
+				WHERE D_CODE=@D_CODE AND IS_AUTH=0;
+
+			SELECT @ErrorVar = @@ERROR;
+
+			IF @ErrorVar <> 0
+				BEGIN
+					RETURN 1;
+				END
+			
+			RETURN 0;
+
+				
+		END
+	ELSE -- might be in hist table
+		BEGIN
+
+			IF EXISTS(SELECT D_CODE from CSD_HIST 
+						WHERE D_CODE=@D_CODE AND MOD_NO=@MOD_NO AND IS_AUTH=0)
+				BEGIN
+
+					DELETE CSD_HIST WHERE D_CODE=@D_CODE AND IS_AUTH=0;
+
+					SELECT @ErrorVar = @@ERROR;		
+
+					IF @ErrorVar <> 0
+						BEGIN							
+							RETURN 1;
+						END
+
+					INSERT INTO CSD_HIST(D_CODE, 
+						INPUT_BY,INPUT_DATETIME,INPUT_FROM,MOD_NO,[STATUS],IS_AUTH,CUSTOMER_REF,AddSlipText)
+						VALUES(@D_CODE, 
+						substring(suser_name(),charindex('\',suser_name())+1,20),
+						GETDATE(),HOST_NAME(),@MOD_NO,'U',0,@CUSTOMER_REF,@AddSlipText);
+
+					SELECT @ErrorVar = @@ERROR;
+		
+					IF @ErrorVar <> 0
+						BEGIN							
+							RETURN 1;
+						END
+					
+					SELECT @RET_MOD_NO=@MOD_NO;
+
+					DELETE CSD_DET_HIST
+						WHERE D_CODE=@D_CODE AND IS_AUTH=0;
+
+					SELECT @ErrorVar = @@ERROR;
+
+					IF @ErrorVar <> 0
+						BEGIN
+							RETURN 1;
+						END			
+					
+					RETURN 0;
+			
+				END
+			ELSE
+				BEGIN
+					-- not exist
+					
+					RETURN 4;
+				END
+
+		END
+    
+END
+

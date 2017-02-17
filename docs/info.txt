@@ -1,0 +1,74 @@
+select D.ref_no,D.citicash_amount as amt,D.schedule_date,            
+ DATEADD(day,convert(int,C.cash_days),D.schedule_date )REVDATE,c.acc_no,C.cash_days,D.d_code,            
+ D.deposit_type ,d.location_code,g.cash_days,DATEADD(day,convert(int,isnull(g.cash_days,c.cash_days)),D.schedule_date )REVDATE2           
+ From Client  C inner join  dschedule D 
+on D.client_code=C.client_code
+left outer join (select * from client_loc_charge where [status]='L') g
+on g.client_code=c.client_code and g.location_code=d.location_code
+ where 
+  D.citicash_amount>0 and D.ref_no is null and D.checked is null 
+
+-------------------------------------------------------------------------
+
+number of total records currently maintaining in the system
+Bank, Branch, Location
+
+location charge -- screenshot
+
+deposit schedule stock - screenshot
+
+------------------
+
+use of returncheck [bit] in Loc_not_charge
+
+
+
+
+SELECT HOST_NAME() AS HostName, SUSER_NAME() LoggedInUser
+
+
+
+screenshot needed
+-----------------------
+
+master
+------------- ---------------------------------------
+Parameter
+-----------------------------------------------------
+client					**
+nikash client
+cittibankbranch
+bank
+branch					**
+location				**
+zone
+reject/return
+entrylocation
+cheque type
+bbk account info
+holiday					**
+locationcharge
+deposit schedule stock maintain
+nikash branch
+-----------------------------------------------------
+Deposit Information
+------------------------------------------------------
+Deposit Schedule			**
+Citicash detail				**
+citispeed detail			**
+citicheck detail			**
+flexfile
+flex reversal file generate
+Excise DutyUpload
+Outstanding Reversal
+
+
+collection
+-------------
+Collection Schdule			**
+DD Detail				**
+Normal Collection			**
+DD information for Sub system
+
+
+

@@ -1,0 +1,27 @@
+[11/20/2012 12:35:05 PM] ZIP Reader Version 14.00.0010 Build 1029
+[11/20/2012 12:35:07 PM] Loading C:\office\19-Nov-12\CCMS\docs\CCMS Doc\CCMS Vendor form.zip
+	0 errors/warnings
+[11/20/2012 12:35:07 PM] Finished.
+[11/20/2012 12:35:07 PM] Extracting C:\office\19-Nov-12\CCMS\docs\CCMS Doc\CCMS Vendor form.zip
+	Unstoring C:\office\19-Nov-12\CCMS\docs\CCMS Doc\CCMS Vendor form\CCMS Vendor form
+		CRC32 verified
+	Inflating C:\office\19-Nov-12\CCMS\docs\CCMS Doc\CCMS Vendor form\CCMS Vendor form\frmccashdetail.frm
+		CRC32 verified
+	Inflating C:\office\19-Nov-12\CCMS\docs\CCMS Doc\CCMS Vendor form\CCMS Vendor form\frmccheckdetail.frm
+		CRC32 verified
+	Inflating C:\office\19-Nov-12\CCMS\docs\CCMS Doc\CCMS Vendor form\CCMS Vendor form\FrmCRC.frm
+		CRC32 verified
+	Inflating C:\office\19-Nov-12\CCMS\docs\CCMS Doc\CCMS Vendor form\CCMS Vendor form\frmcspeeddetail.frm
+		CRC32 verified
+	Inflating C:\office\19-Nov-12\CCMS\docs\CCMS Doc\CCMS Vendor form\CCMS Vendor form\frmdd.frm
+		CRC32 verified
+	Inflating C:\office\19-Nov-12\CCMS\docs\CCMS Doc\CCMS Vendor form\CCMS Vendor form\frmds.frm
+		CRC32 verified
+	Inflating C:\office\19-Nov-12\CCMS\docs\CCMS Doc\CCMS Vendor form\CCMS Vendor form\FrmRevFileGen.frm
+		CRC32 verified
+	Inflating C:\office\19-Nov-12\CCMS\docs\CCMS Doc\CCMS Vendor form\CCMS Vendor form\FrmRevlOutstandView.frm
+		CRC32 verified
+	Extracted 9 file(s)/folder(s)
+	Skipped 0 file(s)/folder(s)
+	0 errors/warnings
+[11/20/2012 12:35:16 PM] Finished.

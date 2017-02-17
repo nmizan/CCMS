@@ -1,0 +1,1274 @@
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 11-Jan-15
+-- Description:	get detail of Dschedule
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_DSchedule_GetFilterData]	
+	@SCHEDULE_DATE_FROM	datetime, 
+	@SCHEDULE_DATE_TO	datetime, 
+	@DS_CODE			varchar(12),
+	@LOCATION_CODE		varchar(4),	
+	@CORR_BANK_CODE		varchar(4),
+	@REF_NO				varchar(10),
+	@CLIENT_CODE		varchar(6), 	
+	@D_CODE				varchar(12),	
+	@DEPOSIT_TYPE		varchar(5),	
+	@CITICASH_AMOUNT	numeric(12,2),
+	@CITICHECK_AMOUNT	numeric(12,2),
+	@IS_SEARCH_SPEED	bit,
+	@DRAWEE_BANK_CODE	varchar(4),		
+	@CHECK_NO			varchar(15), 
+	@AMOUNT				numeric(12,2)
+AS
+BEGIN	
+		
+	SET NOCOUNT ON;
+	
+	DECLARE @query1 as nvarchar(2000),
+		@query2 as nvarchar(2000);
+		
+	SET @query1 = 'SELECT ds.*,cl.ACC_NAME ,cl.ACC_NO,ba.BANK_NAME,lo.LOCATION_NAME,
+		ba.BANK_NAME,lo.LOCATION_NAME '
+	
+	IF @IS_SEARCH_SPEED=1 
+	BEGIN
+		SET @query1 = @query1+	',cd.*,ba2.BANK_NAME AS DRAWEE_BANK_NAME,rr.REJECT_REASON '
+	END
+	
+	SET @query1 = @query1+'FROM dbo.DSCHEDULE ds
+		LEFT OUTER JOIN dbo.CLIENT cl
+		ON cl.CLIENT_CODE = ds.CLIENT_CODE
+		LEFT OUTER JOIN dbo.BANK ba
+		ON ba.BANK_CODE=ds.CORR_BANK_CODE 
+		LEFT OUTER JOIN LOCATION lo
+		ON lo.LOCATION_CODE=ds.LOCATION_CODE'
+	
+	IF @IS_SEARCH_SPEED=1 
+	BEGIN
+	SET @query1 = @query1 + ' LEFT OUTER JOIN dbo.CSD_DET cd
+		ON cd.D_CODE=ds.D_CODE
+		LEFT OUTER JOIN dbo.BANK ba2
+		ON ba2.BANK_CODE=cd.DRAWEE_BANK_CODE
+		LEFT OUTER JOIN dbo.RETURN_REJECT rr
+		ON rr.REJECT_CODE=cd.RTN_CODE';
+	END
+	
+	SET @query1 = @query1 + ' WHERE ds.[STATUS]=''L'' ';
+	
+	-----------------------
+	
+	IF (@SCHEDULE_DATE_FROM IS NOT NULL) AND (@SCHEDULE_DATE_TO IS NOT NULL)
+	BEGIN
+		SET @query1=@query1 + ' AND ds.SCHEDULE_DATE>=@SCHEDULE_DATE_FROM AND ds.SCHEDULE_DATE<=@SCHEDULE_DATE_TO ';			
+	END
+	
+	IF @DS_CODE<>'' 
+	BEGIN
+		SET @query1=@query1 + ' AND ds.DS_CODE=@DS_CODE ';		
+	END
+		
+	IF @LOCATION_CODE<>'' 
+	BEGIN
+		SET @query1=@query1 + ' AND ds.LOCATION_CODE=@LOCATION_CODE ';		
+	END
+	
+	IF @CORR_BANK_CODE<>'' 
+	BEGIN
+		SET @query1=@query1 + ' AND ds.CORR_BANK_CODE=@CORR_BANK_CODE ';		
+	END
+		
+	IF @REF_NO<>'' 
+	BEGIN
+		SET @query1=@query1 + ' AND ds.REF_NO=@REF_NO ';		
+	END
+	
+	IF @CLIENT_CODE<>'' 
+	BEGIN
+		SET @query1=@query1 + ' AND ds.CLIENT_CODE=@CLIENT_CODE ';		
+	END	
+	
+	IF @D_CODE<>'' 
+	BEGIN
+		SET @query1=@query1 + ' AND ds.D_CODE=@D_CODE ';		
+	END	
+	
+	IF @DEPOSIT_TYPE<>'' 
+	BEGIN
+		SET @query1=@query1 + ' AND ds.DEPOSIT_TYPE=@DEPOSIT_TYPE ';		
+	END	
+	
+	IF @CITICASH_AMOUNT<>0
+	BEGIN
+		SET @query1=@query1 + ' AND ds.CITICASH_AMOUNT=@CITICASH_AMOUNT ';		
+	END	
+	
+	IF @CITICHECK_AMOUNT<>0
+	BEGIN
+		SET @query1=@query1 + ' AND ds.CITICHECK_AMOUNT=@CITICHECK_AMOUNT ';		
+	END	
+	
+	IF @IS_SEARCH_SPEED=1 
+	BEGIN	
+		IF @DRAWEE_BANK_CODE<>'' 
+		BEGIN
+			SET @query1=@query1 + ' AND cd.DRAWEE_BANK_CODE=@DRAWEE_BANK_CODE ';		
+		END
+		
+		IF @CHECK_NO<>'' 
+		BEGIN
+			SET @query1=@query1 + ' AND cd.CHECK_NO=@CHECK_NO ';		
+		END
+		
+		IF @AMOUNT<>0 
+		BEGIN
+			SET @query1=@query1 + ' AND cd.AMOUNT=@AMOUNT ';		
+		END		
+	END
+	
+	
+	-----------------------	  
+	
+	SET @query1 = @query1 + ' ORDER BY ds.SCHEDULE_DATE,ds.DS_CODE,ds.SLNO ';
+	
+	IF @IS_SEARCH_SPEED=1 
+	BEGIN
+		SET @query1 = @query1 + ' ,cd.SLNO';
+	END
+		
+	
+	EXEC sp_executesql @query1,N'@SCHEDULE_DATE_FROM	datetime, 
+	@SCHEDULE_DATE_TO	datetime, 
+	@DS_CODE			varchar(12),
+	@LOCATION_CODE		varchar(4),	
+	@CORR_BANK_CODE		varchar(4),
+	@REF_NO				varchar(10),
+	@CLIENT_CODE		varchar(6), 	
+	@D_CODE				varchar(12),	
+	@DEPOSIT_TYPE		varchar(5),	
+	@CITICASH_AMOUNT	numeric(12,2),
+	@CITICHECK_AMOUNT	numeric(12,2),
+	@IS_SEARCH_SPEED	bit,
+	@DRAWEE_BANK_CODE	varchar(4),		
+	@CHECK_NO			varchar(15), 
+	@AMOUNT				numeric(12,2)' ,                    
+                   @SCHEDULE_DATE_FROM=@SCHEDULE_DATE_FROM,
+    @SCHEDULE_DATE_TO=@SCHEDULE_DATE_TO,
+	@DS_CODE=@DS_CODE,
+	@LOCATION_CODE	=@LOCATION_CODE,
+	@CORR_BANK_CODE=@CORR_BANK_CODE,
+	@REF_NO=@REF_NO,
+	@CLIENT_CODE=@CLIENT_CODE,
+	@D_CODE	=@D_CODE,@DEPOSIT_TYPE = @DEPOSIT_TYPE,
+	@CITICASH_AMOUNT=@CITICASH_AMOUNT,
+	@CITICHECK_AMOUNT=@CITICHECK_AMOUNT,
+	@IS_SEARCH_SPEED=@IS_SEARCH_SPEED,
+	@DRAWEE_BANK_CODE=@DRAWEE_BANK_CODE,
+	@CHECK_NO=@CHECK_NO,
+	@AMOUNT=@AMOUNT
+	   
+END
+
+GO
+
+
+
+ALTER view [dbo].[V_BOOKED_SCHEDULE]      
+AS    
+(
+	SELECT d.D_CODE,d.REF_NO,(d.CITICASH_AMOUNT+d.CITICHECK_AMOUNT) AS AMOUNT,
+		d.CITICASH_AMOUNT,d.CITICHECK_AMOUNT,d.SCHEDULE_DATE,
+		d.LOCATION_CODE,l.LOCATION_NAME,d.CLIENT_CODE,c.ACC_NAME,
+		d.FILENAME,d.FLEXGEN_DATE
+		FROM DSCHEDULE d 
+		INNER JOIN LOCATION l ON l.LOCATION_CODE=d.LOCATION_CODE
+		INNER JOIN CLIENT c ON c.CLIENT_CODE=d.CLIENT_CODE
+		WHERE d.[STATUS]='L' AND d.[FILENAME] IS NOT NULL 
+)
+
+GO
+
+
+
+ALTER view [dbo].[V_BOOKING]      
+AS    
+(
+	SELECT b.D_CODE,b.REF_NO,b.AMOUNT,d.CITICASH_AMOUNT,d.CITICHECK_AMOUNT,d.SCHEDULE_DATE,
+		d.LOCATION_CODE,l.LOCATION_NAME,d.CLIENT_CODE,c.ACC_NAME
+		FROM TMP_BOOKING b
+		INNER JOIN DSCHEDULE d ON d.D_CODE=b.D_CODE
+		INNER JOIN LOCATION l ON l.LOCATION_CODE=d.LOCATION_CODE
+		INNER JOIN CLIENT c ON c.CLIENT_CODE=d.CLIENT_CODE
+		WHERE d.[STATUS]='L'
+)
+
+GO
+
+
+
+ALTER VIEW [dbo].[V_CASH_DEPOSIT]
+as
+(
+	SELECT ds.*,cc.CUSTOMER_REF,cc.CASH_REF,cc.SLIP_DATE,
+	cl.ACC_NO,cl.ACC_NAME,l.LOCATION_NAME
+	FROM DSCHEDULE ds	
+	INNER JOIN CCASH cc
+	ON cc.D_CODE=ds.D_CODE
+	LEFT OUTER JOIN CLIENT cl
+	ON ds.CLIENT_CODE=cl.CLIENT_CODE
+	LEFT OUTER JOIN LOCATION l
+	ON l.LOCATION_CODE=ds.LOCATION_CODE
+	WHERE ds.[STATUS]='L'
+)
+
+GO
+
+
+
+ALTER VIEW [dbo].[V_DEPOSIT_BREAK]
+AS
+(
+		SELECT a.SCHEDULE_DATE AS dScheduleDate, a.DS_CODE, a.DEPOSIT_TYPE, a.LOCATION_CODE, 
+		a.CORR_BANK_CODE, SUM(ISNULL(a.CITICASH_AMOUNT, 0)) AS dCitiCash, 
+		SUM(ISNULL(a.CITICHECK_AMOUNT, 0)) AS dCitiCheck, SUM(ISNULL(a.NO_CHECK, 0)) AS dNofCheck, 
+		SUM(ISNULL(a.R_amount, 0)) AS ReturnAmt, SUM(ISNULL(a.R_Check_no, 0)) AS ReturnCheck, 
+		cs.CS_CODE, cs.SCHEDULE_DATE AS cScheduleDate, cs.CITICASH_AMOUNT AS cCitiCash, 
+        cs.CITICHECK_AMOUNT AS cCitiCheck, l.LOCATION_NAME, b.BANK_NAME, ISNULL(cs.NO_CHECK, 0) AS cCheck
+	FROM (SELECT ds.SCHEDULE_DATE, ds.DS_CODE, ds.DEPOSIT_TYPE, ds.D_CODE, ds.LOCATION_CODE, 
+			ds.CORR_BANK_CODE, ds.CITICASH_AMOUNT, ds.CITICHECK_AMOUNT, ds.NO_CHECK, 
+			f.R_amount, f.R_Check_no
+		  FROM dbo.DSCHEDULE AS ds LEFT OUTER JOIN
+                  (SELECT csd.D_CODE AS R_dcode, COUNT(csd.CHECK_NO) AS R_Check_no, 
+						SUM(csd.AMOUNT) AS R_amount
+				   FROM dbo.CSD_DET AS csd 
+                   WHERE csd.[STATUS]='L' AND csd.RTN_STATUS = 'R'
+                   GROUP BY csd.D_CODE
+                   ) AS f 
+		  ON f.R_dcode = ds.D_CODE 
+		  WHERE ds.[STATUS]='L') AS a 
+		  LEFT OUTER JOIN dbo.CSCHEDULE AS cs ON cs.DS_CODE = a.DS_CODE 
+		  LEFT OUTER JOIN dbo.BANK AS b ON b.BANK_CODE = a.CORR_BANK_CODE 
+		  LEFT OUTER JOIN dbo.LOCATION AS l ON l.LOCATION_CODE = a.LOCATION_CODE
+		  GROUP BY a.SCHEDULE_DATE, a.DS_CODE, a.DEPOSIT_TYPE, a.LOCATION_CODE, 
+				a.CORR_BANK_CODE, cs.CS_CODE, cs.SCHEDULE_DATE, cs.CITICASH_AMOUNT, 
+                cs.CITICHECK_AMOUNT, l.LOCATION_NAME, b.BANK_NAME, cs.NO_CHECK
+
+)
+
+GO
+
+
+
+
+
+ALTER VIEW [dbo].[V_GUARANTEED_CREDIT_BOOKING]
+AS
+(
+	SELECT a.CLIENT_CODE, a.ENTRY_DATE, a.SCHEDULE_DATE, a.AMOUNT, a.GUARANTEED_CR_ACC, 
+	a.GUARANTEED_CR_OFST_ACC, a.ACC_NAME, a.FLEXGEN_DATE, a.FILE_USER_ID, a.CLIENT_ACC_NO, 
+	a.DS_CODE, a.D_CODE, d.LOCATION_CODE, l.LOCATION_NAME, b.BANK_NAME, d.CORR_BANK_CODE, d.DEPOSIT_TYPE
+	FROM dbo.TMP_GUARANTEED_BOOKING AS a 
+	INNER JOIN dbo.DSCHEDULE AS d ON d.D_CODE = a.D_CODE 
+	INNER JOIN dbo.LOCATION AS l ON l.LOCATION_CODE = d.LOCATION_CODE 
+	INNER JOIN dbo.BANK AS b ON b.BANK_CODE = d.CORR_BANK_CODE
+	WHERE d.[STATUS] ='L'
+
+)
+GO
+
+
+
+
+
+ALTER VIEW [dbo].[V_SPEED_DEPOSIT]
+as
+(
+	SELECT ds.DS_CODE, ds.D_CODE, ds.DEPOSIT_TYPE, ds.CITICASH_AMOUNT, ds.CITICHECK_AMOUNT, 
+	ds.SCHEDULE_DATE, ds.NO_CHECK, ds.CLIENT_CODE, ds.LOCATION_CODE, ds.CORR_BANK_CODE, 
+	ds.CORR_BRANCH_CODE, ds.REF_NO, 
+	cdd.SLNO,cdd.AMOUNT,cdd.CHECK_NO,cdd.CHECK_REF,cdd.CUSTOMER_REF,cdd.DRAWER,cdd.SLIP_DATE,
+		cl.ACC_NO,cl.ACC_NAME,cl.MAIL_ADD,l.LOCATION_NAME,b.BANK_NAME,db.BANK_NAME AS DRAWEE_BANK_NAME
+		FROM DSCHEDULE ds		
+		INNER JOIN CSD_DET cdd
+		ON cdd.D_CODE=ds.D_CODE
+		LEFT OUTER JOIN CLIENT cl
+		ON ds.CLIENT_CODE=cl.CLIENT_CODE
+		LEFT OUTER JOIN LOCATION l
+		ON l.LOCATION_CODE=ds.LOCATION_CODE
+		LEFT OUTER JOIN BANK b
+		ON b.BANK_CODE = ds.CORR_BANK_CODE
+		LEFT OUTER JOIN BANK db
+		ON db.BANK_CODE=cdd.DRAWEE_BANK_CODE
+		WHERE ds.[STATUS]='L'
+
+)
+
+GO
+
+
+
+ALTER VIEW [dbo].[V_SPEED_RETURN]
+AS
+(
+	SELECT ds.DS_CODE, ds.D_CODE, ds.DEPOSIT_TYPE, ds.CITICASH_AMOUNT, ds.CITICHECK_AMOUNT, 
+	ds.SCHEDULE_DATE, ds.NO_CHECK, ds.CLIENT_CODE, ds.LOCATION_CODE, ds.CORR_BANK_CODE, 
+	ds.CORR_BRANCH_CODE, ds.REF_NO, cdd.SLNO, cdd.AMOUNT, cdd.CHECK_NO, cdd.CHECK_REF, 
+	cdd.DRAWER, cdd.SLIP_DATE, rr.REJECT_REASON, cl.ACC_NO, cl.ACC_NAME, l.LOCATION_NAME, 
+	rc.RTN_DATE
+	FROM dbo.DSCHEDULE AS ds 	
+	INNER JOIN dbo.CSD_DET AS cdd ON cdd.D_CODE = ds.D_CODE 
+	INNER JOIN dbo.RETURN_REJECT AS rr ON rr.REJECT_CODE = cdd.RTN_CODE 
+	LEFT OUTER JOIN dbo.CLIENT AS cl ON ds.CLIENT_CODE = cl.CLIENT_CODE 
+	LEFT OUTER JOIN dbo.LOCATION AS l ON l.LOCATION_CODE = ds.LOCATION_CODE 
+	LEFT OUTER JOIN dbo.RETURN_CSD AS rc ON ds.D_CODE = rc.D_CODE AND rc.[STATUS] = 'L'
+	WHERE cdd.RTN_STATUS = 'R' AND ds.[STATUS] = 'L'
+)
+
+GO
+
+
+
+ALTER VIEW [dbo].[V_SPEEDCASH_DAYZERO]
+as
+(
+	SELECT dc.ENTRY_DATE,ds.*, cl.ACC_NO,cl.ACC_NAME,l.LOCATION_NAME
+	FROM DCOLLECTED dc 
+	INNER JOIN DSCHEDULE ds
+	ON dc.DS_CODE=ds.DS_CODE
+	LEFT OUTER JOIN CLIENT cl
+	ON ds.CLIENT_CODE=cl.CLIENT_CODE
+	LEFT OUTER JOIN LOCATION l
+	ON l.LOCATION_CODE=ds.LOCATION_CODE
+	WHERE ((cl.CASH_DAYS=0 AND ds.DEPOSIT_TYPE='Cash') 
+	OR (cl.SPEED_DAYS=0 AND ds.DEPOSIT_TYPE='Check'))
+	AND dc.[STATUS]='L'
+)
+
+GO
+
+
+
+ALTER VIEW [dbo].[V_SPEEDCASH_DETAIL]
+as
+(
+	SELECT ds.*,dc.ENTRY_DATE, cl.ACC_NO,cl.ACC_NAME,l.LOCATION_NAME,b.BANK_NAME
+	FROM DSCHEDULE ds
+	INNER JOIN DCOLLECTED dc
+	ON dc.DS_CODE=ds.DS_CODE
+	LEFT OUTER JOIN CLIENT cl
+	ON ds.CLIENT_CODE=cl.CLIENT_CODE
+	LEFT OUTER JOIN LOCATION l
+	ON l.LOCATION_CODE=ds.LOCATION_CODE
+	LEFT OUTER JOIN BANK b
+	ON b.BANK_CODE = ds.CORR_BANK_CODE
+	WHERE dc.[STATUS]='L'		
+)
+
+GO
+
+
+
+ALTER VIEW [dbo].[V_UNCLEAR_FUND]
+as
+(
+SELECT c.CASH_CR_TYPE,a.REF_NO,a.VALUE_DATE,b.LOCATION_CODE,a.REV_DATE,
+	a.ACC_NO,a.REFACC_NO,b.CLIENT_CODE,b.CITICASH_AMOUNT+b.CITICHECK_AMOUNT as total,
+	b.DEPOSIT_TYPE,a.D_CODE ,a.STATUS_ID,a.REMARKS ,b.DS_CODE ,c.ACC_NAME,
+	d.STATUS_NAME, b.BANK_NAME,b.LOCATION_NAME  
+FROM CCMSREF_TAB a  
+	LEFT OUTER JOIN TRAN_STATUS d ON  a.STATUS_ID=d.STATUS_ID ,CLIENT c  ,  
+	(SELECT DISTINCT a.DS_CODE,a.D_CODE,a.DEPOSIT_TYPE,a.CITICHECK_AMOUNT DCITICHECK_AMOUNT, 
+	a.SCHEDULE_DATE as DSCHEDULE_DATE ,a.CITICASH_AMOUNT DCITICASH_AMOUNT,
+	a.NO_CHECK ,a.CORR_BRANCH_CODE,a.SCHEDULE_DATE,a.CORR_BANK_CODE,b.bank_name,
+	a.LOCATION_CODE,c.LOCATION_NAME, '' Sch_break,isnull(a.CITICHECK_AMOUNT,0)CITICHECK_AMOUNT,
+	isnull(a.CITICASH_AMOUNT,0)CITICASH_AMOUNT,a.CLIENT_CODE     
+	FROM DSCHEDULE a            
+	LEFT OUTER JOIN BANK b ON b.BANK_CODE=a.CORR_BANK_CODE              
+	LEFT OUTER JOIN LOCATION c ON c.LOCATION_CODE=a.LOCATION_CODE 
+	)b  
+WHERE   
+	A.D_CODE = B.D_CODE   
+	AND b.CLIENT_CODE=c.CLIENT_CODE
+	AND a.FILENAME is null   
+	AND b.DS_CODE not in   
+	(SELECT DS_CODE FROM CSCHEDULE)
+
+)
+
+GO
+
+
+
+
+
+
+ALTER VIEW [dbo].[V_ANY_REMINDER]
+as
+(
+	SELECT SLNO,CHECK_NO,cc.AMOUNT,cc.DRAWEE_BANK_CODE,cc.BRANCH_CODE,cc.LOCATION_CODE,
+		SLIP_DATE,DRAWER,DLOCATION_CODE,cc.CLIENT_CODE,
+		cc.NONZONE_REF,BANK_NAME,BRANCH_NAME,BRANCH_ADD1,BRANCH_ADD2,LOCATION_NAME,
+		REF_DATE,(cc.DRAWEE_BANK_CODE+cc.LOCATION_CODE+cc.branch_code) as struniquebranch_code,
+		REMINDER_NO,REMINDER_DATE,DATEDIFF(d,CC.SLIP_DATE,getdate()) as DAYS_OUTSTANDING
+		FROM CCHECK cc, BANK b,BRANCH br,LOCATION l,NCOLLECTION nc
+		WHERE cc.[STATUS]='L' 
+		AND	cc.REMINDER_NO<7
+		AND cc.DRAWEE_BANK_CODE=br.BANK_CODE AND cc.BRANCH_CODE=br.BRANCH_CODE
+		AND cc.LOCATION_CODE=br.LOCATION_CODE
+		AND cc.DRAWEE_BANK_CODE=b.BANK_CODE  
+		AND cc.LOCATION_CODE=br.LOCATION_CODE AND 
+		cc.LOCATION_CODE=l.LOCATION_CODE AND cc.RTN_STATUS='O' AND 
+		cc.NONZONE_REF IS NOT NULL 
+		AND cc.NONZONE_REF=nc.NONZONE_REF
+)
+
+
+GO
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 12-Jan-15
+-- Description:	Get Reminder History by check no
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_CCheck_GetReminderHistByCheckNo]	
+	@CHECK_NO	varchar(15)
+AS
+BEGIN	
+	
+	SET NOCOUNT ON;
+
+	SELECT rh.D_CODE,rh.CLIENT_CODE,rh.CHECK_NO,rh.REMINDER_DATE,
+	rh.REMINDER_NO-1 AS 'REMINDER_NO',cl.ACC_NO,cl.ACC_NAME 
+	FROM
+	(SELECT DISTINCT D_CODE,CLIENT_CODE,CHECK_NO,REMINDER_DATE,REMINDER_NO FROM CCHECK cc
+	WHERE cc.REMINDER_NO>1 AND cc.[STATUS]='L' AND cc.CHECK_NO=@CHECK_NO
+	UNION
+	SELECT DISTINCT D_CODE,CLIENT_CODE,CHECK_NO,REMINDER_DATE,REMINDER_NO  FROM CCHECK_HIST cch
+	WHERE cch.REMINDER_NO>1 AND cch.CHECK_NO=@CHECK_NO) rh
+	LEFT OUTER JOIN CLIENT cl ON cl.CLIENT_CODE=rh.CLIENT_CODE 
+	ORDER BY D_CODE,CLIENT_CODE,REMINDER_NO
+
+END
+
+
+GO
+
+
+
+ALTER TABLE dbo.RETURN_MISMATCH_CLEAR
+ADD ROUTING_NO varchar (9) NULL; 
+GO
+
+	
+ALTER TABLE dbo.IRE_RET
+ADD PayorBankRoutingNumber varchar (9) NULL; 
+GO
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 25-Jul-13
+-- Description:	Add record to IRE_RET
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_IRERet_Add]
+	@PayorBankRoutingNumber varchar (9),
+	@ChequeSequenceNumber	varchar(50), 
+	@ItemAmount				float, 
+	@ReturnReason			varchar(50),
+	@SEQ_NUMBER				varchar(50)
+AS
+BEGIN	
+			
+	
+	DECLARE @ErrorVar		int; 
+
+	SET NOCOUNT ON;
+
+	INSERT INTO IRE_RET(PayorBankRoutingNumber,ChequeSequenceNumber, 
+		ItemAmount, ReturnReason, ECEInstitutionItemSequenceNumber)
+		VALUES(@PayorBankRoutingNumber, @ChequeSequenceNumber,
+		@ItemAmount,@ReturnReason,@SEQ_NUMBER)
+
+	SELECT @ErrorVar = @@ERROR;	
+
+	IF @ErrorVar <> 0				
+		BEGIN			
+			RETURN 1;
+		END
+	
+	RETURN 0;
+
+	
+END
+
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 20-Aug-13
+-- Description:	RETURN_MISMATCH_CLEAR add
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_ReturnMismatchClear_Add]	
+	@CHECK_NUMBER	varchar(15),
+	@AMOUNT			numeric(14,2),
+	@RTN_CODE		varchar(2),
+	@OPR_DATE		datetime,
+	@SEQ_NUMBER		varchar(50),
+	@ROUTING_NO		varchar(9)
+AS
+BEGIN	
+	
+		INSERT INTO RETURN_MISMATCH_CLEAR(CHECK_NUMBER, AMOUNT, 
+			RTN_CODE, OPR_DATE, SEQ_NUMBER,ROUTING_NO)
+			VALUES(@CHECK_NUMBER,@AMOUNT,
+			@RTN_CODE,@OPR_DATE,@SEQ_NUMBER,@ROUTING_NO)
+
+		RETURN 0;
+
+		
+END
+
+GO
+
+
+
+
+ALTER view [dbo].[V_RETURN_MISMATCH_CLEAR]      
+AS    
+(
+	SELECT rm.*,ba.BANK_NAME,br.BRANCH_NAME  FROM 
+	dbo.RETURN_MISMATCH_CLEAR rm
+	LEFT OUTER JOIN dbo.CLEARING_BRANCH br ON br.ROUTING_NO=rm.ROUTING_NO
+	LEFT OUTER JOIN dbo.CLEARING_BANK ba ON ba.BANK_CODE=br.BANK_CODE 
+)
+
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 14-Jan-15
+-- Description:	get list records of Clearing Branch having routing
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_ClearingBranch_GetRoutingBranchList]
+AS
+BEGIN		
+	SET NOCOUNT ON;
+
+	SELECT br.BRANCH_NAME,br.NIKBRANCH_CODE,br.ROUTING_NO,
+	ba.BANK_NAME,ba.BANK_CODE  
+	FROM dbo.CLEARING_BRANCH br
+	LEFT OUTER JOIN dbo.CLEARING_BANK ba 
+	ON ba.BANK_CODE=br.BANK_CODE 
+	WHERE br.[STATUS]='L' AND br.ROUTING_NO<>''
+	ORDER BY br.BRANCH_NAME;	
+	   
+END
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 18-Apr-13
+-- Description:	Get detail of ClearingTab
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_ClearingTab_GetDetails]	
+	@MID		numeric(10,0),
+	@MOD_NO		int
+AS
+BEGIN	
+	
+	SET NOCOUNT ON;
+
+	IF EXISTS( SELECT DS_CODE 
+			   FROM CLEARINGTAB WHERE MID=@MID AND MOD_NO=@MOD_NO)
+		BEGIN
+			SELECT ct.*,'IS_AUTH'=1,
+				cb.BRANCH_NAME AS 'ENTRY_LOC_NAME',br.BRANCH_NAME,
+				br.ROUTING_NO,
+				b.BANK_CODE,b.BANK_NAME,cl.ACC_NAME, ctp.CHECKTYPE_NAME
+			FROM CLEARINGTAB ct
+				LEFT OUTER JOIN CITIBANK_BRANCH cb
+				ON cb.BRANCH_CODE=ct.ENTRY_LOC				
+				LEFT OUTER JOIN CLEARING_BRANCH br
+				ON br.NIKBRANCH_CODE=ct.NIKBRANCH_CODE
+				LEFT OUTER JOIN CLEARING_BANK b
+				ON b.BANK_CODE=br.BANK_CODE
+				LEFT OUTER JOIN CLEARING_CLIENT cl
+				ON cl.ACC_NO=ct.REMARK
+				LEFT OUTER JOIN CHECKTYPE ctp
+				ON ctp.CHECKTYPE_CODE=ct.CHECK_TYPE
+			WHERE ct.MID=@MID AND ct.MOD_NO = @MOD_NO			
+		END	
+	ELSE
+		BEGIN
+			SELECT cth.* ,
+				cb.BRANCH_NAME AS 'ENTRY_LOC_NAME',br.BRANCH_NAME,
+				br.ROUTING_NO,
+				b.BANK_CODE,b.BANK_NAME,cl.ACC_NAME, ctp.CHECKTYPE_NAME
+			FROM CLEARINGTAB_HIST cth
+				LEFT OUTER JOIN CITIBANK_BRANCH cb
+				ON cb.BRANCH_CODE=cth.ENTRY_LOC				
+				LEFT OUTER JOIN CLEARING_BRANCH br
+				ON br.NIKBRANCH_CODE=cth.NIKBRANCH_CODE
+				LEFT OUTER JOIN CLEARING_BANK b
+				ON b.BANK_CODE=br.BANK_CODE
+				LEFT OUTER JOIN CLEARING_CLIENT cl
+				ON cl.ACC_NO=cth.REMARK
+				LEFT OUTER JOIN CHECKTYPE ctp
+				ON ctp.CHECKTYPE_CODE=cth.CHECK_TYPE
+			WHERE cth.MID=@MID AND cth.MOD_NO = @MOD_NO			
+		END
+END
+
+GO
+
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 21-Apr-13
+-- Description: Process for reversal deposit update
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_Process_ClearingRevGenerate]
+	@REV_DATE	datetime,	
+	@ENTRY_LOC	varchar(3),
+	@REFACC_NO	varchar(16),
+	@VALUE_TYPE	numeric(1,0)
+AS
+BEGIN	
+	
+	DELETE FROM TMP_REVERSAL_CLEARING 
+		WHERE REV_DATE=@REV_DATE AND ENTRY_LOC=@ENTRY_LOC AND VALUE_TYPE=@VALUE_TYPE;
+
+
+	INSERT INTO TMP_REVERSAL_CLEARING( CR_TYPE,VALUE_DATE,ENTRY_LOC,REV_DATE,
+		ACC_NO,REFACC_NO,CLIENT_CODE,AMOUNT,
+		DS_CODE,
+		CHECK_NUMBER,
+		SEQ_NO,ADD_TEXT,VALUE_TYPE)
+                          
+------By Total                                  
+	SELECT c.SPEED_CR_TYPE,a.OPR_DATE VALUE_DATE, a.ENTRY_LOC,a.OPR_DATE,
+		c.ACC_NO,@REFACC_NO AS REFACC_NO,a.REMARK,sum(a.DEBIT_CREDIT) as total,
+		substring(CONVERT(varchar(12), a.OPR_DATE,112),3,8) as DS_CODE,
+		substring(CONVERT(varchar(12), a.OPR_DATE,112),3,8) CHECK_NUMBER,
+		COUNT(a.REMARK),'' ADD_TEXT,@VALUE_TYPE
+	FROM CLEARINGTAB a, CLEARING_CLIENT c                                  
+	WHERE 
+		a.[STATUS]='L'
+		AND a.DEBIT_CREDIT>0                                  
+		AND a.OPR_DATE=@REV_DATE AND a.ENTRY_LOC=@ENTRY_LOC
+		AND a.VALUE_TYPE=@VALUE_TYPE
+		AND a.REMARK=c.ACC_NO
+		AND a.FLEX_FILENAME IS NULL
+		AND c.SPEED_CR_TYPE='T'
+	GROUP BY 
+		a.OPR_DATE,a.ENTRY_LOC,c.SPEED_CR_TYPE,                                  
+		c.ACC_NO ,a.REMARK                
+
+	UNION ALL
+            
+------By Deposit code
+	SELECT c.SPEED_CR_TYPE,a.OPR_DATE valueDate,a.ENTRY_LOC,a.OPR_DATE,
+		c.ACC_NO,@REFACC_NO AS REFACC_NO,a.REMARK,sum(a.DEBIT_CREDIT) as total,
+		a.DS_CODE ,
+		a.DS_CODE CHECK_NUMBER,
+		count(a.REMARK),'' ADD_TEXT,@VALUE_TYPE
+	FROM CLEARINGTAB a, CLEARING_CLIENT c
+	WHERE
+		a.[STATUS]='L'
+		AND a.DEBIT_CREDIT>0 
+		AND a.OPR_DATE=@REV_DATE AND a.ENTRY_LOC=@ENTRY_LOC
+		AND a.VALUE_TYPE=@VALUE_TYPE
+		AND a.REMARK=c.ACC_NO
+		AND a.FLEX_FILENAME IS NULL
+		AND c.SPEED_CR_TYPE='D'
+	GROUP BY a.OPR_DATE,a.ENTRY_LOC,c.SPEED_CR_TYPE,
+		c.ACC_NO ,a.REMARK,a.DS_CODE
+	                                  
+                                  
+	UNION ALL
+--\\\\\\\\\\\\\\\By Check\\\\\\\\                                  
+                                
+                                
+	SELECT  c.SPEED_CR_TYPE,a.OPR_DATE,a.ENTRY_LOC,a.OPR_DATE,
+		a.REMARK,@REFACC_NO REFACC_NO,a.REMARK,a.DEBIT_CREDIT,
+		a.DS_CODE,
+		a.CHECK_NUMBER,
+		1  ,'' ADD_TEXT,@VALUE_TYPE
+	FROM CLEARINGTAB a, CLEARING_CLIENT c
+	WHERE                    
+		a.[STATUS]='L'
+		AND a.DEBIT_CREDIT>0
+		AND a.OPR_DATE=@REV_DATE AND a.ENTRY_LOC=@ENTRY_LOC
+		AND a.VALUE_TYPE=@VALUE_TYPE
+		AND a.REMARK=c.ACC_NO
+		AND a.FLEX_FILENAME IS NULL
+		AND c.SPEED_CR_TYPE='C'
+                      
+	UNION ALL                
+                
+	SELECT  c.SPEED_CR_TYPE,a.OPR_DATE,a.ENTRY_LOC,a.OPR_DATE,
+		a.REMARK,@REFACC_NO REFACC_NO,a.REMARK,a.DEBIT_CREDIT,
+		b.CUSTOMER_REF , 
+		a.CHECK_NUMBER,
+		1 ,'' ADD_TEXT,@VALUE_TYPE
+		FROM CLEARINGTAB a, CHECKTOTAL b, CLEARING_CLIENT c
+	WHERE 
+		a.MID=b.MID AND b.[STATUS]='L'
+		AND a.DS_CODE=b.DS_CODE AND a.ENTRY_LOC=b.ENTRY_LOC AND a.OPR_DATE=b.OPR_DATE
+		AND a.VALUE_TYPE=@VALUE_TYPE
+		AND a.DEBIT_CREDIT>0
+		AND a.OPR_DATE=@REV_DATE AND a.ENTRY_LOC=@ENTRY_LOC
+		AND c.ACC_NO=a.REMARK
+		AND a.FLEX_FILENAME IS NULL
+		AND c.SPEED_CR_TYPE='R'
+        
+	UNION ALL                
+                
+	SELECT  c.SPEED_CR_TYPE,a.OPR_DATE,a.ENTRY_LOC,a.OPR_DATE,
+		a.REMARK,@REFACC_NO REFACC_NO,a.REMARK,a.DEBIT_CREDIT,
+		b.CUSTOMER_REF , 
+		a.DS_CODE ,
+		1  ,'Chq:'+ a.CHECK_NUMBER +'  ' + e.BANK_NAME +space(2)+ ' ' + d.BRANCH_NAME ADD_TEXT,@VALUE_TYPE
+	FROM CLEARINGTAB a,CHECKTOTAL b, CLEARING_CLIENT c, CLEARING_BRANCH d ,CLEARING_BANK e                    
+	WHERE
+		a.MID=b.MID AND b.[STATUS]='L'
+		AND a.DS_CODE=b.DS_CODE AND a.ENTRY_LOC=b.ENTRY_LOC AND a.OPR_DATE=b.OPR_DATE
+		AND a.VALUE_TYPE=@VALUE_TYPE
+		AND a.DEBIT_CREDIT>0
+		AND a.OPR_DATE=@REV_DATE AND a.ENTRY_LOC=@ENTRY_LOC   
+		AND c.ACC_NO=a.REMARK                        
+		AND a.FLEX_FILENAME IS NULL                                  
+		AND c.SPEED_CR_TYPE='B'        
+		AND a.NIKBRANCH_CODE=d.NIKBRANCH_CODE        
+		AND d.BANK_CODE=e.BANK_CODE 
+
+	UNION ALL
+
+------By DepositRef
+	SELECT c.SPEED_CR_TYPE,a.OPR_DATE valueDate,a.ENTRY_LOC,a.OPR_DATE,
+		c.ACC_NO ,@REFACC_NO REFACC_NO,a.REMARK,sum(a.DEBIT_CREDIT) as total,
+		a.DS_CODE ,
+		b.CUSTOMER_REF,
+		count(a.REMARK),'' Add_text,@VALUE_TYPE
+	FROM CLEARINGTAB a, CLEARING_CLIENT c  , checktotal  b
+	WHERE
+		a.MID=b.MID AND b.[STATUS]='L'
+		AND a.DS_CODE=b.DS_CODE AND a.ENTRY_LOC=b.ENTRY_LOC AND a.OPR_DATE=b.OPR_DATE
+		AND a.VALUE_TYPE=@VALUE_TYPE
+		AND a.DEBIT_CREDIT>0
+		AND a.OPR_DATE=@REV_DATE AND a.ENTRY_LOC=@ENTRY_LOC
+		AND a.REMARK=c.ACC_NO
+		AND a.FLEX_FILENAME IS NULL		
+		AND c.SPEED_CR_TYPE='DR'
+	GROUP BY a.OPR_DATE,a.ENTRY_LOC,c.SPEED_CR_TYPE,
+		c.ACC_NO ,a.REMARK,a.DS_CODE ,b.CUSTOMER_REF
+         
+END
+
+GO
+
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 21-Apr-13
+-- Description: Process for making Clearing data checked
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_Process_ClearingDataChecked]
+	@OPR_DATE	datetime,	
+	@ENTRY_LOC	varchar(3),
+	@VALUE_TYPE	numeric(1,0)
+AS
+BEGIN	
+	
+	UPDATE CLEARINGTAB
+		SET CHECKED=1
+		WHERE (CHECKED IS NULL OR CHECKED=0)
+			AND OPR_DATE=@OPR_DATE AND ENTRY_LOC=@ENTRY_LOC
+			AND VALUE_TYPE=@VALUE_TYPE AND [STATUS]='L' 
+	         
+END
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 21-Apr-13
+-- Description: Update Clearing Data Final
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_Process_ClearingDataFinalUpdate]
+	@REV_DATE		datetime,	
+	@ENTRY_LOC		varchar(3),
+	@VALUE_TYPE		numeric(1,0),
+	@FLEX_FILENAME	varchar(15)
+AS
+BEGIN
+
+	UPDATE CLEARINGTAB 
+		SET FLEX_FILENAME=@FLEX_FILENAME
+	WHERE FLEX_FILENAME IS NULL 
+		AND OPR_DATE=@REV_DATE AND ENTRY_LOC=@ENTRY_LOC
+		AND VALUE_TYPE=@VALUE_TYPE
+		AND [STATUS]='L';
+
+	UPDATE TMP_REVERSAL_CLEARING
+		SET FLEX_FILENAME=@FLEX_FILENAME,
+			USERID=substring(suser_name(),charindex('\',suser_name())+1,20)
+	WHERE FLEX_FILENAME IS NULL 
+		AND REV_DATE=@REV_DATE AND ENTRY_LOC=@ENTRY_LOC
+		AND VALUE_TYPE=@VALUE_TYPE;
+
+	INSERT INTO REVERSAL_HIST_CLEARING
+		SELECT * FROM TMP_REVERSAL_CLEARING
+			WHERE FLEX_FILENAME IS NOT NULL 
+			AND REV_DATE=@REV_DATE AND ENTRY_LOC=@ENTRY_LOC
+			AND VALUE_TYPE=@VALUE_TYPE;
+
+	DELETE FROM TMP_REVERSAL_CLEARING
+		WHERE FLEX_FILENAME IS NOT NULL 
+			AND REV_DATE=@REV_DATE AND ENTRY_LOC=@ENTRY_LOC
+			AND VALUE_TYPE=@VALUE_TYPE;
+
+END
+
+GO
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 22-Sep-13
+-- Description:	Get total check count of ClearingTab
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_ClearingTab_GetTotalCheck]		
+	@OPR_DATE	datetime,
+	@ENTRY_LOC	varchar(3),
+	@VALUE_TYPE	numeric(1,0)
+AS
+BEGIN	
+	
+	SET NOCOUNT ON;
+
+	SELECT a.OPR_DATE, COUNT(CHECK_NUMBER) TOTCHECK 
+	FROM CLEARINGTAB a	
+	WHERE a.[STATUS]='L' AND a.OPR_DATE=@OPR_DATE
+	AND a.ENTRY_LOC=@ENTRY_LOC AND a.VALUE_TYPE=@VALUE_TYPE
+	GROUP by a.OPR_DATE
+	
+END
+
+GO
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 24-Jan-13
+-- Description:	Get outstanding of ClearingTab
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_ClearingTab_GetOutstandings]		
+	@OPR_DATE	datetime,
+	@ENTRY_LOC	varchar(3)	
+AS
+BEGIN	
+	
+	SET NOCOUNT ON;
+
+	SELECT * 
+	FROM CLEARINGTAB 
+	WHERE [STATUS]='L' AND FLEX_FILENAME IS NULL 
+	AND OPR_DATE =@OPR_DATE AND ENTRY_LOC=@ENTRY_LOC
+	ORDER BY OPR_DATE,DS_CODE,CHECK_NUMBER
+	
+END
+
+GO
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 27-Apr-13
+-- Description: Get unchecked clearingtab records
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_ClearingTab_GetUnchecked]
+	@OPR_DATE	datetime,	
+	@ENTRY_LOC	varchar(3),
+	@VALUE_TYPE	numeric(1,0)
+AS
+BEGIN	
+	
+	SELECT * FROM CLEARINGTAB		
+		WHERE (CHECKED IS NULL OR CHECKED=0)
+			AND OPR_DATE=@OPR_DATE AND ENTRY_LOC=@ENTRY_LOC
+			AND VALUE_TYPE=@VALUE_TYPE AND [STATUS]='L'
+	         
+END
+
+GO
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 02-Oct-13
+-- Description: Process for clearing return 
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_Process_ClearingRetGenerate]
+	@OPR_DATE	datetime,	
+	@ENTRY_LOC	varchar(3)
+AS
+BEGIN	
+	
+	DELETE FROM TMP_RETURN_CLEARING 
+		WHERE ENTRY_LOC=@ENTRY_LOC ;
+
+
+	INSERT INTO TMP_RETURN_CLEARING(OPR_DATE, REMARK, ACC_NO, AMOUNT, ENTRY_LOC, 
+	INSTRUMENT, ADDTEXT, RULETYPE)            
+
+	SELECT ct.OPR_DATE,
+	ct.REMARK,ct.REMARK AS 'ACC_NO', SUM(rc.AMOUNT) AMOUNT,ct.ENTRY_LOC,
+	'' AS 'INSTRUMENT',
+	CONVERT(varchar(15),COUNT(ct.MID))  AS  'ADDTEXT', '1' AS 'RULETYPE'
+		FROM CLEARINGTAB ct
+		--INNER JOIN CHECKTOTAL c ON c.MID=ct.MID
+		INNER JOIN RETURN_CLEARING rc
+		ON ct.MID=rc.MID AND ct.DSL=rc.DSL		
+		WHERE 
+		rc.[STATUS]='L'
+		AND ct.RTN_STATUS='R' AND ct.[STATUS]='L'
+		AND ct.OPR_DATE =@OPR_DATE AND ct.ENTRY_LOC=@ENTRY_LOC
+		AND SUBSTRING(ct.REMARK,7,6) IN ('200282','200274')
+		GROUP BY ct.REMARK,ct.ENTRY_LOC,ct.OPR_DATE
+		
+	UNION ALL
+		
+	SELECT ct.OPR_DATE,
+	ct.REMARK,'010009155130005' AS 'ACC_NO',SUM(rc.AMOUNT) AMOUNT,ct.ENTRY_LOC,
+	'' AS 'INSTRUMENT',
+	CONVERT(varchar(15),COUNT(ct.MID))  AS  'ADDTEXT' ,'2' AS 'RULETYPE'
+		FROM CLEARINGTAB ct
+		--INNER JOIN CHECKTOTAL c ON c.MID=ct.MID
+		INNER JOIN RETURN_CLEARING rc
+		ON ct.MID=rc.MID AND ct.DSL=rc.DSL		
+		WHERE 
+		rc.[STATUS]='L'
+		AND ct.RTN_STATUS='R' AND ct.[STATUS]='L'
+		AND ct.OPR_DATE =@OPR_DATE AND ct.ENTRY_LOC=@ENTRY_LOC
+		AND ct.REMARK IN ('010001200038017','010001200038018')
+		GROUP BY ct.REMARK,ct.ENTRY_LOC,ct.OPR_DATE
+	
+	UNION ALL
+	
+	SELECT ct.OPR_DATE,
+	ct.REMARK,'010009155220004' AS 'ACC_NO',SUM(rc.AMOUNT) AMOUNT,ct.ENTRY_LOC,
+	'' AS 'INSTRUMENT',
+	CONVERT(varchar(15),COUNT(ct.MID))  AS  'ADDTEXT' ,'2' AS 'RULETYPE'
+		FROM CLEARINGTAB ct
+		--INNER JOIN CHECKTOTAL c ON c.MID=ct.MID
+		INNER JOIN RETURN_CLEARING rc
+		ON ct.MID=rc.MID AND ct.DSL=rc.DSL		
+		WHERE 
+		rc.[STATUS]='L'
+		AND ct.RTN_STATUS='R' AND ct.[STATUS]='L'
+		AND ct.OPR_DATE =@OPR_DATE AND ct.ENTRY_LOC=@ENTRY_LOC
+		AND ct.REMARK='010009275590007'
+		GROUP BY ct.REMARK,ct.ENTRY_LOC,ct.OPR_DATE
+		
+	UNION ALL
+		
+		SELECT ct.OPR_DATE,
+	ct.REMARK,ct.REMARK AS 'ACC_NO',rc.AMOUNT,ct.ENTRY_LOC,
+	ct.CHECK_NUMBER AS 'INSTRUMENT',
+	b.BANK_NAME + '(' + cb.BRANCH_NAME + ') '  AS 'ADDTEXT' ,'3' AS 'RULETYPE'
+		FROM CLEARINGTAB ct
+		--INNER JOIN CHECKTOTAL c ON c.MID=ct.MID
+		INNER JOIN RETURN_CLEARING rc		
+		ON ct.MID=rc.MID AND ct.DSL=rc.DSL
+		INNER JOIN CLEARING_BRANCH cb ON cb.NIKBRANCH_CODE=ct.NIKBRANCH_CODE
+		INNER JOIN CLEARING_BANK b ON b.BANK_CODE=cb.BANK_CODE
+		WHERE 
+		rc.[STATUS]='L'
+		AND ct.RTN_STATUS='R' AND ct.[STATUS]='L'
+		AND ct.OPR_DATE =@OPR_DATE AND ct.ENTRY_LOC=@ENTRY_LOC
+		AND ct.REMARK NOT IN ('010001200038017','010001200038018','010009275590007')
+		AND SUBSTRING(ct.REMARK,7,6) NOT IN ('200282','200274')
+         
+END
+
+GO
+
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 21-Aug-13
+-- Description: Update Clearing Return  Final
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_Process_ClearingDataReturnUpdate]
+	@OPR_DATE		datetime,	
+	@ENTRY_LOC		varchar(3),
+	@FLEX_FILENAME	varchar(15)
+	--@REFACC_NO		varchar(16)
+AS
+BEGIN
+
+	--INSERT INTO REVERSAL_HIST_CLEARING_RET(AMOUNT, VALUE_DATE, 
+	--	USERID, 
+	--	FLEX_FILENAME, REFACC_NO, ACC_NO, ENTRY_LOC, DS_CODE, CHECK_NUMBER)
+	--	SELECT rc.AMOUNT,@OPR_DATE,
+	--		substring(suser_name(),charindex('\',suser_name())+1,20),
+	--		@FLEX_FILENAME,@REFACC_NO,ct.REMARK,@ENTRY_LOC,ct.DS_CODE,rc.CHECK_NUMBER
+	--		FROM CLEARINGTAB ct
+	--		INNER JOIN CHECKTOTAL c ON c.MID=ct.MID 
+	--		INNER JOIN RETURN_CLEARING rc
+	--		ON ct.MID=rc.MID AND ct.DSL=rc.DSL
+	--		WHERE c.[STATUS]='L' AND ct.RTN_STATUS='R' AND rc.[STATUS]='L'
+	--		AND rc.RTN_FILENAME IS NULL
+	--		AND ct.OPR_DATE =@OPR_DATE AND ct.ENTRY_LOC=@ENTRY_LOC;
+			
+	UPDATE RETURN_CLEARING 
+		SET RTN_FILENAME=@FLEX_FILENAME,
+		RTN_FILE_USERID=substring(suser_name(),charindex('\',suser_name())+1,20)
+		FROM RETURN_CLEARING rc
+		INNER JOIN CLEARINGTAB ct ON ct.MID=rc.MID AND ct.DSL=rc.DSL
+		--INNER JOIN CHECKTOTAL c ON c.MID=ct.MID
+		WHERE ct.[STATUS]='L' AND rc.[STATUS]='L' AND ct.RTN_STATUS='R'
+		--AND rc.RTN_FILENAME IS NULL
+		AND ct.OPR_DATE =@OPR_DATE AND ct.ENTRY_LOC=@ENTRY_LOC;
+		
+	
+END
+
+GO
+
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 21-Aug-13
+-- Description: Get detail for clearing return flexfile
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_ClearingTab_GetFlexReturn]
+	@OPR_DATE	datetime,	
+	@ENTRY_LOC	varchar(3)
+AS
+BEGIN
+
+	SELECT rc.OPR_DATE,SUM(rc.AMOUNT) AS AMOUNT, COUNT(rc.CHECK_NUMBER) AS TOTCHECK
+		FROM CLEARINGTAB ct
+		--INNER JOIN CHECKTOTAL c ON c.MID=ct.MID
+		INNER JOIN RETURN_CLEARING rc
+		ON ct.MID=rc.MID AND ct.DSL=rc.DSL
+		WHERE ct.[STATUS]='L' AND rc.[STATUS]='L' 
+		AND rc.OPR_DATE=@OPR_DATE AND ct.ENTRY_LOC=@ENTRY_LOC
+		--AND rc.RTN_FILENAME IS NULL 
+		AND ct.RTN_STATUS='R'
+		GROUP BY rc.OPR_DATE
+			         
+END
+
+GO
+
+
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 20-Aug-13
+-- Description:	Get detail of ClearingTab
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_ClearingTab_GetReturnMatch]	
+	@CHECK_NUMBER	varchar(15),
+	@AMOUNT			numeric(14,2),
+	@OPR_DATE		datetime	
+AS
+BEGIN	
+	
+	SET NOCOUNT ON;
+	
+		SELECT ct.*,
+			br.BRANCH_NAME,
+			b.BANK_CODE,b.BANK_NAME
+			FROM CLEARINGTAB ct							
+			LEFT OUTER JOIN CLEARING_BRANCH br
+			ON br.NIKBRANCH_CODE=ct.NIKBRANCH_CODE
+			LEFT OUTER JOIN CLEARING_BANK b
+			ON b.BANK_CODE=br.BANK_CODE					
+			WHERE ct.CHECK_NUMBER=@CHECK_NUMBER AND ct.DEBIT_CREDIT=@AMOUNT
+			AND OPR_DATE=@OPR_DATE AND ct.[STATUS]='L' ;	
+		
+END
+
+GO
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 30-Oct-13
+-- Description:	Add Return Check having same check info
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_ReturnClearing_AddDup]	
+	@MID			numeric(10,0),
+	@DSL			numeric(4,0),	
+	@CHECK_NUMBER	varchar(15),
+	@AMOUNT			numeric(14,2),
+	@RTN_CODE		varchar(2),
+	@OPR_DATE		datetime,
+	@SEQ_NUMBER		varchar(50)		
+AS
+BEGIN	
+	
+	DECLARE
+		@v_cnt	int;
+	
+		SELECT @v_cnt=COUNT(*)
+			FROM CLEARINGTAB ct											
+			WHERE ct.CHECK_NUMBER=@CHECK_NUMBER AND ct.DEBIT_CREDIT=@AMOUNT
+			AND OPR_DATE=@OPR_DATE AND ct.MID=@MID AND ct.DSL=@DSL 
+			AND ct.[STATUS]='L';
+		
+		IF @v_cnt=0
+		BEGIN
+			RETURN 4;			
+		END
+				
+		INSERT INTO RETURN_CLEARING(MID, DSL, CHECK_NUMBER, AMOUNT, RTN_CODE, 
+			OPR_DATE, SEQ_NUMBER,
+			INPUT_BY, 
+			INPUT_DATETIME, INPUT_FROM, [STATUS])
+			VALUES(@MID, @DSL, @CHECK_NUMBER, @AMOUNT, @RTN_CODE, 
+			@OPR_DATE,@SEQ_NUMBER,  
+			substring(suser_name(),charindex('\',suser_name())+1,20),
+			GETDATE(),HOST_NAME(), 'U')
+
+		RETURN 0;
+
+		
+END
+
+GO
+
+
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 20-Aug-13
+-- Description:	Return Check add
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_ReturnClearing_Add]	
+	@CHECK_NUMBER	varchar(15),
+	@AMOUNT			numeric(14,2),
+	@RTN_CODE		varchar(2),
+	@OPR_DATE		datetime,
+	@SEQ_NUMBER		varchar(50),
+	@RET_MID		numeric(10,0) output,
+	@RET_DSL		numeric(4,0) output	
+AS
+BEGIN	
+	
+	DECLARE
+		@v_cnt	int;
+	
+		SELECT @v_cnt=COUNT(*)
+			FROM CLEARINGTAB ct											
+			WHERE ct.CHECK_NUMBER=@CHECK_NUMBER AND ct.DEBIT_CREDIT=@AMOUNT
+			AND OPR_DATE=@OPR_DATE AND ct.[STATUS]='L';
+		
+		IF @v_cnt=0
+		BEGIN
+			RETURN 4;			
+		END
+
+		IF @v_cnt>1
+		BEGIN
+			RETURN 1;			
+		END
+
+		SELECT @RET_MID=MID,@RET_DSL=DSL
+			FROM CLEARINGTAB ct											
+			WHERE ct.CHECK_NUMBER=@CHECK_NUMBER AND ct.DEBIT_CREDIT=@AMOUNT
+			AND OPR_DATE=@OPR_DATE AND ct.[STATUS]='L';
+	
+		INSERT INTO RETURN_CLEARING(MID, DSL, CHECK_NUMBER, AMOUNT, RTN_CODE, 
+			OPR_DATE, SEQ_NUMBER,
+			INPUT_BY, 
+			INPUT_DATETIME, INPUT_FROM, [STATUS])
+			VALUES(@RET_MID, @RET_DSL, @CHECK_NUMBER, @AMOUNT, @RTN_CODE, 
+			@OPR_DATE,@SEQ_NUMBER,  
+			substring(suser_name(),charindex('\',suser_name())+1,20),
+			GETDATE(),HOST_NAME(), 'U')
+
+		RETURN 0;
+
+		
+END
+
+GO
+
+
+
+ALTER TABLE dbo.CSCHEDULE
+ADD [STATUS] char (1) NULL; 
+
+GO
+
+
+UPDATE dbo.CSCHEDULE SET [STATUS]=tc.STATUS 
+FROM dbo.TOTALCS tc INNER JOIN dbo.CSCHEDULE cs
+ON tc.CS_CODE=cs.CS_CODE 
+
+GO
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,23 @@
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_Process_UpdateUniqueCollectionNoClearingTab]
+	@UNIQUE_COLLECTION_NO varchar(14),	      
+	@CHECK_NO varchar(15)	
+AS
+BEGIN
+	
+	SET NOCOUNT ON;
+
+   UPDATE CLEARINGTAB
+	set UNIQUE_COLLECTION_NO=@UNIQUE_COLLECTION_NO where CHECK_NO=@CHECK_NO
+    RETURN 0;
+END
+GO

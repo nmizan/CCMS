@@ -1,0 +1,605 @@
+ALTER TABLE CLEARINGTAB
+ADD [STATUS] char (1) NULL; 
+GO
+
+ALTER TABLE CLEARINGTAB
+ADD GOV_CHQ bit NULL;
+GO
+
+ALTER TABLE CLEARINGTAB_HIST
+ADD GOV_CHQ bit NULL;
+GO
+
+
+ALTER TABLE CLEARINGTAB
+ADD IQA_FAILED bit NULL;
+GO
+
+
+ALTER TABLE CLEARINGTAB_HIST
+ADD IQA_FAILED bit NULL;
+GO
+
+
+UPDATE CLEARINGTAB SET [STATUS]=ch.STATUS 
+FROM CHECKTOTAL ch INNER JOIN CLEARINGTAB cl 
+ON ch.MID=cl.MID 
+
+
+GO
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 17-Apr-13
+-- Description:	Add detail to ClearingTab
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_ClearingTab_Add]	
+	@MID			numeric(10,0),
+	@DSL			numeric(4,0),	
+	@OPR_DATE		datetime, 
+	@ISSUE_DATE		datetime, 
+	@NIKBRANCH_CODE	varchar(7), 
+	@PAYEE_NAME		varchar(40), 
+	@CHECK_SERIES	varchar(4), 
+	@CHECK_NUMBER	varchar(15), 
+	@CHECK_NO		varchar(8), 
+	@BOOK_NO		varchar(8), 
+	@CHECK_TYPE		varchar(8), 
+	@ACC_NO			varchar(15), 
+	@DEBIT_CREDIT	numeric(14,2), 
+	@REMARK			varchar(15), 
+	@BATCH_NO		varchar(8), 
+	@CHECK_REF		varchar(40), 
+	@ENTRY_LOC		varchar(3), 
+	@DS_CODE		varchar(8),
+	@VALUE_TYPE		numeric(1,0),
+	@IS_ROW_CHG		bit,
+	@GOV_CHQ		bit,
+	@IQA_FAILED		bit
+AS
+BEGIN	
+
+	DECLARE @ErrorVar	int;
+		
+	SET NOCOUNT ON;
+			
+	INSERT INTO CLEARINGTAB_HIST(MID,DSL,OPR_DATE, ISSUE_DATE, NIKBRANCH_CODE, PAYEE_NAME, 
+		CHECK_SERIES, CHECK_NUMBER, CHECK_NO, BOOK_NO, CHECK_TYPE, ACC_NO, 
+		DEBIT_CREDIT, REMARK, BATCH_NO, CHECK_REF, ENTRY_LOC, DS_CODE, 
+		RTN_STATUS, IS_PDC,
+		MOD_NO,IS_AUTH,VALUE_TYPE,IS_ROW_CHG,GOV_CHQ,IQA_FAILED)
+		VALUES(@MID,@DSL,@OPR_DATE, @ISSUE_DATE, @NIKBRANCH_CODE, @PAYEE_NAME, 
+		@CHECK_SERIES, @CHECK_NUMBER, @CHECK_NO, @BOOK_NO, @CHECK_TYPE, @ACC_NO, 
+		@DEBIT_CREDIT, @REMARK, @BATCH_NO, @CHECK_REF, @ENTRY_LOC, @DS_CODE, 
+		'O', 0,
+		1,0,@VALUE_TYPE,@IS_ROW_CHG,@GOV_CHQ,@IQA_FAILED);
+
+	SELECT @ErrorVar = @@ERROR;
+	
+	IF @ErrorVar <> 0
+		BEGIN			
+			RETURN 1;
+		END
+		
+	RETURN 0;
+	   
+END
+
+GO
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 17-Apr-13
+-- Description:	update detail to ClearingTab
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_ClearingTab_Update]
+	@MID			numeric(10,0),
+	@DSL			numeric(4,0),		
+	@OPR_DATE		datetime, 
+	@ISSUE_DATE		datetime, 
+	@NIKBRANCH_CODE	varchar(7), 
+	@PAYEE_NAME		varchar(40), 
+	@CHECK_SERIES	varchar(4), 
+	@CHECK_NUMBER	varchar(15), 
+	@CHECK_NO		varchar(8), 
+	@BOOK_NO		varchar(8), 
+	@CHECK_TYPE		varchar(8), 
+	@ACC_NO			varchar(15), 
+	@DEBIT_CREDIT	numeric(14,2), 
+	@REMARK			varchar(15), 
+	@BATCH_NO		varchar(8), 
+	@CHECK_REF		varchar(40), 
+	@ENTRY_LOC		varchar(3), 
+	@DS_CODE		varchar(8),
+	@RTN_STATUS		char(1), 
+	@RTN_CODE		varchar(2), 
+	@RETURN_DATE	datetime, 
+	@CHECKED		tinyint, 
+	@FLEX_FILENAME	varchar(15), 
+	@IS_PDC			bit,
+	@VALUE_TYPE		numeric(1,0), 
+	@IS_ROW_CHG		bit,
+	@GOV_CHQ		bit,
+	@IQA_FAILED		bit,
+	@MOD_NO			numeric(3,0)
+AS
+BEGIN	
+
+	DECLARE @ErrorVar	int;
+		
+	SET NOCOUNT ON;
+			
+	INSERT INTO CLEARINGTAB_HIST(MID,DSL,OPR_DATE, ISSUE_DATE, NIKBRANCH_CODE, PAYEE_NAME, 
+		CHECK_SERIES, CHECK_NUMBER, CHECK_NO, BOOK_NO, CHECK_TYPE, ACC_NO, 
+		DEBIT_CREDIT, REMARK, BATCH_NO, CHECK_REF, ENTRY_LOC, DS_CODE, 
+		RTN_STATUS, RTN_CODE, RETURN_DATE, CHECKED, FLEX_FILENAME, IS_PDC,
+		MOD_NO,IS_AUTH,VALUE_TYPE,IS_ROW_CHG,GOV_CHQ,IQA_FAILED)
+		VALUES(@MID,@DSL,@OPR_DATE, @ISSUE_DATE, @NIKBRANCH_CODE, @PAYEE_NAME, 
+		@CHECK_SERIES, @CHECK_NUMBER, @CHECK_NO, @BOOK_NO, @CHECK_TYPE, @ACC_NO, 
+		@DEBIT_CREDIT, @REMARK, @BATCH_NO, @CHECK_REF, @ENTRY_LOC, @DS_CODE, 
+		@RTN_STATUS, @RTN_CODE, @RETURN_DATE, @CHECKED, @FLEX_FILENAME, @IS_PDC,
+		@MOD_NO,0,@VALUE_TYPE,@IS_ROW_CHG,@GOV_CHQ,@IQA_FAILED);
+
+	SELECT @ErrorVar = @@ERROR;
+	
+	IF @ErrorVar <> 0
+		BEGIN			
+			RETURN 1;
+		END
+		
+	RETURN 0;
+	   
+END
+
+GO
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 20-Apr-13
+-- Description:	Remove record from CheckTotal
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_CheckTotal_Remove]
+	@MID		numeric(10,0),
+	@MOD_NO		int,	
+	@RET_MOD_NO	int output
+AS
+BEGIN	
+	DECLARE @STATUS			char(1),
+			@DS_CODE		varchar(8),
+			@OPR_DATE		datetime,
+			@ENTRY_LOC		varchar(3),
+			@TOTAL_CHKNO	int, 
+			@TOTAL_CHKAMT	numeric(14,2), 
+			@CUSTOMER_REF	varchar(50),
+			@INPUT_BY		varchar(20),
+			@INPUT_DATETIME datetime,
+			@INPUT_FROM		varchar(30),
+			@ENTRY_DATE		datetime;
+	
+	DECLARE @ErrorVar		int; 
+			
+	SET NOCOUNT ON;
+
+	SET @STATUS = '';
+
+	BEGIN TRANSACTION
+
+	IF EXISTS(SELECT DS_CODE from CHECKTOTAL
+			  WHERE MID=@MID AND MOD_NO=@MOD_NO)
+		BEGIN
+			SELECT @STATUS=[STATUS],
+				@DS_CODE=DS_CODE,@OPR_DATE=OPR_DATE,@ENTRY_LOC=ENTRY_LOC,
+				@TOTAL_CHKNO=TOTAL_CHKNO,@TOTAL_CHKAMT=TOTAL_CHKAMT,
+				@CUSTOMER_REF=CUSTOMER_REF,@ENTRY_DATE=ENTRY_DATE,
+				@INPUT_BY=INPUT_BY,	@INPUT_DATETIME=INPUT_DATETIME,
+				@INPUT_FROM=INPUT_FROM
+				FROM CHECKTOTAL
+				WHERE MID=@MID AND MOD_NO=@MOD_NO;
+			
+			IF (@STATUS = 'D')
+				BEGIN
+					-- already deleted
+					ROLLBACK TRANSACTION;
+					RETURN 6;
+				END;
+
+			DELETE CHECKTOTAL_HIST WHERE MID=@MID AND IS_AUTH=0;
+
+			SELECT @ErrorVar = @@ERROR;		
+
+			IF @ErrorVar <> 0				
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+			SELECT @RET_MOD_NO = @MOD_NO + 1;
+
+			INSERT INTO 
+				CHECKTOTAL_HIST (MID,DS_CODE, TOTAL_CHKNO, TOTAL_CHKAMT, OPR_DATE, 
+				CUSTOMER_REF, ENTRY_LOC,ENTRY_DATE, 
+				INPUT_BY, INPUT_DATETIME, INPUT_FROM, MOD_NO, 
+				[STATUS], IS_AUTH)
+				VALUES(@MID, @DS_CODE, @TOTAL_CHKNO, @TOTAL_CHKAMT, @OPR_DATE, 
+				@CUSTOMER_REF, @ENTRY_LOC, @ENTRY_DATE,
+				substring(suser_name(),charindex('\',suser_name())+1,20), 
+				GETDATE(), HOST_NAME(), @RET_MOD_NO, 
+				'D', 0)
+
+			SELECT @ErrorVar = @@ERROR;		
+
+			IF @ErrorVar <> 0				
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+
+-----------
+
+			DELETE CLEARINGTAB_HIST
+				WHERE MID=@MID AND IS_AUTH=0 ;
+
+			SELECT @ErrorVar = @@error;
+
+			IF @ErrorVar <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+			INSERT INTO CLEARINGTAB_HIST(MID,DSL,OPR_DATE, ISSUE_DATE, NIKBRANCH_CODE, 
+				PAYEE_NAME, CHECK_SERIES, CHECK_NUMBER, CHECK_NO, BOOK_NO, 
+				CHECK_TYPE, ACC_NO, DEBIT_CREDIT, REMARK, BATCH_NO, CHECK_REF,
+				ENTRY_LOC, DS_CODE, RTN_STATUS, RTN_CODE, RETURN_DATE, 
+				CHECKED, FLEX_FILENAME, IS_PDC, MOD_NO, IS_AUTH,VALUE_TYPE,IS_ROW_CHG,
+				GOV_CHQ,IQA_FAILED)
+				SELECT MID,DSL,OPR_DATE, ISSUE_DATE, NIKBRANCH_CODE, 
+				PAYEE_NAME, CHECK_SERIES, CHECK_NUMBER, CHECK_NO, BOOK_NO, 
+				CHECK_TYPE, ACC_NO, DEBIT_CREDIT, REMARK, BATCH_NO, CHECK_REF,
+				ENTRY_LOC, DS_CODE, RTN_STATUS, RTN_CODE, RETURN_DATE, 
+				CHECKED, FLEX_FILENAME, IS_PDC, @RET_MOD_NO, 0,VALUE_TYPE,IS_ROW_CHG,
+				GOV_CHQ,IQA_FAILED
+				FROM CLEARINGTAB
+				WHERE MID=@MID AND MOD_NO=@MOD_NO;
+			
+			SELECT @ErrorVar = @@error;
+
+			IF @ErrorVar <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+			
+-----------
+			
+
+			COMMIT TRANSACTION;
+			RETURN 0;
+				
+		END;
+	ELSE 
+		BEGIN			
+			-- item might exist in hist table
+			IF EXISTS(SELECT DS_CODE from CHECKTOTAL_HIST 
+						WHERE MID=@MID AND MOD_NO=@MOD_NO )
+				BEGIN
+					DELETE CHECKTOTAL_HIST
+						WHERE MID=@MID AND MOD_NO=@MOD_NO AND IS_AUTH=0;
+
+					SELECT @ErrorVar = @@ERROR;		
+
+					IF @ErrorVar <> 0				
+						BEGIN
+							ROLLBACK TRANSACTION;
+							RETURN 1;
+						END
+					
+					DELETE CLEARINGTAB_HIST 
+						WHERE MID=@MID AND MOD_NO=@MOD_NO AND IS_AUTH=0 ;
+					
+					SELECT @ErrorVar = @@ERROR;		
+
+					IF @ErrorVar <> 0				
+						BEGIN
+							ROLLBACK TRANSACTION;
+							RETURN 1;
+						END
+	
+					SELECT @RET_MOD_NO = @MOD_NO-1;
+
+					COMMIT TRANSACTION;
+					RETURN 0;			
+
+
+				END
+			ELSE
+				BEGIN
+					-- not exist
+					ROLLBACK TRANSACTION;
+					RETURN 4;
+				END
+			
+		END		
+    
+END
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 20-Apr-13
+-- Description:	Authorize record to CHECKTOTAL
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_CheckTotal_Auth]	
+	@MID			numeric(10,0),	
+	@MOD_NO			int,
+	@MOD_DATETIME	datetime
+AS
+BEGIN	
+	DECLARE @STATUS			char(1),
+			@DS_CODE		varchar(8),
+			@OPR_DATE		datetime,
+			@ENTRY_LOC		varchar(3),
+			@TOTAL_CHKNO	int, 
+			@TOTAL_CHKAMT	numeric(14,2), 
+			@CUSTOMER_REF	varchar(50),		
+			@INPUT_BY		varchar(20),
+			@INPUT_DATETIME datetime,
+			@INPUT_FROM		varchar(30),
+			@LAST_MOD_NO	int,
+			@IS_AUTH		bit;			
+	
+	DECLARE @ErrorVar1		int; 
+			
+	SET NOCOUNT ON;
+
+	SELECT @STATUS = '';
+
+	BEGIN TRANSACTION;
+
+	IF EXISTS(SELECT DS_CODE from CHECKTOTAL_HIST 
+			  WHERE MID=@MID AND MOD_NO=@MOD_NO)
+		BEGIN
+			SELECT @STATUS=[STATUS],
+				@DS_CODE=DS_CODE,@OPR_DATE=OPR_DATE,@ENTRY_LOC=ENTRY_LOC,
+				@TOTAL_CHKNO=TOTAL_CHKNO, 
+				@TOTAL_CHKAMT=TOTAL_CHKAMT,@CUSTOMER_REF=CUSTOMER_REF,
+				@INPUT_BY=INPUT_BY,	@INPUT_DATETIME=INPUT_DATETIME,
+				@INPUT_FROM=INPUT_FROM,@IS_AUTH=IS_AUTH
+				FROM CHECKTOTAL_HIST 
+				WHERE MID=@MID AND MOD_NO=@MOD_NO;
+			IF (@IS_AUTH = 1)
+				BEGIN
+					-- already authorized
+					ROLLBACK TRANSACTION;
+					RETURN 3;
+				END;
+			IF (@INPUT_BY = substring(suser_name(),charindex('\',suser_name())+1,20))
+				BEGIN
+					-- maker and checker same person
+					ROLLBACK TRANSACTION;
+					RETURN 5;
+				END;
+			IF (@INPUT_DATETIME <> @MOD_DATETIME)
+				BEGIN
+					-- Data hase been changed. Need notification
+					ROLLBACK TRANSACTION;
+					RETURN 7;
+				END;			
+		END;
+	ELSE
+		BEGIN			
+			-- not exist
+			ROLLBACK TRANSACTION;
+			RETURN 4;
+		END	;
+
+	IF @STATUS='U'
+		BEGIN
+			SELECT @STATUS='L';
+		END
+		
+	IF @MOD_NO > 1
+		BEGIN	
+		
+			INSERT INTO CHECKTOTAL_HIST(MID, DS_CODE, TOTAL_CHKNO, TOTAL_CHKAMT, 
+				OPR_DATE,CUSTOMER_REF, ENTRY_LOC, ENTRY_DATE, 
+				INPUT_BY, INPUT_DATETIME, INPUT_FROM, AUTH_BY, AUTH_DATETIME, AUTH_FROM, 
+				MOD_NO, [STATUS], IS_AUTH)
+				SELECT MID, DS_CODE, TOTAL_CHKNO, TOTAL_CHKAMT, 
+				OPR_DATE, CUSTOMER_REF, ENTRY_LOC, ENTRY_DATE, 
+				INPUT_BY, INPUT_DATETIME, INPUT_FROM, AUTH_BY, AUTH_DATETIME, AUTH_FROM, 
+				MOD_NO, [STATUS],1 FROM CHECKTOTAL
+				WHERE MID=@MID;
+			
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+
+			UPDATE CHECKTOTAL_HIST
+				SET [STATUS] = 'O' 
+				WHERE MID=@MID
+				AND [STATUS] = 'L';
+
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+			--IF @STATUS='U'
+			--	BEGIN
+			--		SELECT @STATUS='L';
+			--	END
+
+			UPDATE CHECKTOTAL
+				SET
+				DS_CODE=@DS_CODE,OPR_DATE=@OPR_DATE,ENTRY_LOC=@ENTRY_LOC,
+				TOTAL_CHKNO=@TOTAL_CHKNO,
+				TOTAL_CHKAMT=@TOTAL_CHKAMT,CUSTOMER_REF=@CUSTOMER_REF, 
+				INPUT_BY=@INPUT_BY,	INPUT_DATETIME=@INPUT_DATETIME,
+				INPUT_FROM=@INPUT_FROM,
+				AUTH_BY=substring(suser_name(),charindex('\',suser_name())+1,20),
+				AUTH_DATETIME=GETDATE(),AUTH_FROM=HOST_NAME(),
+				MOD_NO=@MOD_NO,[STATUS]=@STATUS
+			WHERE MID=@MID;
+
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+			
+			DELETE CHECKTOTAL_HIST WHERE MID=@MID
+				AND IS_AUTH=0;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END	
+
+		END
+	ELSE -- first record
+		BEGIN  
+			INSERT INTO CHECKTOTAL(MID, DS_CODE, TOTAL_CHKNO, TOTAL_CHKAMT, OPR_DATE, 
+				CUSTOMER_REF, ENTRY_LOC, ENTRY_DATE, 
+				INPUT_BY, INPUT_DATETIME, INPUT_FROM, 
+				AUTH_BY, 
+				AUTH_DATETIME, AUTH_FROM, MOD_NO, [STATUS])
+				SELECT MID,DS_CODE, TOTAL_CHKNO, TOTAL_CHKAMT, OPR_DATE, 
+					CUSTOMER_REF, ENTRY_LOC,ENTRY_DATE,
+					INPUT_BY, INPUT_DATETIME, INPUT_FROM, 
+					substring(suser_name(),charindex('\',suser_name())+1,20), 
+					GETDATE(), HOST_NAME(), MOD_NO, 'L' 
+					FROM CHECKTOTAL_HIST
+					WHERE MID=@MID AND MOD_NO=@MOD_NO;
+			
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+			DELETE CHECKTOTAL_HIST WHERE MID=@MID
+				AND IS_AUTH=0;
+			
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END			
+					
+		END
+	
+	-- Now update CLEARINGTAB
+
+	INSERT INTO CLEARINGTAB_HIST(MID,DSL,OPR_DATE, ISSUE_DATE, NIKBRANCH_CODE, 
+		PAYEE_NAME, CHECK_SERIES, CHECK_NUMBER, CHECK_NO, BOOK_NO, 
+		CHECK_TYPE, ACC_NO, DEBIT_CREDIT, REMARK, BATCH_NO, CHECK_REF, 
+		ENTRY_LOC, DS_CODE, RTN_STATUS, RTN_CODE, RETURN_DATE, CHECKED, 
+		FLEX_FILENAME, IS_PDC, MOD_NO, IS_AUTH,VALUE_TYPE,IS_ROW_CHG)
+		SELECT MID,DSL,OPR_DATE, ISSUE_DATE, NIKBRANCH_CODE, 
+		PAYEE_NAME, CHECK_SERIES, CHECK_NUMBER, CHECK_NO, BOOK_NO, 
+		CHECK_TYPE, ACC_NO, DEBIT_CREDIT, REMARK, BATCH_NO, CHECK_REF, 
+		ENTRY_LOC, DS_CODE, RTN_STATUS, RTN_CODE, RETURN_DATE, CHECKED, 
+		FLEX_FILENAME, IS_PDC, MOD_NO, 1,VALUE_TYPE,IS_ROW_CHG
+		FROM CLEARINGTAB
+		WHERE MID=@MID;
+	
+	SELECT @ErrorVar1 = @@error;
+
+	IF @ErrorVar1 <> 0
+		BEGIN
+			ROLLBACK TRANSACTION;
+			RETURN 1;
+		END
+	
+	DELETE CLEARINGTAB WHERE MID=@MID;
+
+	SELECT @ErrorVar1 = @@error;
+
+	IF @ErrorVar1 <> 0
+		BEGIN
+			ROLLBACK TRANSACTION;
+			RETURN 1;
+		END
+
+	INSERT INTO CLEARINGTAB(MID,DSL,OPR_DATE, ISSUE_DATE, NIKBRANCH_CODE, 
+		PAYEE_NAME, CHECK_SERIES, CHECK_NUMBER, CHECK_NO, BOOK_NO, 
+		CHECK_TYPE, ACC_NO, DEBIT_CREDIT, REMARK, BATCH_NO, CHECK_REF, 
+		ENTRY_LOC, DS_CODE, RTN_STATUS, RTN_CODE, RETURN_DATE, CHECKED, 
+		FLEX_FILENAME, IS_PDC, MOD_NO,VALUE_TYPE,IS_ROW_CHG,
+		[STATUS],GOV_CHQ,IQA_FAILED)
+		SELECT MID,DSL,OPR_DATE, ISSUE_DATE, NIKBRANCH_CODE, 
+		PAYEE_NAME, CHECK_SERIES, CHECK_NUMBER, CHECK_NO, BOOK_NO, 
+		CHECK_TYPE, ACC_NO, DEBIT_CREDIT, REMARK, BATCH_NO, CHECK_REF, 
+		ENTRY_LOC, DS_CODE, RTN_STATUS, RTN_CODE, RETURN_DATE, CHECKED, 
+		FLEX_FILENAME, IS_PDC, MOD_NO,VALUE_TYPE,IS_ROW_CHG,
+		@STATUS,GOV_CHQ,IQA_FAILED
+		FROM CLEARINGTAB_HIST 
+		WHERE MID=@MID AND MOD_NO=@MOD_NO;
+	
+	SELECT @ErrorVar1 = @@error;
+
+	IF @ErrorVar1 <> 0
+		BEGIN
+			ROLLBACK TRANSACTION;
+			RETURN 1;
+		END	
+
+	DELETE CLEARINGTAB_HIST WHERE MID=@MID AND MOD_NO=@MOD_NO;
+
+	SELECT @ErrorVar1 = @@error;
+
+	IF @ErrorVar1 <> 0
+		BEGIN
+			ROLLBACK TRANSACTION;
+			RETURN 1;
+		END
+	
+	COMMIT TRANSACTION;
+		
+	SELECT @ErrorVar1 = @@error;
+		
+	IF @ErrorVar1 = 0
+		BEGIN		
+			RETURN 0;
+		END
+	ELSE
+		BEGIN
+			RETURN 1;
+		END
+
+    
+END
+
+GO
+
+
+
+

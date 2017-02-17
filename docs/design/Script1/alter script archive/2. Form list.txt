@@ -1,0 +1,330 @@
+USE [CCMS]
+GO
+
+
+DELETE FROM FORM_LIST;
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(1,'MaintenanceClientDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(2,'MaintenanceClientSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(3,'MaintenanceBankDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(4,'MaintenanceBankSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(5,'MaintenanceBranchDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(6,'MaintenanceBranchSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(7,'MaintenanceLocationDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(8,'MaintenanceLocationSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(9,'MaintenanceZoneDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(10,'MaintenanceZoneSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(11,'MaintenanceReturnDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(12,'MaintenanceReturnSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(13,'MaintenanceChequeTypeDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(14,'MaintenanceChequeTypeSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(15,'MaintenanceHolidayDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(16,'MaintenanceHolidaySummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(17,'MaintenanceScheduleStockDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(18,'MaintenanceScheduleStockSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(19,'MaintenanceCitiBankBranchDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(20,'MaintenanceCitiBankBranchSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(21,'MaintenanceClearingClientDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(22,'MaintenanceClearingClientSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(23,'MaintenanceClearingBankDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(24,'MaintenanceClearingBankSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(25,'MaintenanceClearingBranchDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(26,'MaintenanceClearingBranchSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(27,'MaintenanceClearingLocationDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(28,'MaintenanceClearingLocationSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(29,'MaintenanceFlexAccountDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(30,'MaintenanceFlexAccountSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(31,'DepositScheduleDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(32,'DepositScheduleSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(33,'DepositScheduleMismatchTotal',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(34,'DepositScheduleMismatchCashSpeed',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(35,'DepositCitiCashDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(36,'DepositCitiCashSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(37,'DepositCitiSpeedDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(38,'DepositCitiSpeedSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(39,'DepositCitiSpeedMismatchTotal',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(40,'DepositCitiAnywhereDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(41,'DepositCitiAnywhereSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(42,'DepositCitiAnywhereCollectionProc',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(43,'DepositCitiAnywhereReminderProc',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(44,'DepositCitiAnywhereFundingFile',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(45,'DepositFlexFile',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(46,'DepositOutstandingReversal',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(47,'DepositFlexReversalFile',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(48,'Collection',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(49,'CollectionScheduleDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(50,'CollectionScheduleSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(51,'CollectionDDDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(52,'CollectionDDSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(53,'CollectionCitiSpeedReturnDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(54,'CollectionCitiSpeedReturnSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(55,'CollectionCitiAnywhereReturnDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(56,'CollectionCitiAnywhereReturnSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(57,'ClearingCheckDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(58,'ClearingCheckSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(59,'ClearingSetClearingDate',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(60,'ClearingUploadClearingCheck',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(61,'ClearingFlexFile',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(62,'ClearingFlexFileForReturnChecks',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(63,'ClearingDDCheckProcess',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(64,'ClearingPDCCheckDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(65,'ClearingPDCCheckSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(66,'ClearingPDCTransfer',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(67,'ClearingCheckReturnDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(68,'ClearingCheckReturnSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(69,'ClearingReturnFileUpload',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(70,'ClearingTransferDataToHistory',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(71,'ReportManifoldChecksForCollection',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(72,'ReportManifoldChecksForReminder',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(73,'ReportManifoldCitiAnywhereFundingDD',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(74,'ReportManifoldCitiAnywhereReturn',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(75,'ReportReportsCitiCashSpeedSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(76,'ReportReportsCitiCashDeposit',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(77,'ReportReportsCitiSpeedDeposit',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(78,'ReportReportsCitiSpeedReturn',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(79,'ReportReportsCitiAnywhereDepositDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(80,'ReportReportsCitiAnywhereProcessing',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(81,'ReportReportsCitiAnywhereFunding',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(82,'ReportReportsCitiAnywhereOutstanding',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(83,'ReportReportsMonthlyBillCashManagement',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(84,'ReportReportsDayZeroCashCheck',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(85,'ReportReportsClearingCheckSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(86,'ReportReportsBankwiseDeliveryCheck',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(87,'ReportReportsHighValueCheck',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(88,'ReportReportsClearingDeposit',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(89,'ReportReportsClearingDepositDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(90,'ReportReportsClearingReturn',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(91,'ReportReportsPDC',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(92,'ReportReportsHoliday',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(93,'ReportControlsChecksCollectionReprint',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(94,'ReportControlsDepositBreak',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(95,'ReportControlsUnclearFund',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(96,'ReportHistoryClearingCheckDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(97,'ReportHistoryClearingCheckDetailOld',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(98,'SystemDepartmentDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(99,'SystemDepartmentSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(100,'SystemUsersDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(101,'SystemUsersSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(102,'SystemFunctionalGroupDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(103,'SystemFunctionalGroupSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(104,'SystemAssignFGUserDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(105,'SystemAssignFGUserSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(106,'SystemReportUsersRole',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(107,'SystemReportActivityLog',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO FORM_LIST(SLNO, FORMS_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(108,'SystemEERSFeedExport',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+

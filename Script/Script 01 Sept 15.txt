@@ -1,0 +1,5 @@
+alter table CSD_HIST add AddSlipText varchar(150)
+alter table CSD_DET_HIST add AddCheckText varchar(150)
+
+alter table CHECKTOTAL_HIST add AddSlipText varchar(150)
+alter table CLEARINGTAB_HIST add AddCheckText varchar(150)

@@ -1,0 +1,142 @@
+USE [CCMS]
+GO
+/****** Object:  StoredProcedure [dbo].[CMS_CheckTotal_Update]    Script Date: 01/09/2015 11:11:53 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 17-Apr-13
+-- Modify Date: 01 Sept 15
+-- Modified by: Mohammad Yasir Arafat
+-- Description:	update detail to CheckTotal
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_CheckTotal_Update]
+	@MID			numeric(10,0),
+	@DS_CODE		varchar(8), 
+	@TOTAL_CHKNO	int, 
+	@TOTAL_CHKAMT	numeric(14,2), 
+	@OPR_DATE		datetime, 
+	@CUSTOMER_REF	varchar(50), 
+	@ENTRY_LOC		varchar(3),
+	@MOD_NO			int,
+	@RET_MOD_NO		int output,
+	@AddSlipText varchar(150)
+AS
+BEGIN	
+	DECLARE @ErrorVar INT;
+	DECLARE @ENTRY_DATE datetime;
+	
+	SET NOCOUNT ON;
+
+	IF EXISTS(SELECT DS_CODE FROM CHECKTOTAL 
+				WHERE  MID=@MID AND MOD_NO=@MOD_NO)
+		BEGIN
+
+			SELECT @ENTRY_DATE=ENTRY_DATE FROM CHECKTOTAL 
+				WHERE MID=@MID AND MOD_NO=@MOD_NO;
+
+			DELETE CHECKTOTAL_HIST WHERE MID=@MID AND IS_AUTH=0;
+
+			SELECT @ErrorVar = @@ERROR;		
+
+			IF @ErrorVar <> 0
+				BEGIN					
+					RETURN 1;
+				END
+			
+			SELECT @RET_MOD_NO = @MOD_NO +1;
+			
+			INSERT INTO CHECKTOTAL_HIST(MID,DS_CODE, TOTAL_CHKNO, TOTAL_CHKAMT, 
+				OPR_DATE, CUSTOMER_REF, ENTRY_LOC, ENTRY_DATE,
+				INPUT_BY,INPUT_DATETIME,INPUT_FROM,MOD_NO,[STATUS],IS_AUTH,AddSlipText)
+				VALUES(@MID,@DS_CODE, @TOTAL_CHKNO, @TOTAL_CHKAMT, 
+				@OPR_DATE, @CUSTOMER_REF, @ENTRY_LOC, @ENTRY_DATE, 
+				substring(suser_name(),charindex('\',suser_name())+1,20),
+				GETDATE(),HOST_NAME(),@RET_MOD_NO,'U',0,@AddSlipText);
+
+			SELECT @ErrorVar = @@ERROR;
+
+			IF @ErrorVar <> 0
+				BEGIN
+					RETURN 1;
+				END				
+			
+			DELETE CLEARINGTAB_HIST
+				WHERE MID=@MID AND IS_AUTH=0;
+
+			SELECT @ErrorVar = @@ERROR;
+
+			IF @ErrorVar <> 0
+				BEGIN
+					RETURN 1;
+				END
+			
+			RETURN 0;
+
+				
+		END
+	ELSE -- might be in hist table
+		BEGIN
+
+			IF EXISTS(SELECT DS_CODE from CHECKTOTAL_HIST 
+						WHERE MID=@MID AND MOD_NO=@MOD_NO AND IS_AUTH=0)
+				BEGIN
+
+					SELECT @ENTRY_DATE=ENTRY_DATE FROM CHECKTOTAL_HIST 
+						WHERE MID=@MID AND MOD_NO=@MOD_NO AND IS_AUTH=0;
+
+					DELETE CHECKTOTAL_HIST WHERE 
+						MID=@MID AND IS_AUTH=0;
+
+					SELECT @ErrorVar = @@ERROR;		
+
+					IF @ErrorVar <> 0
+						BEGIN							
+							RETURN 1;
+						END
+
+					INSERT INTO CHECKTOTAL_HIST(MID,DS_CODE, TOTAL_CHKNO, TOTAL_CHKAMT, 
+						OPR_DATE, CUSTOMER_REF, ENTRY_LOC, ENTRY_DATE,
+						INPUT_BY,INPUT_DATETIME,INPUT_FROM,MOD_NO,[STATUS],IS_AUTH,AddSlipText)
+						VALUES(@MID,@DS_CODE, @TOTAL_CHKNO, @TOTAL_CHKAMT, 
+						@OPR_DATE, @CUSTOMER_REF, @ENTRY_LOC, @ENTRY_DATE,
+						substring(suser_name(),charindex('\',suser_name())+1,20),
+						GETDATE(),HOST_NAME(),@MOD_NO,'U',0,@AddSlipText);
+
+					SELECT @ErrorVar = @@ERROR;
+		
+					IF @ErrorVar <> 0
+						BEGIN							
+							RETURN 1;
+						END
+					
+					SELECT @RET_MOD_NO=@MOD_NO;
+
+					DELETE CLEARINGTAB_HIST
+						WHERE MID=@MID AND IS_AUTH=0;
+
+					SELECT @ErrorVar = @@ERROR;
+
+					IF @ErrorVar <> 0
+						BEGIN
+							RETURN 1;
+						END			
+					
+					RETURN 0;
+			
+				END
+			ELSE
+				BEGIN
+					-- not exist
+					
+					RETURN 4;
+				END
+
+		END
+    
+END
+

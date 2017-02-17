@@ -1,0 +1,71 @@
+USE [CCMS]
+GO
+/****** Object:  StoredProcedure [dbo].[CMS_CSDDet_Add]    Script Date: 01/09/2015 10:30:02 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 09-Jan-13
+-- Modify Date: 31 Aug 15
+-- Modified by: Mohammad Yasir Arafat
+-- Description:	Add detail to CSD_DET
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_CSDDet_Add]	
+	@D_CODE				varchar(12), 
+	@SLNO				numeric(3,0), 
+	@CHECK_NO			varchar(15), 
+	@DRAWER				varchar(50), 
+	@DRAWEE_BANK_CODE	varchar(4), 
+	@AMOUNT				numeric(12,2), 
+	--@CUSTOMER_REF		varchar(15), 
+	@SLIP_DATE			datetime, 
+	@CHECK_DATE			datetime, 
+	@DRAWEE_BRANCH		varchar(50),
+	@CHECK_REF			varchar(15),
+	@AddCheckText varchar(150)	
+AS
+BEGIN	
+	DECLARE @ErrorVar	int;
+		
+	SET NOCOUNT ON;
+			
+	--INSERT INTO CSD_DET_HIST(D_CODE, SLNO, CHECK_NO, DRAWER, 
+	--	DRAWEE_BANK_CODE, AMOUNT,CUSTOMER_REF, SLIP_DATE, CHECK_DATE,
+	--	DRAWEE_BRANCH, CHECK_REF,RTN_STATUS,
+	--	MOD_NO,IS_AUTH)
+	--	VALUES(@D_CODE, @SLNO, @CHECK_NO, @DRAWER, 
+	--	@DRAWEE_BANK_CODE, @AMOUNT,@CUSTOMER_REF, @SLIP_DATE, @CHECK_DATE,
+	--	@DRAWEE_BRANCH, @CHECK_REF,'O',
+	--	1,0);
+
+	INSERT INTO CSD_DET_HIST(D_CODE, SLNO, CHECK_NO, DRAWER, 
+		DRAWEE_BANK_CODE, AMOUNT,SLIP_DATE, CHECK_DATE,
+		DRAWEE_BRANCH, CHECK_REF,RTN_STATUS,
+		MOD_NO,IS_AUTH,AddCheckText)
+		VALUES(@D_CODE, @SLNO, @CHECK_NO, @DRAWER, 
+		@DRAWEE_BANK_CODE, @AMOUNT, @SLIP_DATE, @CHECK_DATE,
+		@DRAWEE_BRANCH, @CHECK_REF,'O',
+		1,0,@AddCheckText);
+
+	--INSERT INTO CSD_DET_HIST(D_CODE, SLNO, CHECK_NO, DRAWER, 
+	--	DRAWEE_BANK_CODE, AMOUNT,CUSTOMER_REF, SLIP_DATE, CHECK_DATE,
+	--	DRAWEE_BRANCH,RTN_STATUS,
+	--	MOD_NO,IS_AUTH)
+	--	VALUES(@D_CODE, @SLNO, @CHECK_NO, @DRAWER, 
+	--	@DRAWEE_BANK_CODE, @AMOUNT,@CUSTOMER_REF, @SLIP_DATE, @CHECK_DATE,
+	--	@DRAWEE_BRANCH, 'O',
+	--	1,0);
+
+	SELECT @ErrorVar = @@ERROR;
+	
+	IF @ErrorVar <> 0
+		BEGIN			
+			RETURN 1;
+		END
+		
+	RETURN 0;
+	   
+END
+

@@ -1,0 +1,25 @@
+Dear Shanto
+
+1.Pls find attached sample file of IRE(inward return xml).Below are the main fields.  
+            <ChequeSequenceNumber>0032255</ChequeSequenceNumber>
+  <ItemAmount>000001030800</ItemAmount> 
+  <ReturnReason>16</ReturnReason> 
+
+
+forward bundle date
+
+
+ If check is not matched with outward check details then there will be unmatched report ,from where user will manually return mark the item
+
+2. For CSV file. A/C or GL should will be maintained by user . However GLs are as follows:
+DHK: 100200201 (Branch-G01, Related Cust-BD0700000, Prod MIS-1056)
+CTG: 100200201 (Branch-G03, Related Cust-BD0700000, Prod MIS-1056)
+GUL: Yet to be defined
+
+3.Reversal form attached
+4. Also find new circular for Charge calculation of central bank.
+
+
+Regards
+Dewan Ahsanullah
+Citibank, N.A.

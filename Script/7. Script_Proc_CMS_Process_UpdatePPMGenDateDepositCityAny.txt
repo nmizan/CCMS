@@ -1,0 +1,23 @@
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Mohammad Yasir Arafat
+-- Create date: 06 Sept 2015
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [CMS_Process_UpdatePPMGenDateDepositCityAny]
+AS
+BEGIN
+	SET NOCOUNT ON;
+update CCHECK set PPM_GenDate=getdate()
+ from BANK,BRANCH,CCHECK,CLIENT
+			where CCHECK.DRAWEE_BANK_CODE=BANK.BANK_CODE and
+			 CCHECK.BRANCH_CODE=BRANCH.BRANCH_CODE and 
+			 BRANCH.BANK_CODE=CCHECK.DRAWEE_BANK_CODE and 
+			 CCHECK.FLEXGEN_DATE is not NULL and CCHECK.CLIENT_CODE=Client.CLIENT_CODE and CCHECK.PPM_GenDate is null 
+			 and CCHECK.SLIP_DATE=getdate();				
+END
+GO

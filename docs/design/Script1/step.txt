@@ -1,0 +1,43 @@
+MID
+
+MID
+DID
+
+-----------
+
+new field in detail-> upd_stat=0/1 0 = no change 1=change
+
+Add Master(DSCODE,..)
+----------------------
+GET MAX MID FROM GENPRM
+AND SET MAXMID =MAXMID +1 at GENPRM
+
+ADD values to master_HIST table
+
+set output = MID
+
+
+ADD Detail(MID,DID,DSCODE,...)
+-------------------------------
+Add values to detail_hist
+upd_stat=1
+
+update master(MID,dscode,...)
+------------------------------
+
+update master
+
+
+update detail(MID,dscode,...)
+-------------------------------
+
+item that are edited will be  upd_stat=1
+
+
+Auth Master(MID)
+-------------------
+no=same way like others except update upd_stat=0 after auth
+
+
+
+

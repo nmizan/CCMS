@@ -1,0 +1,345 @@
+USE [CCMS]
+GO
+
+
+DELETE FROM MENU_LIST;
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(1,'Maintenance',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(2,'MaintenanceClientDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(3,'MaintenanceClientSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(4,'MaintenanceBankDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(5,'MaintenanceBankSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(6,'MaintenanceBranchDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(7,'MaintenanceBranchSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(8,'MaintenanceLocationDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(9,'MaintenanceLocationSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(10,'MaintenanceZoneDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(11,'MaintenanceZoneSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(12,'MaintenanceReturnDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(13,'MaintenanceReturnSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(14,'MaintenanceChequeTypeDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(15,'MaintenanceChequeTypeSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(16,'MaintenanceHolidayDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(17,'MaintenanceHolidaySummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(18,'MaintenanceScheduleStockDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(19,'MaintenanceScheduleStockSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(20,'MaintenanceCitiBankBranchDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(21,'MaintenanceCitiBankBranchSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(22,'MaintenanceClearingClientDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(23,'MaintenanceClearingClientSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(24,'MaintenanceClearingBankDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(25,'MaintenanceClearingBankSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(26,'MaintenanceClearingBranchDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(27,'MaintenanceClearingBranchSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(28,'MaintenanceClearingLocationDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(29,'MaintenanceClearingLocationSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(30,'MaintenanceFlexAccountDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(31,'MaintenanceFlexAccountSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(32,'Deposit',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(33,'DepositScheduleDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(34,'DepositScheduleSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(35,'DepositScheduleMismatchTotal',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(36,'DepositScheduleMismatchCashSpeed',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(37,'DepositCitiCashDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(38,'DepositCitiCashSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(39,'DepositCitiSpeedDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(40,'DepositCitiSpeedSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(41,'DepositCitiSpeedMismatchTotal',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(42,'DepositCitiAnywhereDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(43,'DepositCitiAnywhereSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(44,'DepositCitiAnywhereCollectionProc',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(45,'DepositCitiAnywhereReminderProc',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(46,'DepositCitiAnywhereFundingFile',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(47,'DepositFlexFile',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(48,'DepositOutstandingReversal',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(49,'DepositFlexReversalFile',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(50,'Collection',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(51,'CollectionScheduleDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(52,'CollectionScheduleSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(53,'CollectionDDDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(54,'CollectionDDSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(55,'CollectionCitiSpeedReturnDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(56,'CollectionCitiSpeedReturnSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(57,'CollectionCitiAnywhereReturnDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(58,'CollectionCitiAnywhereReturnSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(59,'Clearing',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(60,'ClearingCheckDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(61,'ClearingCheckSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(62,'ClearingSetClearingDate',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(63,'ClearingUploadClearingCheck',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(64,'ClearingFlexFile',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(65,'ClearingFlexFileForReturnChecks',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(66,'ClearingDDCheckProcess',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(67,'ClearingPDCCheckDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(68,'ClearingPDCCheckSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(69,'ClearingPDCTransfer',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(70,'ClearingCheckReturnDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(71,'ClearingCheckReturnSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(72,'ClearingReturnFileUpload',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(73,'ClearingTransferDataToHistory',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(74,'Report',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(75,'ReportManifoldChecksForCollection',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(76,'ReportManifoldChecksForReminder',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(77,'ReportManifoldCitiAnywhereFundingDD',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(78,'ReportManifoldCitiAnywhereReturn',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(79,'ReportReportsCitiCashSpeedSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(80,'ReportReportsCitiCashDeposit',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(81,'ReportReportsCitiSpeedDeposit',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(82,'ReportReportsCitiSpeedReturn',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(83,'ReportReportsCitiAnywhereDepositDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(84,'ReportReportsCitiAnywhereProcessing',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(85,'ReportReportsCitiAnywhereFunding',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(86,'ReportReportsCitiAnywhereOutstanding',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(87,'ReportReportsMonthlyBillCashManagement',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(88,'ReportReportsDayZeroCashCheck',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(89,'ReportReportsClearingCheckSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(90,'ReportReportsBankwiseDeliveryCheck',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(91,'ReportReportsHighValueCheck',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(92,'ReportReportsClearingDeposit',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(93,'ReportReportsClearingDepositDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(94,'ReportReportsClearingReturn',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(95,'ReportReportsPDC',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(96,'ReportReportsHoliday',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(97,'ReportControlsChecksCollectionReprint',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(98,'ReportControlsDepositBreak',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(99,'ReportControlsUnclearFund',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(100,'ReportHistoryClearingCheckDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(101,'ReportHistoryClearingCheckDetailOld',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(102,'System',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(103,'SystemDepartmentDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(104,'SystemDepartmentSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(105,'SystemUsersDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(106,'SystemUsersSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(107,'SystemFunctionalGroupDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(108,'SystemFunctionalGroupSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(109,'SystemAssignFGUserDetail',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(110,'SystemAssignFGUserSummary',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(111,'SystemReportUsersRole',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(112,'SystemReportActivityLog',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+
+INSERT INTO MENU_LIST(SLNO, MENU_NAME, INPUT_BY, INPUT_DATETIME, MOD_NO, [STATUS])
+VALUES(113,'SystemEERSFeedExport',substring(suser_name(),charindex('\',suser_name())+1,20),GETDATE(),1,'L');
+

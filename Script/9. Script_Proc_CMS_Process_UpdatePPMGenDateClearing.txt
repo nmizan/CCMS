@@ -1,0 +1,23 @@
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Mohammad Yasir Arafat
+-- Create date: 06 Sept 2015
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_Process_UpdatePPMGenDateClearing]
+
+AS
+BEGIN
+update CLEARINGTAB set PPM_GenDate = getdate()
+from BANK,BRANCH,CLEARINGTAB,Client
+			where 
+			CLEARINGTAB.NIKBRANCH_CODE=BRANCH.NIKBRANCH_CODE and 
+			BRANCH.BANK_CODE=BANK.BANK_CODE and CLEARINGTAB.FLEX_FILENAME is not NULL
+			 and client.ACC_NO=CLEARINGTAB.ACC_NO and CLEARINGTAB.PPM_GenDate is null
+			 and CLEARINGTAB.OPR_DATE=getdate();		
+END
+GO

@@ -1,0 +1,44 @@
+alter table CSD_DET add UNIQUE_COLLECTION_NO varchar(30) null
+alter table CCASH_HIST add ADD_TEXT varchar(150)
+alter table CSD_HIST add CUSTOMER_REF varchar(15)
+
+alter table CSD_HIST add AddSlipText varchar(150)
+alter table CSD_DET_HIST add AddCheckText varchar(150)
+
+alter table CHECKTOTAL_HIST add AddSlipText varchar(150)
+alter table CLEARINGTAB_HIST add AddCheckText varchar(150)
+
+alter table CCASH add ADD_TEXT varchar(150)
+
+alter table CSD add CUSTOMER_REF varchar(15)
+alter table CSD add AddSlipText varchar(150)
+
+alter table CSD_DET add AddCheckText varchar(150)
+
+alter table CHECKTOTAL add AddSlipText varchar(150)
+alter table CLEARINGTAB add AddCheckText varchar(150)
+
+alter table GenPRM add Last_UCN_No varchar(14)
+alter table Client add Direct_Debit_Customer bit
+alter table Client_Hist add Direct_Debit_Customer bit
+
+alter table DSCHEDULE add PPM_GenDate datetime null
+
+alter table CCHECK add PPM_GenDate datetime null
+
+alter table CLEARINGTAB add PPM_GenDate datetime null
+
+update Client set Direct_Debit_Customer=0
+
+alter table CLEARING_CLIENT add Direct_Debit_Customer bit
+alter table CLEARING_CLIENT_HIST add Direct_Debit_Customer bit
+update CLEARING_CLIENT set Direct_Debit_Customer=0
+update CLEARING_CLIENT_HIST set Direct_Debit_Customer=0
+
+alter table CSD_DET alter column UNIQUE_COLLECTION_NO varchar(14)
+
+alter table CCHECK add UNIQUE_COLLECTION_NO varchar(14)
+
+alter table CCASH add UNIQUE_COLLECTION_NO varchar(14)
+
+alter table CLEARINGTAB add UNIQUE_COLLECTION_NO varchar(14)

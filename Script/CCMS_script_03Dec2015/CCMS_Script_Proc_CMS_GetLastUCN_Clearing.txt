@@ -1,0 +1,21 @@
+USE [CCMS]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Mohammad Yasir Arafat
+-- Create date: 03 Dec 2015
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE CMS_GetLastUCN_Clearing
+
+AS
+BEGIN
+
+	SET NOCOUNT ON;
+	select Last_UCN_No_Clearing from GENPRM	
+  
+END
+GO

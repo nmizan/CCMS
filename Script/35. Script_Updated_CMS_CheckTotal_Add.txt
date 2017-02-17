@@ -1,0 +1,87 @@
+USE [CCMS]
+GO
+/****** Object:  StoredProcedure [dbo].[CMS_CheckTotal_Add]    Script Date: 01/09/2015 11:08:12 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 16-Apr-13
+-- Modify Date: 01 Sept 15, 07 Sept 15
+-- Modified by: Mohammad Yasir Arafat
+-- Description:	Add detail to CheckTotal
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_CheckTotal_Add]		
+	@DS_CODE		varchar(8), 
+	@TOTAL_CHKNO	int, 
+	@TOTAL_CHKAMT	numeric(14,2), 
+	@OPR_DATE		datetime, 
+	@CUSTOMER_REF	varchar(50), 
+	@ENTRY_LOC		varchar(3),
+	@RET_MID		numeric(10,0) output,
+	@AddSlipText    varchar(150)
+AS
+BEGIN	
+	DECLARE @ErrorVar	int;
+	
+	SET NOCOUNT ON;
+
+	
+	IF EXISTS(SELECT DS_CODE FROM CHECKTOTAL
+				WHERE DS_CODE=@DS_CODE AND OPR_DATE=@OPR_DATE
+				AND ENTRY_LOC=@ENTRY_LOC)
+		BEGIN
+			-- Duplicate Entry				
+			RETURN 2	
+		END
+	
+	DELETE CHECKTOTAL_HIST WHERE 
+		DS_CODE=@DS_CODE AND OPR_DATE=@OPR_DATE
+		AND ENTRY_LOC=@ENTRY_LOC AND IS_AUTH=0;
+
+	SELECT @ErrorVar = @@ERROR;
+		
+	IF @ErrorVar <> 0
+		BEGIN			
+			RETURN 1;
+		END
+
+	SELECT @RET_MID=ISNULL(CLEAR_MAX_MID,0)+1 FROM GENPRM;
+
+	UPDATE GENPRM SET CLEAR_MAX_MID=@RET_MID;
+	
+	INSERT INTO CHECKTOTAL_HIST(MID,DS_CODE, TOTAL_CHKNO, TOTAL_CHKAMT, 
+		OPR_DATE, CUSTOMER_REF, ENTRY_LOC,
+		ENTRY_DATE,
+		INPUT_BY,INPUT_DATETIME,INPUT_FROM,MOD_NO,[STATUS],IS_AUTH,AddSlipText)
+		VALUES(@RET_MID,@DS_CODE, @TOTAL_CHKNO, @TOTAL_CHKAMT, 
+		convert(date, @OPR_DATE), @CUSTOMER_REF, @ENTRY_LOC, 
+		CONVERT(datetime,CONVERT(varchar(12), GETDATE())),
+		substring(suser_name(),charindex('\',suser_name())+1,20),
+		GETDATE(),HOST_NAME(),1,'U',0,@AddSlipText);
+
+	SELECT @ErrorVar = @@ERROR;
+	
+	IF @ErrorVar <> 0
+		BEGIN			
+			RETURN 1;
+		END
+
+	DELETE CLEARINGTAB_HIST WHERE DS_CODE=@DS_CODE AND OPR_DATE=@OPR_DATE
+		AND ENTRY_LOC=@ENTRY_LOC AND IS_AUTH=0;
+	
+	SELECT @ErrorVar = @@ERROR;
+	
+	IF @ErrorVar <> 0
+		BEGIN			
+			RETURN 1;
+		END	
+
+	RETURN 0;
+	
+   
+END
+

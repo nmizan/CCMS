@@ -1,0 +1,3 @@
+alter table CSD_DET add UNIQUE_COLLECTION_NO varchar(30) null
+alter table CCASH_HIST add ADD_TEXT varchar(150)
+alter table CSD_HIST add CUSTOMER_REF varchar(15)

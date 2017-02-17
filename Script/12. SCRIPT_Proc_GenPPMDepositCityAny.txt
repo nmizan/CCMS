@@ -1,0 +1,43 @@
+USE [CCMS]
+GO
+/****** Object:  StoredProcedure [dbo].[CMS_Process_GenPPMDepositCityAny]    Script Date: 31/08/2015 11:36:21 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Mohammad Yasir Arafat
+-- Create date: 31-Aug-2015
+-- Modify date: 03 Sept 2015, 07 Sept 15, 08 Sept 15, 08 Sep 15
+-- Description:	<Description,,>
+-- =============================================
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_Process_GenPPMDepositCityAny]
+AS
+BEGIN
+	SET NOCOUNT ON;
+   
+   SELECT  distinct '1' Record_Type, '' Indicator, '' Serial_No, CCHECK.CHECK_NO Instrument_No,'CHK' Instrument_Type,CCHECK.AMOUNT,				
+			CONVERT(date,CCHECK.SLIP_DATE) Instrument_Date,
+			CONVERT(date,CCHECK.SLIP_DATE) Deposit_Date,
+			'' Customer_Code,
+			CONVERT(date,CCHECK.SLIP_DATE) Pickup_Date,
+			SUBSTRING(CAST(BRANCH.ROUTING_NO AS VARCHAR(50)), 3, 2) Deposit_Channel_Pickup_Location_Code,
+			'' Deposit_Channel_Point_Pickup_Point_Code,
+			'BDT' Currency_Code,'CTA' Clearing_Type_Code,
+			SUBSTRING(CAST(BRANCH.ROUTING_NO AS VARCHAR(50)), 1, 3) Drawee_Bank_Code,
+			SUBSTRING(CAST(BRANCH.ROUTING_NO AS VARCHAR(50)), 1, 8) Drawee_Bank_Branch_Code,
+			SUBSTRING(CAST(BRANCH.ROUTING_NO AS VARCHAR(50)), 3, 2) Clearing_Location_Code,'','',
+			case Client.Direct_Debit_Customer
+			when 0 then SUBSTRING(CAST(BANK.ACC_NO AS VARCHAR(50)), 2, 15)
+			else SUBSTRING(CAST(BANK.ACC_NO AS VARCHAR(50)), 2, 10) end,
+			'','','','','','','','',
+			getdate() collection_Number,CCHECK.Customer_Ref,'',
+			CCHECK.D_CODE,
+			'','','','','','','','','','','','','','','','','','','','','','','',''			
+		from BANK,BRANCH,CCHECK,CLIENT
+			where CCHECK.DRAWEE_BANK_CODE=BANK.BANK_CODE and
+			 CCHECK.BRANCH_CODE=BRANCH.BRANCH_CODE and 
+			 BRANCH.BANK_CODE=CCHECK.DRAWEE_BANK_CODE and CCHECK.REMINDER_NO='1' AND CCHECK.REMINDER_DATE= convert(date, getdate())
+			 and CCHECK.CLIENT_CODE=Client.CLIENT_CODE and CCHECK.PPM_GenDate is null;				
+END

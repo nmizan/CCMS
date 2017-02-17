@@ -1,0 +1,59 @@
+USE [CCMS]
+GO
+/****** Object:  StoredProcedure [dbo].[CMS_DSchedule_Add]    Script Date: 07/09/2015 5:18:50 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 02-Jan-13
+-- Modify date: 07-Sept-15
+-- Modified by: Mohammad Yasir Arafat
+-- Description:	Add detail to Deposit Schedule
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_DSchedule_Add]
+	@DS_CODE			varchar(12),
+	@D_CODE				varchar(12), 
+	@DEPOSIT_TYPE		varchar(5), 
+	@CITICASH_AMOUNT	numeric(12,2), 
+	@CITICHECK_AMOUNT	numeric(12,2), 
+	@SCHEDULE_DATE		datetime, 
+	@NO_CHECK			numeric(4,0), 
+	@CLIENT_CODE		varchar(6), 
+	@LOCATION_CODE		varchar(4), 
+	@CORR_BANK_CODE		varchar(4), 
+	@CORR_BRANCH_CODE	varchar(4),
+	@SLNO				numeric(4,0),
+	@IS_ROW_CHG			bit
+AS
+BEGIN	
+	DECLARE @ErrorVar	int;
+		
+	SET NOCOUNT ON;
+			
+	INSERT INTO DSCHEDULE_HIST(DS_CODE, D_CODE, DEPOSIT_TYPE, 
+		CITICASH_AMOUNT, CITICHECK_AMOUNT, SCHEDULE_DATE, NO_CHECK, 
+		CLIENT_CODE, LOCATION_CODE, CORR_BANK_CODE, CORR_BRANCH_CODE, 
+		MOD_NO,IS_AUTH,
+		SLNO,IS_ROW_CHG)
+		VALUES(@DS_CODE, @D_CODE, @DEPOSIT_TYPE, 
+		@CITICASH_AMOUNT, @CITICHECK_AMOUNT, convert(date, @SCHEDULE_DATE), @NO_CHECK, 
+		@CLIENT_CODE, @LOCATION_CODE, @CORR_BANK_CODE, @CORR_BRANCH_CODE,
+		1,0,
+		@SLNO,@IS_ROW_CHG);
+
+	SELECT @ErrorVar = @@ERROR;
+	
+	IF @ErrorVar <> 0
+		BEGIN			
+			RETURN 1;
+		END
+		
+	RETURN 0;
+	   
+END
+

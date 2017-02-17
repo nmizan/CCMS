@@ -1,0 +1,82 @@
+USE [CCMS]
+GO
+/****** Object:  StoredProcedure [dbo].[CMS_ClearingClient_Add]    Script Date: 08/09/2015 1:50:54 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 31-Mar-13
+-- Modified by : Mohammad Yasir Arafat
+-- Modify date: 08 Sept 15
+-- Description:	Add detail to ClearingClient table
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_ClearingClient_Add]		
+	@ACC_NO				varchar(15),  
+	@ACC_NAME			varchar(50),
+	@MAIL_ADD			varchar(256), 
+	@CONTACT			varchar(50), 		
+	@SPEED_CR_TYPE		varchar(25),
+	@Direct_Debit_Customer bit,	
+	@IS_DISABLE			bit,
+	@IS_GOV				bit,
+	@INSUFF_FUND		bit
+	
+AS
+BEGIN	
+	DECLARE @ErrorVar INT;
+	
+	SET NOCOUNT ON;
+
+	
+
+	IF EXISTS(SELECT ACC_NO FROM CLEARING_CLIENT WHERE ACC_NO=@ACC_NO)
+		BEGIN
+			-- Duplicate Entry				
+			RETURN 2	
+		END
+	
+	DELETE CLEARING_CLIENT_HIST WHERE 
+		ACC_NO=@ACC_NO AND IS_AUTH=0;
+
+	SELECT @ErrorVar = @@ERROR;
+		
+	IF @ErrorVar <> 0
+		BEGIN			
+			RETURN 1;
+		END
+	ELSE
+
+	INSERT INTO CLEARING_CLIENT_HIST(ACC_NO, ACC_NAME,MAIL_ADD,
+		CONTACT, SPEED_CR_TYPE,IS_DISABLE,
+		INPUT_BY,INPUT_DATETIME,INPUT_FROM,MOD_NO,[STATUS],IS_AUTH,
+		IS_GOV,INSUFF_FUND,Direct_Debit_Customer)
+		VALUES(@ACC_NO, @ACC_NAME,@MAIL_ADD,
+		@CONTACT, @SPEED_CR_TYPE, @IS_DISABLE,
+		substring(suser_name(),charindex('\',suser_name())+1,20),
+		GETDATE(),HOST_NAME(),1,'U',0,
+		@IS_GOV,@INSUFF_FUND,@Direct_Debit_Customer);
+
+	SELECT @ErrorVar = @@ERROR;
+	
+	IF @ErrorVar <> 0
+		BEGIN			
+			RETURN 1;
+		END
+
+	DELETE CLEARING_CLIENT_CHARGE_HIST 
+		WHERE ACC_NO=@ACC_NO AND IS_AUTH=0;
+	
+	SELECT @ErrorVar = @@ERROR;
+	
+	IF @ErrorVar <> 0
+		BEGIN			
+			RETURN 1;
+		END	
+	
+	RETURN 0;
+	   
+END
+

@@ -1,0 +1,24 @@
+CREATE VIEW [dbo].[V_DEPOSIT_BREAK]
+AS
+SELECT     a.SCHEDULE_DATE AS dScheduleDate, a.DS_CODE, a.DEPOSIT_TYPE, a.LOCATION_CODE, a.CORR_BANK_CODE, SUM(ISNULL(a.CITICASH_AMOUNT, 0)) 
+                      AS dCitiCash, SUM(ISNULL(a.CITICHECK_AMOUNT, 0)) AS dCitiCheck, SUM(ISNULL(a.NO_CHECK, 0)) AS dNofCheck, SUM(ISNULL(a.R_amount, 0)) AS ReturnAmt, 
+                      SUM(ISNULL(a.R_Check_no, 0)) AS ReturnCheck, cs.CS_CODE, cs.SCHEDULE_DATE AS cScheduleDate, cs.CITICASH_AMOUNT AS cCitiCash, 
+                      cs.CITICHECK_AMOUNT AS cCitiCheck, l.LOCATION_NAME, b.BANK_NAME, ISNULL(cs.NO_CHECK, 0) AS cCheck
+FROM         (SELECT     ds.SCHEDULE_DATE, ds.DS_CODE, ds.DEPOSIT_TYPE, ds.D_CODE, ds.LOCATION_CODE, ds.CORR_BANK_CODE, ds.CITICASH_AMOUNT, 
+                                              ds.CITICHECK_AMOUNT, ds.NO_CHECK, f.R_amount, f.R_Check_no
+                       FROM          dbo.DSCHEDULE AS ds INNER JOIN
+                                              dbo.DCOLLECTED AS dc ON dc.DS_CODE = ds.DS_CODE AND ds.MOD_NO = dc.MOD_NO AND dc.STATUS = 'L' LEFT OUTER JOIN
+                                                  (SELECT     csd.D_CODE AS R_dcode, COUNT(csd.CHECK_NO) AS R_Check_no, SUM(csd.AMOUNT) AS R_amount
+                                                    FROM          dbo.CSD_DET AS csd INNER JOIN
+                                                                           dbo.CSD AS cs ON cs.D_CODE = csd.D_CODE AND csd.MOD_NO = cs.MOD_NO AND cs.STATUS = 'L'
+                                                    WHERE      (csd.RTN_STATUS = 'R')
+                                                    GROUP BY csd.D_CODE) AS f ON f.R_dcode = ds.D_CODE) AS a LEFT OUTER JOIN
+                      dbo.CSCHEDULE AS cs ON cs.DS_CODE = a.DS_CODE LEFT OUTER JOIN
+                      dbo.BANK AS b ON b.BANK_CODE = a.CORR_BANK_CODE LEFT OUTER JOIN
+                      dbo.LOCATION AS l ON l.LOCATION_CODE = a.LOCATION_CODE
+GROUP BY a.SCHEDULE_DATE, a.DS_CODE, a.DEPOSIT_TYPE, a.LOCATION_CODE, a.CORR_BANK_CODE, cs.CS_CODE, cs.SCHEDULE_DATE, cs.CITICASH_AMOUNT, 
+                      cs.CITICHECK_AMOUNT, l.LOCATION_NAME, b.BANK_NAME, cs.NO_CHECK
+
+
+
+GO

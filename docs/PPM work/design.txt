@@ -1,0 +1,18 @@
+
+## PPM File naming convention/rule
+
+## Separate file for clearing/collection/anywhere?
+
+## User generated PPM location?
+
+## Invoice Form with just a text box. User can input as many as rows he wanted 
+
+## Check - RD/RC 
+## Cash - RD (as it is only slip level)
+
+## CLEARING CHeck detail invoice info not needed
+--------------------------------
+
+## Force clearing entry to add routing number
+
+## Force Collection to entry routing number

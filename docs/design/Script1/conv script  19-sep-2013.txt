@@ -1,0 +1,9 @@
+UPDATE NCOLLECTION
+SET INPUT_DATETIME=ISNULL(b.status_date,getdate())
+FROM NCOLLECTION a
+INNER JOIN db_citibank.dbo.normalcollection b
+ON a.NONZONE_REF=b.nonzoneref
+where a.INPUT_DATETIME<CONVERT(datetime,CONVERT(varchar(12), GETDATE()))
+
+
+

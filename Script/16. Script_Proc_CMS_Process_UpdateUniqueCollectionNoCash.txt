@@ -1,0 +1,23 @@
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_Process_UpdateUniqueCollectionNoCash] 
+	@UNIQUE_COLLECTION_NO varchar(30),	      
+	@D_CODE varchar(12)	
+AS
+BEGIN
+
+	SET NOCOUNT ON;
+
+ 	UPDATE CCASH
+	set UNIQUE_COLLECTION_NO=@UNIQUE_COLLECTION_NO where D_CODE=@D_CODE
+    RETURN 0;
+END
+GO

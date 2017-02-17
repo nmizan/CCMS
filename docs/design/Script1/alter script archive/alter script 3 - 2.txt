@@ -1,0 +1,1672 @@
+USE [CCMS]
+GO
+
+ALTER TABLE dbo.DCOLLECTED ADD
+	ENTRY_DATE datetime NULL
+GO
+
+
+ALTER TABLE dbo.DCOLLECTED_HIST ADD
+	ENTRY_DATE datetime NULL
+GO
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 02-Jan-13
+-- Description:	Add detail to Deposit Schedule
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_DCollected_Add]	
+	@DS_CODE		varchar(12), 
+	@TOTAL_NOCHK	numeric(4,0), 
+	@TOTAL_CHKAMT	numeric(12,2), 
+	@TOTAL_CASHAMT	numeric(12,2)
+AS
+BEGIN	
+	DECLARE @ErrorVar	int;
+	
+	SET NOCOUNT ON;
+	
+	IF EXISTS(SELECT DS_CODE FROM DCOLLECTED
+				WHERE DS_CODE=@DS_CODE)
+		BEGIN
+			-- Duplicate Entry				
+			RETURN 2	
+		END
+	
+	DELETE DCOLLECTED_HIST WHERE 
+		DS_CODE=@DS_CODE AND IS_AUTH=0;
+
+	SELECT @ErrorVar = @@ERROR;
+		
+	IF @ErrorVar <> 0
+		BEGIN			
+			RETURN 1;
+		END
+	
+	INSERT INTO DCOLLECTED_HIST(DS_CODE, TOTAL_NOCHK, 
+		TOTAL_CHKAMT, TOTAL_CASHAMT,
+		INPUT_BY,INPUT_DATETIME,INPUT_FROM,MOD_NO,[STATUS],IS_AUTH,ENTRY_DATE)
+		VALUES(@DS_CODE, @TOTAL_NOCHK, 
+		@TOTAL_CHKAMT, @TOTAL_CASHAMT,
+		substring(suser_name(),charindex('\',suser_name())+1,20),
+		GETDATE(),HOST_NAME(),1,'U',0,CONVERT(datetime,CONVERT(varchar(12), GETDATE())));
+
+	SELECT @ErrorVar = @@ERROR;
+	
+	IF @ErrorVar <> 0
+		BEGIN			
+			RETURN 1;
+		END
+
+	DELETE DSCHEDULE_HIST WHERE DS_CODE=@DS_CODE AND IS_AUTH=0;
+	
+	SELECT @ErrorVar = @@ERROR;
+	
+	IF @ErrorVar <> 0
+		BEGIN			
+			RETURN 1;
+		END	
+
+	RETURN 0;
+	
+   
+END
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 03-Jan-13
+-- Description:	Authorize record to DCollected
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_DCollected_Auth]	
+	@DS_CODE		varchar(12),	
+	@MOD_NO			int,
+	@MOD_DATETIME	datetime
+AS
+BEGIN	
+	DECLARE @STATUS			char(1),
+			@TOTAL_NOCHK	numeric(4,0), 
+			@TOTAL_CHKAMT	numeric(12,2), 
+			@TOTAL_CASHAMT	numeric(12,2),			
+			@INPUT_BY		varchar(20),
+			@INPUT_DATETIME datetime,
+			@INPUT_FROM		varchar(30),
+			@LAST_MOD_NO	int,
+			@IS_AUTH		bit,
+			@vSlipDate		datetime,
+			@vDCode			varchar(12);			
+	
+	DECLARE @ErrorVar1		int; 
+			
+	SET NOCOUNT ON;
+
+	SELECT @STATUS = '';
+
+	BEGIN TRANSACTION;
+
+	IF EXISTS(SELECT DS_CODE from DCOLLECTED_HIST 
+			  WHERE DS_CODE=@DS_CODE AND MOD_NO=@MOD_NO)
+		BEGIN
+			SELECT @STATUS=[STATUS],
+				@TOTAL_NOCHK=TOTAL_NOCHK, 
+				@TOTAL_CHKAMT=TOTAL_CHKAMT, @TOTAL_CASHAMT=TOTAL_CASHAMT,	
+				@INPUT_BY=INPUT_BY,	@INPUT_DATETIME=INPUT_DATETIME,
+				@INPUT_FROM=INPUT_FROM,@IS_AUTH=IS_AUTH
+				FROM DCOLLECTED_HIST 
+				WHERE DS_CODE=@DS_CODE AND MOD_NO=@MOD_NO;
+			IF (@IS_AUTH = 1)
+				BEGIN
+					-- already authorized
+					ROLLBACK TRANSACTION;
+					RETURN 3;
+				END;
+			IF (@INPUT_BY = substring(suser_name(),charindex('\',suser_name())+1,20))
+				BEGIN
+					-- maker and checker same person
+					ROLLBACK TRANSACTION;
+					RETURN 5;
+				END;
+			IF (@INPUT_DATETIME <> @MOD_DATETIME)
+				BEGIN
+					-- Data hase been changed. Need notification
+					ROLLBACK TRANSACTION;
+					RETURN 7;
+				END;			
+		END;
+	ELSE
+		BEGIN			
+			-- not exist
+			ROLLBACK TRANSACTION;
+			RETURN 4;
+		END	;
+
+	IF @MOD_NO > 1
+		BEGIN	
+		
+			INSERT INTO DCOLLECTED_HIST(DS_CODE, TOTAL_NOCHK, TOTAL_CHKAMT, 
+				TOTAL_CASHAMT, INPUT_BY, INPUT_DATETIME, INPUT_FROM, AUTH_BY, 
+				AUTH_DATETIME, AUTH_FROM, MOD_NO, [STATUS], IS_AUTH, ENTRY_DATE) 
+				SELECT DS_CODE, TOTAL_NOCHK, TOTAL_CHKAMT, 
+					TOTAL_CASHAMT, INPUT_BY, INPUT_DATETIME, INPUT_FROM, AUTH_BY, 
+					AUTH_DATETIME, AUTH_FROM, MOD_NO, [STATUS], 1,ENTRY_DATE 
+					FROM DCOLLECTED
+					WHERE DS_CODE=@DS_CODE;
+			
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+
+			UPDATE DCOLLECTED_HIST
+				SET [STATUS] = 'O' 
+				WHERE DS_CODE=@DS_CODE
+				AND [STATUS] = 'L';
+
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+			IF @STATUS='U'
+				BEGIN
+					SELECT @STATUS='L';
+				END
+
+			UPDATE DCOLLECTED
+				SET
+				TOTAL_NOCHK=@TOTAL_NOCHK,
+				TOTAL_CHKAMT=@TOTAL_CHKAMT, TOTAL_CASHAMT=@TOTAL_CASHAMT,
+				INPUT_BY=@INPUT_BY,	INPUT_DATETIME=@INPUT_DATETIME,
+				INPUT_FROM=@INPUT_FROM,
+				AUTH_BY=substring(suser_name(),charindex('\',suser_name())+1,20),
+				AUTH_DATETIME=GETDATE(),AUTH_FROM=HOST_NAME(),
+				MOD_NO=@MOD_NO,[STATUS]=@STATUS
+			WHERE DS_CODE=@DS_CODE;
+
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+			
+			DELETE DCOLLECTED_HIST WHERE DS_CODE=@DS_CODE
+				AND IS_AUTH=0;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END	
+
+		END
+	ELSE -- first record
+		BEGIN
+			INSERT INTO DCOLLECTED
+				SELECT DS_CODE,TOTAL_NOCHK, TOTAL_CHKAMT, TOTAL_CASHAMT, 
+					INPUT_BY, INPUT_DATETIME, INPUT_FROM, 
+					substring(suser_name(),charindex('\',suser_name())+1,20), 
+					GETDATE(), HOST_NAME(), MOD_NO, 'L', ENTRY_DATE 
+					FROM DCOLLECTED_HIST
+					WHERE DS_CODE=@DS_CODE AND MOD_NO=@MOD_NO;
+			
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+			DELETE DCOLLECTED_HIST WHERE DS_CODE=@DS_CODE
+				AND IS_AUTH=0;
+			
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END			
+					
+		END
+	
+	-- Now update DSCHEDULE
+
+	INSERT INTO DSCHEDULE_HIST(DS_CODE, D_CODE, DEPOSIT_TYPE, 
+		CITICASH_AMOUNT, CITICHECK_AMOUNT, SCHEDULE_DATE, NO_CHECK, 
+		CLIENT_CODE, LOCATION_CODE, CORR_BANK_CODE, CORR_BRANCH_CODE, 
+		MOD_NO, IS_AUTH, [FILENAME], REF_NO, FILE_USER_ID, SEQ_NO, 
+		CHECKED, FLEXGEN_DATE)
+		SELECT DS_CODE, D_CODE, DEPOSIT_TYPE, 
+		CITICASH_AMOUNT, CITICHECK_AMOUNT, SCHEDULE_DATE, NO_CHECK, 
+		CLIENT_CODE, LOCATION_CODE, CORR_BANK_CODE, CORR_BRANCH_CODE, 
+		MOD_NO, 1, [FILENAME], REF_NO, FILE_USER_ID, SEQ_NO, 
+		CHECKED, FLEXGEN_DATE
+		FROM DSCHEDULE
+		WHERE DS_CODE=@DS_CODE;
+	
+	SELECT @ErrorVar1 = @@error;
+
+	IF @ErrorVar1 <> 0
+		BEGIN
+			ROLLBACK TRANSACTION;
+			RETURN 1;
+		END
+	
+	DELETE DSCHEDULE WHERE DS_CODE=@DS_CODE;
+
+	SELECT @ErrorVar1 = @@error;
+
+	IF @ErrorVar1 <> 0
+		BEGIN
+			ROLLBACK TRANSACTION;
+			RETURN 1;
+		END
+
+	INSERT INTO DSCHEDULE
+		SELECT DS_CODE, D_CODE, DEPOSIT_TYPE, CITICASH_AMOUNT, 
+		CITICHECK_AMOUNT, SCHEDULE_DATE, NO_CHECK, CLIENT_CODE, 
+		LOCATION_CODE, CORR_BANK_CODE, CORR_BRANCH_CODE, MOD_NO, 
+		[FILENAME], REF_NO, FILE_USER_ID, SEQ_NO, CHECKED, 
+		FLEXGEN_DATE
+		FROM DSCHEDULE_HIST 
+		WHERE DS_CODE=@DS_CODE AND MOD_NO=@MOD_NO;
+	
+	SELECT @ErrorVar1 = @@error;
+
+	IF @ErrorVar1 <> 0
+		BEGIN
+			ROLLBACK TRANSACTION;
+			RETURN 1;
+		END	
+
+	DELETE DSCHEDULE_HIST WHERE DS_CODE=@DS_CODE AND MOD_NO=@MOD_NO;
+
+	SELECT @ErrorVar1 = @@error;
+
+	IF @ErrorVar1 <> 0
+		BEGIN
+			ROLLBACK TRANSACTION;
+			RETURN 1;
+		END
+	---------------- update slip_date of ccash and csd_det -----------
+
+	DECLARE tmpCursor1 CURSOR FOR
+		SELECT D_CODE,SCHEDULE_DATE
+        FROM DSCHEDULE WHERE DS_CODE=@DS_CODE ;
+
+	OPEN tmpCursor1;
+	FETCH NEXT FROM tmpCursor1 
+        INTO @vDCode,@vSlipDate;
+	
+	WHILE @@FETCH_STATUS=0 
+ 	BEGIN
+		UPDATE CCASH SET SLIP_DATE=@vSlipDate
+			WHERE D_CODE=@vDCode;
+		
+		UPDATE CCASH_HIST SET SLIP_DATE=@vSlipDate
+			WHERE D_CODE=@vDCode AND IS_AUTH=0;
+
+		UPDATE CSD_DET SET SLIP_DATE=@vSlipDate
+			WHERE D_CODE=@vDCode;
+		
+		UPDATE CSD_DET_HIST SET SLIP_DATE=@vSlipDate
+			WHERE D_CODE=@vDCode AND IS_AUTH=0;
+		
+		FETCH NEXT FROM tmpCursor1 
+			INTO @vDCode,@vSlipDate;
+
+	END
+
+	CLOSE tmpCursor1;
+	DEALLOCATE tmpCursor1;
+
+	-------------------------------
+	COMMIT TRANSACTION;
+		
+	SELECT @ErrorVar1 = @@error;
+		
+	IF @ErrorVar1 = 0
+		BEGIN		
+			RETURN 0;
+		END
+	ELSE
+		BEGIN
+			RETURN 1;
+		END
+
+    
+END
+
+
+GO
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 03-Jan-13
+-- Description:	update detail to DCollected
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_DCollected_Update]	
+	@DS_CODE		varchar(12), 
+	@TOTAL_NOCHK	numeric(4,0), 
+	@TOTAL_CHKAMT	numeric(12,2), 
+	@TOTAL_CASHAMT	numeric(12,2),
+	@MOD_NO			int,
+	@RET_MOD_NO		int output
+AS
+BEGIN	
+	DECLARE @ENTRY_DATE datetime;
+	DECLARE @ErrorVar	INT;	
+	
+	SET NOCOUNT ON;
+
+	IF EXISTS(SELECT DS_CODE FROM DCOLLECTED 
+				WHERE DS_CODE=@DS_CODE AND MOD_NO=@MOD_NO)
+		BEGIN
+
+			SELECT @ENTRY_DATE=ENTRY_DATE FROM DCOLLECTED 
+				WHERE DS_CODE=@DS_CODE AND MOD_NO=@MOD_NO;
+
+			DELETE DCOLLECTED_HIST WHERE DS_CODE=@DS_CODE AND IS_AUTH=0;
+
+			SELECT @ErrorVar = @@ERROR;		
+
+			IF @ErrorVar <> 0
+				BEGIN					
+					RETURN 1;
+				END
+			
+			SELECT @RET_MOD_NO = @MOD_NO +1;
+			
+			INSERT INTO DCOLLECTED_HIST(DS_CODE, TOTAL_NOCHK, 
+				TOTAL_CHKAMT, TOTAL_CASHAMT,
+				INPUT_BY,INPUT_DATETIME,INPUT_FROM,MOD_NO,[STATUS],IS_AUTH,
+				ENTRY_DATE)
+				VALUES(@DS_CODE, @TOTAL_NOCHK, 
+				@TOTAL_CHKAMT, @TOTAL_CASHAMT,
+				substring(suser_name(),charindex('\',suser_name())+1,20),
+				GETDATE(),HOST_NAME(),@RET_MOD_NO,'U',0,
+				@ENTRY_DATE);
+
+			SELECT @ErrorVar = @@ERROR;
+
+			IF @ErrorVar <> 0
+				BEGIN
+					RETURN 1;
+				END				
+			
+			DELETE DSCHEDULE_HIST
+				WHERE DS_CODE=@DS_CODE AND IS_AUTH=0;
+
+			SELECT @ErrorVar = @@ERROR;
+
+			IF @ErrorVar <> 0
+				BEGIN
+					RETURN 1;
+				END
+			
+			RETURN 0;
+
+				
+		END
+	ELSE -- might be in hist table
+		BEGIN
+
+			IF EXISTS(SELECT DS_CODE from DCOLLECTED_HIST 
+						WHERE DS_CODE=@DS_CODE AND MOD_NO=@MOD_NO AND IS_AUTH=0)
+				BEGIN
+
+					SELECT @ENTRY_DATE=ENTRY_DATE from DCOLLECTED_HIST 
+						WHERE DS_CODE=@DS_CODE AND MOD_NO=@MOD_NO AND IS_AUTH=0;
+
+					DELETE DCOLLECTED_HIST WHERE DS_CODE=@DS_CODE AND IS_AUTH=0;
+
+					SELECT @ErrorVar = @@ERROR;		
+
+					IF @ErrorVar <> 0
+						BEGIN							
+							RETURN 1;
+						END
+
+					INSERT INTO DCOLLECTED_HIST(DS_CODE, TOTAL_NOCHK, 
+						TOTAL_CHKAMT, TOTAL_CASHAMT,
+						INPUT_BY,INPUT_DATETIME,INPUT_FROM,MOD_NO,[STATUS],IS_AUTH,
+						ENTRY_DATE)
+						VALUES(@DS_CODE, @TOTAL_NOCHK, 
+						@TOTAL_CHKAMT, @TOTAL_CASHAMT,
+						substring(suser_name(),charindex('\',suser_name())+1,20),
+						GETDATE(),HOST_NAME(),@MOD_NO,'U',0,
+						@ENTRY_DATE);
+
+					SELECT @ErrorVar = @@ERROR;
+		
+					IF @ErrorVar <> 0
+						BEGIN							
+							RETURN 1;
+						END
+					
+					SELECT @RET_MOD_NO=@MOD_NO;
+
+					DELETE DSCHEDULE_HIST
+						WHERE DS_CODE=@DS_CODE AND IS_AUTH=0;
+
+					SELECT @ErrorVar = @@ERROR;
+
+					IF @ErrorVar <> 0
+						BEGIN
+							RETURN 1;
+						END			
+					
+					RETURN 0;
+			
+				END
+			ELSE
+				BEGIN
+					-- not exist
+					
+					RETURN 4;
+				END
+
+		END
+    
+END
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 03-Jan-13
+-- Description:	Remove record from DCollected
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_DCollected_Remove]	
+	@DS_CODE		varchar(12),
+	@MOD_NO			int,
+	@RET_MOD_NO		int output
+AS
+BEGIN	
+	DECLARE @STATUS			char(1),
+			@TOTAL_NOCHK	numeric(4,0), 
+			@TOTAL_CHKAMT	numeric(12,2), 
+			@TOTAL_CASHAMT	numeric(12,2),						
+			@IS_AUTH		bit,
+			@ENTRY_DATE		datetime;	
+	
+	DECLARE @ErrorVar		int; 
+			
+	SET NOCOUNT ON;
+
+	SET @STATUS = '';
+
+	BEGIN TRANSACTION
+
+	IF EXISTS(SELECT DS_CODE from DCOLLECTED
+			  WHERE DS_CODE=@DS_CODE AND MOD_NO=@MOD_NO)
+		BEGIN
+			SELECT @STATUS=[STATUS],
+				@TOTAL_NOCHK=TOTAL_NOCHK, 
+				@TOTAL_CHKAMT=TOTAL_CHKAMT, @TOTAL_CASHAMT=TOTAL_CASHAMT,
+				@ENTRY_DATE=ENTRY_DATE				
+				FROM DCOLLECTED
+				WHERE DS_CODE=@DS_CODE AND MOD_NO=@MOD_NO;
+			
+			IF (@STATUS = 'D')
+				BEGIN
+					-- already deleted
+					ROLLBACK TRANSACTION;
+					RETURN 6;
+				END;
+
+			DELETE DCOLLECTED_HIST WHERE DS_CODE=@DS_CODE AND IS_AUTH=0;
+
+			SELECT @ErrorVar = @@ERROR;		
+
+			IF @ErrorVar <> 0				
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+			SELECT @RET_MOD_NO = @MOD_NO + 1;
+
+			INSERT INTO 
+				DCOLLECTED_HIST (DS_CODE,
+				TOTAL_NOCHK, TOTAL_CHKAMT, TOTAL_CASHAMT, 
+				INPUT_BY, INPUT_DATETIME, INPUT_FROM, MOD_NO, 
+				[STATUS], IS_AUTH, ENTRY_DATE)
+				VALUES(@DS_CODE,
+				@TOTAL_NOCHK, @TOTAL_CHKAMT, @TOTAL_CASHAMT, 
+				substring(suser_name(),charindex('\',suser_name())+1,20), 
+				GETDATE(), HOST_NAME(), @RET_MOD_NO, 
+				'D', 0, @ENTRY_DATE)
+
+			SELECT @ErrorVar = @@ERROR;		
+
+			IF @ErrorVar <> 0				
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+
+-----------
+
+			DELETE DSCHEDULE_HIST
+				WHERE DS_CODE=@DS_CODE AND IS_AUTH=0 ;
+
+			SELECT @ErrorVar = @@error;
+
+			IF @ErrorVar <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+			INSERT INTO DSCHEDULE_HIST(DS_CODE, D_CODE, DEPOSIT_TYPE, CITICASH_AMOUNT, 
+				CITICHECK_AMOUNT, SCHEDULE_DATE, NO_CHECK, CLIENT_CODE, 
+				LOCATION_CODE, CORR_BANK_CODE, CORR_BRANCH_CODE, 
+				MOD_NO, IS_AUTH, [FILENAME], REF_NO, FILE_USER_ID, SEQ_NO, 
+				CHECKED, FLEXGEN_DATE)
+				SELECT DS_CODE, D_CODE, DEPOSIT_TYPE, CITICASH_AMOUNT,
+					CITICHECK_AMOUNT, SCHEDULE_DATE, NO_CHECK, CLIENT_CODE, 
+					LOCATION_CODE, CORR_BANK_CODE, CORR_BRANCH_CODE, 
+					@RET_MOD_NO,0, [FILENAME], REF_NO, FILE_USER_ID, SEQ_NO, 
+					CHECKED, FLEXGEN_DATE
+				FROM DSCHEDULE
+				WHERE DS_CODE=@DS_CODE AND MOD_NO=@MOD_NO;
+			
+			SELECT @ErrorVar = @@error;
+
+			IF @ErrorVar <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+			
+-----------
+			
+
+			COMMIT TRANSACTION;
+			RETURN 0;
+				
+		END;
+	ELSE 
+		BEGIN			
+			-- item might exist in hist table
+			IF EXISTS(SELECT DS_CODE from DCOLLECTED_HIST 
+					  WHERE DS_CODE=@DS_CODE AND MOD_NO=@MOD_NO )
+				BEGIN
+
+------------------
+					IF @MOD_NO=1
+						BEGIN
+							IF EXISTS(SELECT ds.DS_CODE,ds.D_CODE,ds.MOD_NO 
+										FROM DSCHEDULE_HIST ds 
+										INNER JOIN CCASH_HIST cc ON cc.D_CODE=ds.D_CODE
+										WHERE ds.IS_AUTH=0 AND ds.MOD_NO=1 
+										AND DS_CODE=@DS_CODE)
+								BEGIN
+									-- child exist
+									ROLLBACK TRANSACTION;
+									RETURN 10;
+								END
+
+							IF EXISTS(SELECT ds.DS_CODE,ds.D_CODE,ds.MOD_NO 
+										FROM DSCHEDULE_HIST ds 
+										INNER JOIN CSD_HIST cd ON cd.D_CODE=ds.D_CODE
+										WHERE ds.IS_AUTH=0 AND ds.MOD_NO=1 
+										AND DS_CODE=@DS_CODE)
+								BEGIN
+									-- child exist
+									ROLLBACK TRANSACTION;
+									RETURN 10;
+								END
+
+						END
+
+--------------------
+
+
+					DELETE DCOLLECTED_HIST
+						WHERE DS_CODE=@DS_CODE AND MOD_NO=@MOD_NO AND IS_AUTH=0;
+
+					SELECT @ErrorVar = @@ERROR;		
+
+					IF @ErrorVar <> 0				
+						BEGIN
+							ROLLBACK TRANSACTION;
+							RETURN 1;
+						END
+					
+					DELETE DSCHEDULE_HIST 
+						WHERE DS_CODE=@DS_CODE AND MOD_NO=@MOD_NO AND IS_AUTH=0 ;
+					
+					SELECT @ErrorVar = @@ERROR;		
+
+					IF @ErrorVar <> 0				
+						BEGIN
+							ROLLBACK TRANSACTION;
+							RETURN 1;
+						END
+	
+					SELECT @RET_MOD_NO = @MOD_NO-1;
+
+					COMMIT TRANSACTION;
+					RETURN 0;			
+
+
+				END
+			ELSE
+				BEGIN
+					-- not exist
+					ROLLBACK TRANSACTION;
+					RETURN 4;
+				END
+			
+		END		
+    
+END
+
+GO
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 24-Mar-12
+-- Description:	Get detail to DCollected table
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_DCollected_GetDetailList]		
+	@DEL_FLAG	int	,
+	@AUTH_FLAG	bit,
+	@ENTRY_DATE	datetime
+AS
+BEGIN	
+		
+	SET NOCOUNT ON;
+
+
+	IF @AUTH_FLAG=0
+		BEGIN						
+			SELECT *,'S' = 'U'				 
+				FROM DCOLLECTED_HIST 
+				WHERE IS_AUTH=0
+				ORDER BY DS_CODE;			
+		END;
+	ELSE
+		BEGIN
+			IF @DEL_FLAG=0
+				BEGIN
+					SELECT *,1,'S' = 'A'				
+						FROM DCOLLECTED
+						WHERE [STATUS] ='L'
+						AND ENTRY_DATE=@ENTRY_DATE
+						ORDER BY DS_CODE;
+				END;
+			ELSE
+				BEGIN
+					SELECT *,1,'S' = 
+						CASE  
+							WHEN [STATUS] = 'D' THEN 'D'                    
+							ELSE 'A'
+						END 
+						FROM DCOLLECTED
+						WHERE [STATUS] IN ('L','D')
+						AND ENTRY_DATE=@ENTRY_DATE
+						ORDER BY DS_CODE;
+				END;
+		END;	
+	   
+END
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 13-May-13
+-- Description:	Get clients of invalid credit entry
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_Client_GetListInvCredit]	
+AS
+BEGIN	
+		
+	SET NOCOUNT ON;
+
+	SELECT * FROM CLIENT
+		WHERE CASH_DAYS IS NULL 
+			OR SPEED_DAYS IS NULL
+			OR CASH_CR_TYPE IS NULL OR CASH_CR_TYPE=''
+			OR SPEED_CR_TYPE IS NULL OR SPEED_CR_TYPE=''
+	   
+END
+
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_Client_GetListInvCredit] TO [ccms_sp_only]
+
+GO
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 25-Feb-13
+-- Description: Process for booking check by bank code
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_Process_BeforeBookingCheck]		
+	@SEQ_NO		NUMERIC(4,0) output,
+	@BATCH_NO	VARCHAR(4) output,
+	@REF_NO		VARCHAR(10) output
+AS
+BEGIN	
+	DECLARE @ErrorVar INT;
+			
+	
+	SET NOCOUNT ON;
+
+	SELECT @SEQ_NO = isnull(max(SEQ_NO),0) from DSCHEDULE;
+	
+	SELECT @BATCH_NO = ISNULL(MAX(BATCH_NO),'5600')+1		
+		FROM GENPRM
+		WHERE DATEDIFF(d,GETDATE(),BATCH_DATE)=0;
+
+	SELECT @REF_NO = ISNULL(MAX(REF_NO),0)+1 FROM GENPRM;
+	--SELECT @RefNo =  RIGHT('0000000000' + @RefNo, 10)
+
+	DELETE TMP_BOOKING;
+
+	SELECT @ErrorVar = @@ERROR;		
+
+	IF @ErrorVar <> 0
+		BEGIN	
+			RETURN 1;
+		END
+
+	
+         
+END
+
+GO
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 23-Feb-13
+-- Description: Process for booking check by bank code
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_Process_BookingCheckByBank]	
+	@BANK_CODE		varchar(4)	
+AS
+BEGIN	
+	DECLARE @ErrorVar INT;
+	
+	SET NOCOUNT ON;
+--1     
+              
+--2            
+	INSERT INTO TMP_BOOKING (REF_NO, AMOUNT, VALUE_DATE, REV_DATE, ACC_NO, DAYS,
+		D_CODE,DEP_TYP)            
+		SELECT ds.REF_NO,ds.CITICASH_AMOUNT as amt,ds.SCHEDULE_DATE,            
+			DATEADD(day,convert(int,ISNULL(clc.CASH_DAYS,cl.CASH_DAYS)),ds.SCHEDULE_DATE )REVDATE,cl.ACC_NO,
+			ISNULL(clc.CASH_DAYS,cl.CASH_DAYS) as CASH_DAYS,ds.D_CODE,
+			ds.DEPOSIT_TYPE 
+			FROM CLIENT  cl 
+			INNER JOIN  DSCHEDULE ds
+			on DS.CLIENT_CODE=CL.CLIENT_CODE
+			LEFT OUTER JOIN (SELECT * FROM CLIENT_LOC_CHARGE where [STATUS]='L') clc
+			ON clc.CLIENT_CODE=cl.CLIENT_CODE and clc.LOCATION_CODE=ds.LOCATION_CODE
+			WHERE ds.CITICASH_AMOUNT>0 and ds.REF_NO is null and ds.CHECKED is null
+			AND ds.CORR_BANK_CODE=@BANK_CODE            
+		UNION ALL          
+		SELECT ds.REF_NO,ds.CITICHECK_AMOUNT as amt,ds.SCHEDULE_DATE,            
+			DATEADD(day,convert(int,ISNULL(clc.SPEED_DAYS,cl.SPEED_DAYS)),ds.SCHEDULE_DATE )REVDATE,cl.ACC_NO,
+			ISNULL(clc.SPEED_DAYS,cl.SPEED_DAYS) as SPEED_DAYS,ds.D_CODE,
+			ds.DEPOSIT_TYPE
+			FROM CLIENT  cl 
+			INNER JOIN  DSCHEDULE ds
+			on DS.CLIENT_CODE=CL.CLIENT_CODE
+			LEFT OUTER JOIN (SELECT * FROM CLIENT_LOC_CHARGE where [STATUS]='L') clc
+			ON clc.CLIENT_CODE=cl.CLIENT_CODE and clc.LOCATION_CODE=ds.LOCATION_CODE
+			where ds.CITICHECK_AMOUNT>0 and ds.REF_NO is null and ds.CHECKED is null
+			AND ds.CORR_BANK_CODE=@BANK_CODE
+			AND CONVERT(datetime,CONVERT(varchar(10),ds.schedule_date,101))             
+			<= CONVERT(datetime,CONVERT(varchar(10),GETDATE(),101)) ;       
+            
+	SELECT @ErrorVar = @@ERROR;		
+
+	IF @ErrorVar <> 0
+		BEGIN	
+			RETURN 1;
+		END		
+    
+END
+
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 23-Feb-13
+-- Description: Process for holiday
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_Process_Holiday]		
+AS
+BEGIN	
+	DECLARE @ErrorVar INT,
+			@vcnt1 	int,
+			@vcnt2 	int,
+			@vcnt3 	int,
+			@vFdt 	datetime,
+			@vDelDt	datetime,
+			@vDcode	varchar(8);
+	
+	SET NOCOUNT ON;
+--1
+
+	DECLARE GLTCURSOR CURSOR FOR
+		SELECT D_CODE,VALUE_DATE,CONVERT(numeric(2),days) as DAYS,
+		DATEADD(DAY,CONVERT(numeric(2),DAYS),VALUE_DATE) as DELIVERY
+        FROM TMP_BOOKING;
+
+	OPEN GLTCURSOR;
+	FETCH NEXT FROM GLTCURSOR 
+        INTO @VDcode,@vFdt,@vCnt2,@vDelDt;
+
+	WHILE @@FETCH_STATUS=0 
+ 	BEGIN
+		SET @vcnt1=1;
+		
+		WHILE @vcnt1<=@vcnt2
+		BEGIN                    
+			SET @vFdt=(SELECT DATEADD(DAY,1,@vFdt));
+			SET @vcnt3=0;
+			SET @vcnt3=(SELECT COUNT(1) AS cnt FROM HOLIDAY WHERE HOLI_DAY=@vFdt
+				AND [STATUS]='L');
+	                     
+			IF @vcnt3>0     
+			BEGIN
+				SET @vDelDt=(SELECT DATEADD(DAY,1,@vDelDt));
+				SET @vcnt2=@vcnt2+1;
+			END
+			
+			SET @vcnt1=@vcnt1+1;
+		END
+		
+		UPDATE TMP_BOOKING set REV_DATE = @vDelDt where D_CODE=@VDcode           
+
+		FETCH NEXT FROM GLTCURSOR 
+		INTO @VDcode,@vFdt,@vCnt2,@vDelDt
+	END
+	
+	CLOSE GLTCURSOR;
+	DEALLOCATE GLTCURSOR;
+
+	SELECT @ErrorVar = @@ERROR;		
+
+	IF @ErrorVar <> 0
+		BEGIN	
+			RETURN 1;
+		END
+
+	RETURN 0;
+
+END
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 25-Feb-13
+-- Description: Process for booking check by bank code
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_Process_AfterBookingCheck]			
+	@REF_NO		VARCHAR(10) output
+AS
+BEGIN	
+	DECLARE @ErrorVar INT,
+		@vRevDate datetime,
+		@vAmount numeric(14,2);
+			
+	
+	SET NOCOUNT ON;
+
+	exec CMS_Process_Holiday;
+
+	SELECT @ErrorVar = @@ERROR;		
+
+	IF @ErrorVar <> 0
+		BEGIN	
+			RETURN 1;
+		END
+
+	DELETE TMP_CR_BOOKING;
+	DELETE TMP_DR_BOOKING;
+
+	DECLARE CURSORCASH CURSOR FOR
+		SELECT REV_DATE,sum(AMOUNT) as total FROM
+			TMP_BOOKING 
+			WHERE DEP_TYP='CASH' 
+			GROUP by REV_DATE order by REV_DATE;
+		
+
+	OPEN CURSORCASH;
+	FETCH NEXT FROM CURSORCASH 
+        INTO @vRevDate,@vAmount;
+
+	WHILE @@FETCH_STATUS=0 
+ 	BEGIN
+		
+		INSERT INTO TMP_CR_BOOKING(CRED_TYPE, SUNACC_NO,SUNDRY_REFACC_NO, AMOUNT, REF_NO, VALUE_DATE, REV_DATE, DAYS, REMARKS, DEP_TYP)
+			VALUES('1','G010009275600005','G010009275600005',@vAmount,RIGHT('0000000000' + @REF_NO, 10),
+			CONVERT(datetime,convert(varchar(12), GETDATE())),
+			@vRevDate,'','Cash','CASH');
+		
+		SELECT @REF_NO =  @REF_NO + 1;
+
+		FETCH NEXT FROM CURSORCASH 
+		INTO @vRevDate,@vAmount;
+	END
+
+	CLOSE CURSORCASH;
+	DEALLOCATE CURSORCASH;
+--2
+
+	DECLARE CURSORSPEED CURSOR FOR
+		SELECT REV_DATE,sum(AMOUNT) as total FROM
+			TMP_BOOKING 
+			WHERE DEP_TYP='CHECK' 
+			GROUP by REV_DATE order by REV_DATE;	
+
+	OPEN CURSORSPEED;
+	FETCH NEXT FROM CURSORSPEED 
+        INTO @vRevDate,@vAmount;
+
+	WHILE @@FETCH_STATUS=0 
+ 	BEGIN
+		
+		INSERT INTO TMP_CR_BOOKING(CRED_TYPE, SUNACC_NO,SUNDRY_REFACC_NO, AMOUNT, REF_NO, VALUE_DATE, REV_DATE, DAYS, REMARKS, DEP_TYP)
+			VALUES('1','G010009275570009','G010009275570009',@vAmount,RIGHT('0000000000' + @REF_NO, 10),
+			CONVERT(datetime,convert(varchar(12), GETDATE())),
+			@vRevDate,'','Speed','CHECK');
+		
+		SELECT @REF_NO =  @REF_NO + 1;
+
+		FETCH NEXT FROM CURSORSPEED 
+		INTO @vRevDate,@vAmount;
+	END
+
+	CLOSE CURSORSPEED;
+	DEALLOCATE CURSORSPEED;
+         
+END
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 25-Feb-13
+-- Description: Process for booking check by bank code
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_Process_BookingCheckUpdate]	
+AS
+BEGIN	
+	DECLARE @ErrorVar		INT,
+			@vCcode Char(6),     
+			@vrefno varchar(10),    
+			@vdays varchar(2),    
+			@vcnt numeric,    
+			@DCODE VARCHAR(12),    
+			@VREVDATE DATETIME  ,      
+			@REFACCNO varchar(15),    
+			@deptype  varchar(15)  
+	
+	SET NOCOUNT ON;
+                    
+	DECLARE GLTCURSOR CURSOR FOR
+        SELECT REF_NO,REV_DATE,SUNACC_NO,DEP_TYP 
+			FROM TMP_CR_BOOKING;    
+		
+	OPEN GLTCURSOR;
+    
+	FETCH NEXT FROM GLTCURSOR 
+		INTO  @vrefno,@VREVDATE,@REFACCNO, @deptype;    
+    
+	WHILE @@FETCH_STATUS=0        
+    BEGIN
+		UPDATE TMP_BOOKING SET REF_NO=@VREFNO, REFACC_NO=@REFACCNO WHERE REV_DATE=@VREVDATE    
+			and DEP_TYP= @deptype    
+		
+		FETCH NEXT FROM GLTCURSOR INTO    
+			@VREFNO,@VREVDATE,@REFACCNO,@deptype
+	END 
+
+	CLOSE GLTCURSOR    
+    
+	DEALLOCATE GLTCURSOR          
+    
+	UPDATE DSCHEDULE SET CHECKED=1 
+		WHERE FILENAME IS NULL AND REF_NO IS NULL 
+		AND (CHECKED IS NULL OR CHECKED =0) 
+
+	IF @@ERROR<>0 GOTO ErrorHandler          
+          
+
+	RETURN 0;           
+                     
+    ErrorHandler:          
+	PRINT 'Record Does not Inserted/Updated:';          
+
+	RETURN 1;       
+	
+END
+
+GO
+
+
+
+
+GRANT EXECUTE ON [dbo].[CMS_Process_BeforeBookingCheck] TO [ccms_sp_only]
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 13-May-13
+-- Description: Get unchecked dschedule records
+-- =============================================
+
+CREATE PROCEDURE [dbo].[CMS_DSchedule_GetUncheckedByBank]	
+	@BANK_CODE	varchar(4)	
+AS
+BEGIN	
+	
+	SELECT * FROM DSCHEDULE		
+		WHERE (CHECKED IS NULL OR CHECKED=0)
+			AND CORR_BANK_CODE=@BANK_CODE
+	         
+END
+
+GO
+
+
+GRANT EXECUTE ON [dbo].[CMS_DSchedule_GetUncheckedByBank] TO [ccms_sp_only]
+
+GO
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 23-Feb-13
+-- Description: Process for booking check by bank code
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_Process_BookingByBank]	
+	@BANK_CODE		varchar(4)	
+AS
+BEGIN	
+	DECLARE @ErrorVar INT;
+	
+	SET NOCOUNT ON;
+--1
+              
+--2            
+	INSERT INTO TMP_BOOKING (REF_NO, AMOUNT, VALUE_DATE, REV_DATE, ACC_NO, DAYS,
+		D_CODE,DEP_TYP)            
+		SELECT ds.REF_NO,ds.CITICASH_AMOUNT as amt,ds.SCHEDULE_DATE,            
+			DATEADD(day,convert(int,ISNULL(clc.CASH_DAYS,cl.CASH_DAYS)),ds.SCHEDULE_DATE )REVDATE,cl.ACC_NO,
+			ISNULL(clc.CASH_DAYS,cl.CASH_DAYS) as CASH_DAYS,ds.D_CODE,
+			ds.DEPOSIT_TYPE 
+			FROM CLIENT  cl 
+			INNER JOIN  DSCHEDULE ds
+			on DS.CLIENT_CODE=CL.CLIENT_CODE
+			LEFT OUTER JOIN (SELECT * FROM CLIENT_LOC_CHARGE where [STATUS]='L') clc
+			ON clc.CLIENT_CODE=cl.CLIENT_CODE and clc.LOCATION_CODE=ds.LOCATION_CODE
+			WHERE ds.CITICASH_AMOUNT>0 and ds.REF_NO is null
+			AND ds.CORR_BANK_CODE=@BANK_CODE            
+		UNION ALL          
+		SELECT ds.REF_NO,ds.CITICHECK_AMOUNT as amt,ds.SCHEDULE_DATE,            
+			DATEADD(day,convert(int,ISNULL(clc.SPEED_DAYS,cl.SPEED_DAYS)),ds.SCHEDULE_DATE )REVDATE,cl.ACC_NO,
+			ISNULL(clc.SPEED_DAYS,cl.SPEED_DAYS) as SPEED_DAYS,ds.D_CODE,
+			ds.DEPOSIT_TYPE
+			FROM CLIENT  cl 
+			INNER JOIN  DSCHEDULE ds
+			on DS.CLIENT_CODE=CL.CLIENT_CODE
+			LEFT OUTER JOIN (SELECT * FROM CLIENT_LOC_CHARGE where [STATUS]='L') clc
+			ON clc.CLIENT_CODE=cl.CLIENT_CODE and clc.LOCATION_CODE=ds.LOCATION_CODE
+			where ds.CITICHECK_AMOUNT>0 and ds.REF_NO is null 
+			AND ds.CORR_BANK_CODE=@BANK_CODE
+			AND CONVERT(datetime,CONVERT(varchar(10),ds.schedule_date,101))             
+			<= CONVERT(datetime,CONVERT(varchar(10),GETDATE(),101)) ;       
+            
+	SELECT @ErrorVar = @@ERROR;		
+
+	IF @ErrorVar <> 0
+		BEGIN	
+			RETURN 1;
+		END		
+    
+END
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 25-Feb-13
+-- Description: Process for booking check by bank code
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_Process_UpdateRef]
+	@FILENAME		varchar(15),	
+	@GENPRMREF_NO	varchar(10), --Last refno for genprm table      
+	@BATCH_NO		varchar(10)
+AS
+BEGIN	
+	DECLARE @ErrorVar	int,			
+			@vrefno		varchar(10), 			
+			@DCODE		varchar(12),        
+			@VREVDATE	datetime,          
+			@REFACCNO	varchar(15),        
+			@deptype	varchar(15);
+	
+	SET NOCOUNT ON;
+              
+    ---1        
+	DECLARE GLTCURSOR CURSOR FOR 
+		SELECT REF_NO,REV_DATE,SUNACC_NO,DEP_TYP FROM TMP_CR_BOOKING;       
+
+	OPEN GLTCURSOR;        
+
+	FETCH NEXT FROM GLTCURSOR INTO
+		@vrefno,@VREVDATE,@REFACCNO, @deptype;       
+
+	WHILE @@FETCH_STATUS=0
+	BEGIN         
+		UPDATE TMP_BOOKING SET REF_NO=@VREFNO, REFACC_NO=@REFACCNO 
+			WHERE REV_DATE=@VREVDATE        
+			AND DEP_TYP= @deptype;
+        
+		FETCH NEXT FROM GLTCURSOR INTO        
+			@VREFNO,@VREVDATE,@REFACCNO,@deptype;
+	END  
+      
+	CLOSE GLTCURSOR;
+	DEALLOCATE GLTCURSOR;        
+          
+            
+    ---2        
+    DECLARE GLTCURSOR CURSOR FOR
+		SELECT REF_NO,D_CODE FROM TMP_BOOKING;       
+            
+    OPEN  GLTCURSOR;         
+            
+    FETCH NEXT FROM GLTCURSOR
+		INTO @VREFNO,@DCODE;        
+             
+    WHILE @@FETCH_STATUS=0                 
+	BEGIN        
+		UPDATE DSCHEDULE 
+			SET REF_NO=@VREFNO WHERE D_CODE=@DCODE;           
+		
+		FETCH NEXT FROM GLTCURSOR
+			INTO @VREFNO,@DCODE;        
+	END        
+            
+    CLOSE GLTCURSOR;         
+    DEALLOCATE GLTCURSOR;       
+            
+    ---3        
+              
+    INSERT INTO CCMSREF_TAB(REF_NO,AMOUNT,VALUE_DATE,REV_DATE,ACC_NO,REFACC_NO,D_CODE,REVERGEN)        
+		SELECT REF_NO,AMOUNT,VALUE_DATE,REV_DATE,ACC_NO,REFACC_NO,D_CODE,@FILENAME FROM TMP_BOOKING         
+            
+     --4 update genprm after generate files.      
+    UPDATE GENPRM
+		SET BATCH_NO=@BATCH_NO, REF_NO=@GENPRMREF_NO, BATCH_DATE=GETDATE();     
+    
+	                             
+	IF @@ERROR<>0 GOTO ErrorHandler              
+               
+               
+	RETURN 0;            
+                         
+    ErrorHandler:              
+	PRINT 'Record Does not Inserted/Updated:' ;             
+	             
+	RETURN 1;
+	
+	
+END
+
+
+GO
+
+
+
+GRANT EXECUTE ON [dbo].[CMS_Process_BookingDrByBank] TO [ccms_sp_only]
+
+GO
+
+
+GRANT EXECUTE ON [dbo].[CMS_TmpCrBooking_GetDetail] TO [ccms_sp_only]
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_TmpDrBooking_GetFlexDetail] TO [ccms_sp_only]
+
+GO
+
+
+
+GRANT EXECUTE ON [dbo].[CMS_Process_BookingUpdtScheRefByBank] TO [ccms_sp_only]
+
+GO
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 25-Feb-13
+-- Description: Process for booking check by bank code
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_Process_BookingUpdtScheRefByBank]
+	@BANK_CODE	varchar(4),
+	@FILENAME	varchar(15),      
+	@SEQ_NO		varchar(20),      
+	@VALUE_DATE	datetime          
+	
+AS
+BEGIN
+
+--- Update Schedule table Check wise and cash wise      
+     UPDATE DSCHEDULE
+		SET [FILENAME]=@FILENAME,SEQ_NO=@SEQ_NO,FLEXGEN_DATE=getdate(),
+		FILE_USER_ID=substring(suser_name(),charindex('\',suser_name())+1,20) 
+		WHERE REF_NO IS NULL AND [FILENAME] IS NULL AND DEPOSIT_TYPE='Cash'
+		AND CORR_BANK_CODE=@BANK_CODE;      
+     UPDATE DSCHEDULE
+		SET [FILENAME]=@FILENAME,SEQ_NO=@SEQ_NO,FLEXGEN_DATE=getdate(),
+		FILE_USER_ID=substring(suser_name(),charindex('\',suser_name())+1,20)
+		WHERE REF_NO IS NULL AND [FILENAME] IS NULL AND DEPOSIT_TYPE='Check' 
+		AND SCHEDULE_DATE <= @VALUE_DATE
+		AND CORR_BANK_CODE=@BANK_CODE;     
+END 
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_Process_UpdateRef] TO [ccms_sp_only]
+
+GO
+
+DECLARE @SQL VARCHAR(4000);
+SET @SQL = 'ALTER TABLE CCMSREF_TAB DROP CONSTRAINT |ConstraintName| ';
+
+SET @SQL = REPLACE(@SQL, '|ConstraintName|', ( SELECT   name
+                                               FROM     sysobjects
+                                               WHERE    xtype = 'PK'
+                                                        AND parent_obj = OBJECT_ID('CCMSREF_TAB')
+                                             ));
+
+EXEC (@SQL);
+
+SET @SQL = 'ALTER TABLE CCMSREF_TAB_HIST DROP CONSTRAINT |ConstraintName| ';
+
+SET @SQL = REPLACE(@SQL, '|ConstraintName|', ( SELECT   name
+                                               FROM     sysobjects
+                                               WHERE    xtype = 'PK'
+                                                        AND parent_obj = OBJECT_ID('CCMSREF_TAB_HIST')
+                                             ));
+
+EXEC (@SQL);
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 14-May-13
+-- Description:	Get reversal data from CCMSRef_tab
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_CCMSRefTab_GetReversalData]		
+	@REV_DATE	datetime
+AS
+BEGIN	
+	
+	SET NOCOUNT ON;
+
+	SELECT a.*,b.ACC_NAME 
+	FROM CCMSREF_TAB a 
+	LEFT OUTER JOIN CLIENT b on b.ACC_NO=a.ACC_NO 
+	WHERE [FILENAME] IS NULL and REV_DATE<=@REV_DATE 
+	ORDER BY REV_DATE, b.ACC_NAME asc
+	
+END
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_CCMSRefTab_GetReversalData] TO [ccms_sp_only]
+
+GO
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 25-Feb-13
+-- Description: Process for reversal
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_Process_Revgenerate]	
+AS
+BEGIN	
+
+	UPDATE CCMSREF_TAB SET STATUS_ID=1, AUTHORIZE=1   
+		WHERE D_CODE IN  
+			(SELECT a.D_CODE    
+				FROM CCMSREF_TAB a , DSCHEDULE b    
+				WHERE   
+				A.D_CODE = B.D_CODE   
+				AND a.FILENAME IS NULL   
+				AND b.DS_CODE IN (SELECT DS_CODE FROM CSCHEDULE)   
+			) 
+  
+	UPDATE CCMSREF_TAB SET STATUS_ID=1, AUTHORIZE=1   
+		WHERE D_CODE IN  
+			(SELECT a.D_CODE    
+				FROM CCMSREF_TAB a , DSCHEDULE b 
+				WHERE
+				A.D_CODE = B.D_CODE
+				AND a.FILENAME IS NULL   
+				AND a.REV_DATE=b.SCHEDULE_DATE
+			) 
+ 
+ ----- che
+
+	DELETE FROM TMP_REVERSAL ;
+	INSERT INTO TMP_REVERSAL(CR_TYPE,REF_NO,VALUE_DATE,LOCATION_CODE,REV_DATE,
+		ACC_NO,REFACC_NO,CLIENT_CODE,AMOUNT,DEPOSIT_TYPE,
+		DS_CODE,CHECKDS_NO,CUSTOMER_REF)                  
+		SELECT c.CASH_CR_TYPE,a.REF_NO,a.VALUE_DATE,b.LOCATION_CODE,a.REV_DATE,
+			a.ACC_NO,a.REFACC_NO,b.CLIENT_CODE,SUM(b.CITICASH_AMOUNT) as total,b.DEPOSIT_TYPE,
+			'' as D_CODE ,'' CHECKDS_NO ,''
+			FROM CCMSREF_TAB a ,DSCHEDULE b,CLIENT c
+			WHERE
+			CONVERT(datetime,CONVERT(varchar(12), a.REV_DATE)) <= CONVERT(datetime,CONVERT(varchar(12), getdate()))
+			AND b.CITICASH_AMOUNT>0
+			AND a.D_CODE=b.D_CODE
+			AND b.CLIENT_CODE=c.CLIENT_CODE
+			AND a.FILENAME IS NULL
+			AND c.CASH_CR_TYPE='L'
+			AND (a.STATUS_ID=1)    
+			AND (a.AUTHORIZE =1)     
+			GROUP BY a.REV_DATE,a.REF_NO,b.LOCATION_CODE,b.CLIENT_CODE,a.VALUE_DATE,c.CASH_CR_TYPE,                  
+				a.ACC_NO,a.REFACC_NO,b.DEPOSIT_TYPE                  
+		UNION ALL                  
+--\\\\\\by deposit\\\\\\\\\\\\\                  
+		SELECT c.CASH_CR_TYPE,a.REF_NO,VALUE_DATE,b.LOCATION_CODE,a.REV_DATE,
+			a.ACC_NO,a.REFACC_NO,b.CLIENT_CODE,SUM(b.CITICASH_AMOUNT) as total,b.DEPOSIT_TYPE,
+			b.D_CODE ,isnull(b.D_CODE,'') CHECKDS_NO ,isnull(d.customer_ref,'')customer_ref
+			FROM CCMSREF_TAB a ,DSCHEDULE b
+			LEFT OUTER JOIN ccash d on d.D_CODE=b.D_CODE,CLIENT c
+			WHERE
+			CONVERT(datetime,CONVERT(varchar(12), a.REV_DATE)) <= CONVERT(datetime,CONVERT(varchar(12), getdate()))                     
+			AND b.CITICASH_AMOUNT>0
+			AND a.D_CODE=b.D_CODE
+			AND b.CLIENT_CODE=c.CLIENT_CODE
+			AND a.FILENAME IS NULL
+			AND c.CASH_CR_TYPE='D'                  
+			AND ( a.STATUS_ID=1 )
+			AND ( a.AUTHORIZE =1 )
+			GROUP BY a.REV_DATE,a.REF_NO,b.CLIENT_CODE,a.VALUE_DATE,b.LOCATION_CODE,c.CASH_CR_TYPE,
+			a.ACC_NO,a.REFACC_NO ,b.D_CODE,b.DEPOSIT_TYPE,d.customer_ref      
+--\\\\\total\\\\\\\\\\\\\\\                  
+		UNION ALL
+		SELECT c.CASH_CR_TYPE,a.REF_NO,VALUE_DATE,'000' as LOCATION_CODE,a.REV_DATE,
+			a.ACC_NO,a.REFACC_NO,b.CLIENT_CODE,SUM(b.CITICASH_AMOUNT) as total,b.DEPOSIT_TYPE,
+			substring(CONVERT(varchar(12), VALUE_DATE,112),3,8)as D_CODE, count(b.CITICASH_AMOUNT) CHECKDS_NO,''
+			FROM CCMSREF_TAB a ,DSCHEDULE b,CLIENT c
+			WHERE
+			CONVERT(datetime,CONVERT(varchar(12), a.REV_DATE)) <= CONVERT(datetime,CONVERT(varchar(12), getdate()))
+			AND b.CITICASH_AMOUNT>0
+			AND a.D_CODE=b.D_CODE
+			AND b.CLIENT_CODE=c.CLIENT_CODE 
+			AND a.FILENAME IS NULL 
+			AND c.CASH_CR_TYPE='T'
+			AND ( a.STATUS_ID=1 )
+			AND ( a.AUTHORIZE =1  )
+			GROUP BY a.REV_DATE,a.REF_NO,b.CLIENT_CODE,a.VALUE_DATE,c.CASH_CR_TYPE, 
+			a.ACC_NO,a.REFACC_NO,b.DEPOSIT_TYPE           
+----########################By Ref no ###############               
+		UNION ALL                 
+		SELECT c.CASH_CR_TYPE,a.REF_NO,VALUE_DATE,'000' as LOCATION_CODE,a.REV_DATE,a.ACC_NO,a.REFACC_NO,
+			b.CLIENT_CODE,b.CITICASH_AMOUNT as total,b.DEPOSIT_TYPE,left(rtrim(d.CASH_REF ),10) as D_CODE ,  d.D_CODE CHECKDS_NO ,d.customer_ref 
+			FROM CCMSREF_TAB a ,DSCHEDULE b,CLIENT c,ccash d
+			WHERE
+			CONVERT(datetime,CONVERT(varchar(12), a.REV_DATE)) <= CONVERT(datetime,CONVERT(varchar(12), getdate())) 
+			AND b.CITICASH_AMOUNT>0
+			AND a.D_CODE=b.D_CODE
+			AND b.CLIENT_CODE=c.CLIENT_CODE 
+			AND a.FILENAME IS NULL 
+			AND d.D_CODE=b.D_CODE
+			AND c.CASH_CR_TYPE='R'
+			AND ( a.STATUS_ID=1 )
+			AND ( a.AUTHORIZE =1  )			  
+----------------                  
+	INSERT INTO TMP_REVERSAL( CR_TYPE,REF_NO,VALUE_DATE,LOCATION_CODE,REV_DATE, 
+		ACC_NO,REFACC_NO,CLIENT_CODE,AMOUNT,b.DEPOSIT_TYPE,
+		b.DS_CODE,CHECKDS_NO,CUSTOMER_REF)
+		SELECT c.SPEED_CR_TYPE,a.REF_NO,VALUE_DATE,b.LOCATION_CODE,a.REV_DATE,
+			a.ACC_NO,a.REFACC_NO,b.CLIENT_CODE,SUM(b.citicheck_AMOUNT) as total,b.DEPOSIT_TYPE,
+			'' as D_CODE , '' CHECKDS_NO ,'' CUSTOMER_REF
+			FROM CCMSREF_TAB a ,DSCHEDULE b,CLIENT c 
+			WHERE 
+			CONVERT(datetime,CONVERT(varchar(12), a.REV_DATE)) <= CONVERT(datetime,CONVERT(varchar(12), getdate()))			                   
+			AND b.citicheck_AMOUNT>0
+			AND a.D_CODE=b.D_CODE       
+			AND b.CLIENT_CODE=c.CLIENT_CODE 
+			AND a.FILENAME IS NULL			                 
+			AND c.SPEED_CR_TYPE='L'
+			AND ( a.STATUS_ID=1 )
+			AND ( a.AUTHORIZE =1  ) 
+			GROUP BY a.REV_DATE,b.LOCATION_CODE,a.REF_NO,b.CLIENT_CODE,a.VALUE_DATE,c.SPEED_CR_TYPE,
+			a.ACC_NO,a.REFACC_NO,b.DEPOSIT_TYPE                
+		UNION ALL 
+----By Deposit  
+		SELECT c.SPEED_CR_TYPE,a.REF_NO,VALUE_DATE,b.LOCATION_CODE,a.REV_DATE,
+			a.ACC_NO,a.REFACC_NO,b.CLIENT_CODE,SUM(b.citicheck_AMOUNT) as total,b.DEPOSIT_TYPE,
+			b.D_CODE , b.D_CODE CHECKDS_NO,''customer_ref
+			FROM CCMSREF_TAB a ,DSCHEDULE b
+			,CLIENT c
+			WHERE
+			CONVERT(datetime,CONVERT(varchar(12), a.REV_DATE)) <= CONVERT(datetime,CONVERT(varchar(12), getdate()))
+			AND b.citicheck_AMOUNT>0 
+			AND a.D_CODE=b.D_CODE 
+			AND b.CLIENT_CODE=c.CLIENT_CODE 
+			AND c.SPEED_CR_TYPE='D'
+			AND a.FILENAME IS NULL
+			AND ( a.STATUS_ID=1 )
+			AND ( a.AUTHORIZE =1  )
+			GROUP BY a.REV_DATE,a.REF_NO,b.DS_CODE,b.CLIENT_CODE,a.VALUE_DATE,c.SPEED_CR_TYPE,b.LOCATION_CODE,                  
+			a.ACC_NO,a.REFACC_NO,b.D_CODE,b.DEPOSIT_TYPE                      
+		UNION ALL                
+------By Total                  
+		SELECT c.SPEED_CR_TYPE,a.REF_NO,VALUE_DATE,'000' as LOCATION_CODE,a.REV_DATE,
+			a.ACC_NO,a.REFACC_NO,b.CLIENT_CODE,SUM(b.citicheck_AMOUNT) as total,b.DEPOSIT_TYPE,
+			substring(CONVERT(varchar(10), VALUE_DATE,112),3,8) , '' CHECKDS_NO ,''
+			FROM CCMSREF_TAB a ,DSCHEDULE b,CLIENT c 
+			WHERE 
+			CONVERT(datetime,CONVERT(varchar(12), a.REV_DATE)) <= CONVERT(datetime,CONVERT(varchar(12), getdate()))
+			AND b.citicheck_AMOUNT>0 
+			AND a.D_CODE=b.D_CODE
+			AND b.CLIENT_CODE=c.CLIENT_CODE 
+			AND a.FILENAME IS NULL 
+			AND c.SPEED_CR_TYPE='T'
+			AND ( a.STATUS_ID=1 )
+			AND ( a.AUTHORIZE =1  ) 
+			GROUP BY a.REV_DATE,b.CLIENT_CODE,a.VALUE_DATE,a.REF_NO,c.SPEED_CR_TYPE, 
+			a.ACC_NO,a.REFACC_NO,b.DEPOSIT_TYPE 
+		UNION ALL 
+--\\\\\\\\\\\\\\\By Check\\\\\\\\ 
+		SELECT  c.SPEED_CR_TYPE,a.REF_NO,VALUE_DATE,b.LOCATION_CODE,a.REV_DATE,
+			a.ACC_NO,a.REFACC_NO,b.CLIENT_CODE,D.AMOUNT,b.DEPOSIT_TYPE,
+			d.check_no , b.D_CODE CHECKDS_NO  ,d.Customer_Ref 
+			FROM CCMSREF_TAB a,CLIENT c,DSCHEDULE b,csd_det d 
+			WHERE
+			CONVERT(datetime,CONVERT(varchar(12), a.REV_DATE)) <= CONVERT(datetime,CONVERT(varchar(12), getdate())) 
+			AND d.AMOUNT>0 
+			AND a.D_CODE=b.D_CODE 
+			AND b.CLIENT_CODE=c.CLIENT_CODE 
+			AND a.D_CODE=d.D_CODE 
+			AND a.FILENAME IS NULL 
+			AND c.SPEED_CR_TYPE='C'
+			AND ( a.STATUS_ID=1 )
+			AND ( a.AUTHORIZE =1  ) 
+		UNION ALL         
+		SELECT  c.SPEED_CR_TYPE,a.REF_NO,VALUE_DATE,b.LOCATION_CODE,a.REV_DATE,
+			a.ACC_NO,a.REFACC_NO,b.CLIENT_CODE,D.AMOUNT,b.DEPOSIT_TYPE,
+			left(d.CHECK_REF,10)  ,  b.D_CODE CHECKDS_NO ,d.Customer_Ref 
+			FROM CCMSREF_TAB a,CLIENT c,DSCHEDULE b,csd_det d 
+			WHERE 
+			CONVERT(datetime,CONVERT(varchar(12), a.REV_DATE)) <= CONVERT(datetime,CONVERT(varchar(12), getdate()))
+			AND d.AMOUNT>0
+			AND a.D_CODE=b.D_CODE 
+			AND b.CLIENT_CODE=c.CLIENT_CODE 
+			AND a.D_CODE=d.D_CODE 
+			AND a.FILENAME IS NULL 
+			AND c.SPEED_CR_TYPE='R' 
+			AND ( a.STATUS_ID=1 )
+			AND ( a.AUTHORIZE =1  ) 
+			ORDER BY a.REF_NO
+         
+END
+
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 14-May-13
+-- Description:	Get invalid dscode entry of TMP_Reversal
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_TmpReversal_GetListInvDs]	
+AS
+BEGIN	
+	
+	SET NOCOUNT ON;
+	
+	SELECT * FROM TMP_REVERSAL 
+		WHERE DS_CODE IS NULL;
+
+END
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_TmpReversal_GetListInvDs] TO [ccms_sp_only]
+
+GO
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 14-May-13
+-- Description:	Get dschedule for missing citicash/citispeed entry
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_DSchedule_GetMissingDetail]			
+AS
+BEGIN	
+		
+	SET NOCOUNT ON;
+
+	SELECT a.*,cl.ACC_NO,cl.ACC_NAME,lo.LOCATION_NAME,bn.BANK_NAME,br.BRANCH_NAME 
+		FROM
+		(SELECT ds.* FROM DSCHEDULE ds
+			LEFT OUTER JOIN CCASH cc ON ds.D_CODE=cc.D_CODE
+			WHERE ds.DEPOSIT_TYPE='Cash' and cc.D_CODE IS NULL
+		UNION ALL
+		SELECT ds.* FROM DSCHEDULE ds
+			LEFT OUTER JOIN CSD_DET cs ON ds.D_CODE=cs.D_CODE
+			WHERE ds.DEPOSIT_TYPE='Check' and cs.D_CODE IS NULL
+		) a
+		LEFT OUTER JOIN CLIENT cl 
+		ON cl.CLIENT_CODE=a.CLIENT_CODE
+		LEFT OUTER JOIN LOCATION lo
+		ON lo.LOCATION_CODE=a.LOCATION_CODE
+		LEFT OUTER JOIN BANK bn 
+		ON bn.BANK_CODE=a.CORR_BANK_CODE
+		LEFT OUTER JOIN BRANCH br
+		ON br.BRANCH_CODE=a.CORR_BRANCH_CODE AND br.BANK_CODE=a.CORR_BANK_CODE
+		ORDER BY DS_CODE,D_CODE;
+	   
+END
+
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_DSchedule_GetMissingDetail] TO [ccms_sp_only]
+
+GO
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 26-Feb-13
+-- Description:	Get detail of TMP_Reversal Credit Flex Data
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_TmpReversal_GetFlexCrDetail]	
+	@REV_DATE	datetime
+AS
+BEGIN	
+	
+	SET NOCOUNT ON;
+
+	SELECT a.*,b.* 
+		FROM TMP_REVERSAL a
+		LEFT OUTER JOIN LOCATION b 
+		ON a.LOCATION_CODE=b.LOCATION_CODE 
+		WHERE REV_DATE<=@REV_DATE
+
+END
+
+
+
+GO
+
+
+
+
+

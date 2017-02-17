@@ -1,0 +1,2303 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{5C7F29D1-A045-4C55-BFDA-D0EF4AF8D835}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <StartupObject>CCMS.My.MyApplication</StartupObject>
+    <RootNamespace>CCMS</RootNamespace>
+    <AssemblyName>CCMS</AssemblyName>
+    <FileAlignment>512</FileAlignment>
+    <MyType>WindowsForms</MyType>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <OptionExplicit>On</OptionExplicit>
+    <OptionCompare>Binary</OptionCompare>
+    <OptionStrict>Off</OptionStrict>
+    <OptionInfer>On</OptionInfer>
+    <ApplicationManifest>My Project\app.manifest</ApplicationManifest>
+    <IsWebBootstrapper>true</IsWebBootstrapper>
+    <PublishUrl>http://localhost/CCMS/</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Web</InstallFrom>
+    <UpdateEnabled>true</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DocumentationFile>CCMS.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DocumentationFile>CCMS.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DocumentationFile>CCMS.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.vb</CodeAnalysisModuleSuppressionsFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DocumentationFile>CCMS.xml</DocumentationFile>
+    <Optimize>true</Optimize>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.vb</CodeAnalysisModuleSuppressionsFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="CrystalDecisions.CrystalReports.Engine, Version=10.5.3700.0, Culture=neutral, PublicKeyToken=692fbea5521e1304" />
+    <Reference Include="CrystalDecisions.Enterprise.Framework, Version=10.5.3700.0, Culture=neutral, PublicKeyToken=692fbea5521e1304" />
+    <Reference Include="CrystalDecisions.Enterprise.InfoStore, Version=10.5.3700.0, Culture=neutral, PublicKeyToken=692fbea5521e1304" />
+    <Reference Include="CrystalDecisions.ReportSource, Version=10.5.3700.0, Culture=neutral, PublicKeyToken=692fbea5521e1304" />
+    <Reference Include="CrystalDecisions.Shared, Version=10.5.3700.0, Culture=neutral, PublicKeyToken=692fbea5521e1304" />
+    <Reference Include="CrystalDecisions.Windows.Forms, Version=10.5.3700.0, Culture=neutral, PublicKeyToken=692fbea5521e1304" />
+    <Reference Include="Microsoft.Office.Interop.Excel, Version=11.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Microsoft.Office.Interop.Outlook, Version=14.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Microsoft Visual Studio 11.0\Visual Studio Tools for Office\PIA\Office14\Microsoft.Office.Interop.Outlook.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.EnterpriseLibrary.Common, Version=4.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>EntLib\Microsoft.Practices.EnterpriseLibrary.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.EnterpriseLibrary.Data, Version=4.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>EntLib\Microsoft.Practices.EnterpriseLibrary.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.VisualBasic.PowerPacks.Vs, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <Reference Include="MigraDoc.DocumentObjectModel, Version=1.32.3885.0, Culture=neutral, PublicKeyToken=f94615aa0424f9eb, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>ExtLib\MigraDoc.DocumentObjectModel.dll</HintPath>
+    </Reference>
+    <Reference Include="MigraDoc.Rendering, Version=1.32.3885.0, Culture=neutral, PublicKeyToken=f94615aa0424f9eb, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>ExtLib\MigraDoc.Rendering.dll</HintPath>
+    </Reference>
+    <Reference Include="PdfSharp, Version=1.32.2608.0, Culture=neutral, PublicKeyToken=f94615aa0424f9eb, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>ExtLib\PdfSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Design" />
+    <Reference Include="System.DirectoryServices" />
+    <Reference Include="System.DirectoryServices.AccountManagement">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Web.Services, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Windows\assembly\GAC_MSIL\System.Web.Services\2.0.0.0__b03f5f7f11d50a3a\System.Web.Services.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="Winforms.Components, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>ExtLib\Winforms.Components.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Collections.Generic" />
+    <Import Include="System.Data" />
+    <Import Include="System.Drawing" />
+    <Import Include="System.Diagnostics" />
+    <Import Include="System.Windows.Forms" />
+    <Import Include="System.Linq" />
+    <Import Include="System.Xml.Linq" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ApplicationEvents.vb" />
+    <Compile Include="Common\CommonAppSet.vb" />
+    <Compile Include="Common\CommonUtil.vb" />
+    <Compile Include="Common\DBConnDefaultSettings.vb" />
+    <Compile Include="Common\DBConnSection.vb" />
+    <Compile Include="Common\DBConnSettings.vb" />
+    <Compile Include="Common\Enum.vb" />
+    <Compile Include="Common\ExportUtil.vb" />
+    <Compile Include="Common\Logger.vb" />
+    <Compile Include="Common\NullHelper.vb" />
+    <Compile Include="Common\SecForm.vb" />
+    <Compile Include="Common\SecurePassword.vb" />
+    <Compile Include="FrmCitiCashWithBearerSumm.Designer.vb">
+      <DependentUpon>FrmCitiCashWithBearerSumm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmCitiCashWithBearerSumm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmInvoice.Designer.vb">
+      <DependentUpon>FrmInvoice.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmInvoice.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmPPMFeedExport.Designer.vb">
+      <DependentUpon>FrmPPMFeedExport.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmPPMFeedExport.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmPPMServiceClearing.Designer.vb">
+      <DependentUpon>FrmPPMServiceClearing.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmPPMServiceClearing.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmPPMServiceCollection.Designer.vb">
+      <DependentUpon>FrmPPMServiceCollection.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmPPMServiceCollection.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmPPMServiceControl.Designer.vb">
+      <DependentUpon>FrmPPMServiceControl.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmPPMServiceControl.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmPPM_Clearing.Designer.vb">
+      <DependentUpon>FrmPPM_Clearing.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmPPM_Clearing.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmPPM_Collection.Designer.vb">
+      <DependentUpon>FrmPPM_Collection.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmPPM_Collection.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmRptUsersFormPerm.Designer.vb">
+      <DependentUpon>FrmRptUsersFormPerm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptUsersFormPerm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmRptUsersMenuPerm.Designer.vb">
+      <DependentUpon>FrmRptUsersMenuPerm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptUsersMenuPerm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmRptUsersInactivity.Designer.vb">
+      <DependentUpon>FrmRptUsersInactivity.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptUsersInactivity.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmDepoScheSearch.Designer.vb">
+      <DependentUpon>FrmDepoScheSearch.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmDepoScheSearch.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmCitiCheckSearch.Designer.vb">
+      <DependentUpon>FrmCitiCheckSearch.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmCitiCheckSearch.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmAppSettting.Designer.vb">
+      <DependentUpon>FrmAppSettting.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmAppSettting.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmCitiSpeedCollectionReturnProcess.Designer.vb">
+      <DependentUpon>FrmCitiSpeedCollectionReturnProcess.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmCitiSpeedCollectionReturnProcess.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmCitiSpeedReturnFile.Designer.vb">
+      <DependentUpon>FrmCitiSpeedReturnFile.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmCitiSpeedReturnFile.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmClearingChargeDet.Designer.vb">
+      <DependentUpon>FrmClearingChargeDet.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmClearingChargeDet.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmClearingChargeFile.Designer.vb">
+      <DependentUpon>FrmClearingChargeFile.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmClearingChargeFile.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmClearingSearch.Designer.vb">
+      <DependentUpon>FrmClearingSearch.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmClearingSearch.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmClientMail.Designer.vb">
+      <DependentUpon>FrmClientMail.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmClientMail.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmCTRRefSearch.Designer.vb">
+      <DependentUpon>FrmCTRRefSearch.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmCTRRefSearch.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmDDBreakup.Designer.vb">
+      <DependentUpon>FrmDDBreakup.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmDDBreakup.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmDepositExportGo.Designer.vb">
+      <DependentUpon>FrmDepositExportGo.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmDepositExportGo.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmEmailSettingDetail.Designer.vb">
+      <DependentUpon>FrmEmailSettingDetail.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmEmailSettingDetail.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmEmailSettingSummary.Designer.vb">
+      <DependentUpon>FrmEmailSettingSummary.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmEmailSettingSummary.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmGuaranteedCreditBooking.Designer.vb">
+      <DependentUpon>FrmGuaranteedCreditBooking.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmGuaranteedCreditBooking.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmImportSameDayMis.Designer.vb">
+      <DependentUpon>FrmImportSameDayMis.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmImportSameDayMis.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmLoginSession.Designer.vb">
+      <DependentUpon>FrmLoginSession.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmLoginSession.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmProcessSameDayMis.Designer.vb">
+      <DependentUpon>FrmProcessSameDayMis.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmProcessSameDayMis.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmReportSameDayMis.Designer.vb">
+      <DependentUpon>FrmReportSameDayMis.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmReportSameDayMis.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmRptClearBACHChargeSummSheet.Designer.vb">
+      <DependentUpon>FrmRptClearBACHChargeSummSheet.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptClearBACHChargeSummSheet.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmRptClearChargeSumm.Designer.vb">
+      <DependentUpon>FrmRptClearChargeSumm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptClearChargeSumm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmRptClearClientWiseCharge.Designer.vb">
+      <DependentUpon>FrmRptClearClientWiseCharge.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptClearClientWiseCharge.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmRptClearClientWiseChargeSumm.Designer.vb">
+      <DependentUpon>FrmRptClearClientWiseChargeSumm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptClearClientWiseChargeSumm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmRptClearGovtCheck.Designer.vb">
+      <DependentUpon>FrmRptClearGovtCheck.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptClearGovtCheck.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmRptClearingCheckHistOld.Designer.vb">
+      <DependentUpon>FrmRptClearingCheckHistOld.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptClearingCheckHistOld.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmClearDDCheckProcess.Designer.vb">
+      <DependentUpon>FrmClearDDCheckProcess.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmClearDDCheckProcess.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmCitiSpeedReturnSumm.Designer.vb">
+      <DependentUpon>FrmCitiSpeedReturnSumm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmCitiSpeedReturnSumm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmCitiSpeedReturnDet.Designer.vb">
+      <DependentUpon>FrmCitiSpeedReturnDet.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmCitiSpeedReturnDet.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmClearingReturnFile.Designer.vb">
+      <DependentUpon>FrmClearingReturnFile.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmClearingReturnFile.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmClearingReturnSumm.Designer.vb">
+      <DependentUpon>FrmClearingReturnSumm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmClearingReturnSumm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmClearCheckImport.Designer.vb">
+      <DependentUpon>FrmClearCheckImport.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmClearCheckImport.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmClearingReturnDet.Designer.vb">
+      <DependentUpon>FrmClearingReturnDet.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmClearingReturnDet.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmLogReport.Designer.vb">
+      <DependentUpon>FrmLogReport.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmLogReport.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmRptDepositBreak2.Designer.vb">
+      <DependentUpon>FrmRptDepositBreak2.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptDepositBreak2.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmRptGuaranteedCreditBooking.Designer.vb">
+      <DependentUpon>FrmRptGuaranteedCreditBooking.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptGuaranteedCreditBooking.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmRptUsersRole.Designer.vb">
+      <DependentUpon>FrmRptUsersRole.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptUsersRole.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmSameDayMISDetail.Designer.vb">
+      <DependentUpon>FrmSameDayMISDetail.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmSameDayMISDetail.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmSameDayMISEmailHistory.Designer.vb">
+      <DependentUpon>FrmSameDayMISEmailHistory.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmSameDayMISEmailHistory.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmSameDayMISSummary.Designer.vb">
+      <DependentUpon>FrmSameDayMISSummary.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmSameDayMISSummary.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmSetClearDate.Designer.vb">
+      <DependentUpon>FrmSetClearDate.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmSetClearDate.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmEERSFeedExport.Designer.vb">
+      <DependentUpon>FrmEERSFeedExport.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmEERSFeedExport.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmClearRetImport.Designer.vb">
+      <DependentUpon>FrmClearRetImport.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmClearRetImport.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmRptClearPDC.Designer.vb">
+      <DependentUpon>FrmRptClearPDC.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptClearPDC.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmRptClearDepositDet.Designer.vb">
+      <DependentUpon>FrmRptClearDepositDet.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptClearDepositDet.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmRptClearDeposit.Designer.vb">
+      <DependentUpon>FrmRptClearDeposit.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptClearDeposit.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmRptClearHighValue.Designer.vb">
+      <DependentUpon>FrmRptClearHighValue.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptClearHighValue.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmRptClearBranchwise.Designer.vb">
+      <DependentUpon>FrmRptClearBranchwise.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptClearBranchwise.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmRptClearCheckSumm.Designer.vb">
+      <DependentUpon>FrmRptClearCheckSumm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptClearCheckSumm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmPDCTransfer.Designer.vb">
+      <DependentUpon>FrmPDCTransfer.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmPDCTransfer.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmPDCSumm.Designer.vb">
+      <DependentUpon>FrmPDCSumm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmPDCSumm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmPDCDet.Designer.vb">
+      <DependentUpon>FrmPDCDet.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmPDCDet.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmRptClearReturn.Designer.vb">
+      <DependentUpon>FrmRptClearReturn.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptClearReturn.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmRptHoliday.Designer.vb">
+      <DependentUpon>FrmRptHoliday.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptHoliday.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmClearingSumm.Designer.vb">
+      <DependentUpon>FrmClearingSumm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmClearingSumm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmFlexAccSumm.Designer.vb">
+      <DependentUpon>FrmFlexAccSumm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmFlexAccSumm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmFlexAccDet.Designer.vb">
+      <DependentUpon>FrmFlexAccDet.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmFlexAccDet.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmCitiAnyFunding.Designer.vb">
+      <DependentUpon>FrmCitiAnyFunding.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmCitiAnyFunding.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmCCMSRefSearch.Designer.vb">
+      <DependentUpon>FrmCCMSRefSearch.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmCCMSRefSearch.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmCitiAnyReturnSumm.Designer.vb">
+      <DependentUpon>FrmCitiAnyReturnSumm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmCitiAnyReturnSumm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmCollScheduleSumm.Designer.vb">
+      <DependentUpon>FrmCollScheduleSumm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmCollScheduleSumm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmCollectionProcessCitiAny.Designer.vb">
+      <DependentUpon>FrmCollectionProcessCitiAny.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmCollectionProcessCitiAny.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmDDSumm.Designer.vb">
+      <DependentUpon>FrmDDSumm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmDDSumm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmPendingAuth.Designer.vb">
+      <DependentUpon>FrmPendingAuth.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmPendingAuth.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmRptAnyCheckCollectionReprint.Designer.vb">
+      <DependentUpon>FrmRptAnyCheckCollectionReprint.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptAnyCheckCollectionReprint.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmRptMonthBillCashCheck.Designer.vb">
+      <DependentUpon>FrmRptMonthBillCashCheck.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptMonthBillCashCheck.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmSubSysDDInfo.Designer.vb">
+      <DependentUpon>FrmSubSysDDInfo.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmSubSysDDInfo.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmCitiSpeedMismatchTotal.Designer.vb">
+      <DependentUpon>FrmCitiSpeedMismatchTotal.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmCitiSpeedMismatchTotal.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmDepoScheMismatchTotal.Designer.vb">
+      <DependentUpon>FrmDepoScheMismatchTotal.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmDepoScheMismatchTotal.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmDepoScheMissingDetail.Designer.vb">
+      <DependentUpon>FrmDepoScheMissingDetail.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmDepoScheMissingDetail.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmClearingClientSumm.Designer.vb">
+      <DependentUpon>FrmClearingClientSumm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmClearingClientSumm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmClearingDepositFile.Designer.vb">
+      <DependentUpon>FrmClearingDepositFile.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmClearingDepositFile.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmClearingLocationSumm.Designer.vb">
+      <DependentUpon>FrmClearingLocationSumm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmClearingLocationSumm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmClearingLocationDet.Designer.vb">
+      <DependentUpon>FrmClearingLocationDet.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmClearingLocationDet.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmClearingBranchSumm.Designer.vb">
+      <DependentUpon>FrmClearingBranchSumm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmClearingBranchSumm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmClearingBranchDet.Designer.vb">
+      <DependentUpon>FrmClearingBranchDet.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmClearingBranchDet.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmClearingBankSumm.Designer.vb">
+      <DependentUpon>FrmClearingBankSumm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmClearingBankSumm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmClearingBankDet.Designer.vb">
+      <DependentUpon>FrmClearingBankDet.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmClearingBankDet.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmClearingClientDet.Designer.vb">
+      <DependentUpon>FrmClearingClientDet.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmClearingClientDet.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmCitiCheckSumm.Designer.vb">
+      <DependentUpon>FrmCitiCheckSumm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmCitiCheckSumm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmCitiSpeedSumm.Designer.vb">
+      <DependentUpon>FrmCitiSpeedSumm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmCitiSpeedSumm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmCitiCashSumm.Designer.vb">
+      <DependentUpon>FrmCitiCashSumm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmCitiCashSumm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmDepoScheSumm.Designer.vb">
+      <DependentUpon>FrmDepoScheSumm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmDepoScheSumm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmAbout.Designer.vb">
+      <DependentUpon>FrmAbout.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmAbout.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmRptAnyReminder.Designer.vb">
+      <DependentUpon>FrmRptAnyReminder.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptAnyReminder.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmRptAnyCheckCollection.Designer.vb">
+      <DependentUpon>FrmRptAnyCheckCollection.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptAnyCheckCollection.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmTempTest.Designer.vb">
+      <DependentUpon>FrmTempTest.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmTempTest.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmUpWait.Designer.vb">
+      <DependentUpon>FrmUpWait.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmUpWait.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Report\crCitiAnyFunding.vb">
+      <DependentUpon>crCitiAnyFunding.rpt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <SubType>Component</SubType>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Report\crAccWiseClearCheckSumm.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>crAccWiseClearCheckSumm.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Report\crBankWiseDeliveryCheck.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>crBankWiseDeliveryCheck.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Report\crCitiAnyReturnOld.vb">
+      <DependentUpon>crCitiAnyReturnOld.rpt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <SubType>Component</SubType>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Report\crBooking.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>crBooking.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Report\crBookingCheck1.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>crBookingCheck.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Report\crCitiAnyReminder.vb">
+      <DependentUpon>crCitiAnyReminder.rpt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <SubType>Component</SubType>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="FrmRptDepositBreak.Designer.vb">
+      <DependentUpon>FrmRptDepositBreak.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptDepositBreak.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmRptUnclearFund.Designer.vb">
+      <DependentUpon>FrmRptUnclearFund.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptUnclearFund.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmRptDDFunding.Designer.vb">
+      <DependentUpon>FrmRptDDFunding.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptDDFunding.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmRptAnyReturn.Designer.vb">
+      <DependentUpon>FrmRptAnyReturn.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptAnyReturn.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmRptAnyOutstanding.Designer.vb">
+      <DependentUpon>FrmRptAnyOutstanding.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptAnyOutstanding.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmRptAnyFunding.Designer.vb">
+      <DependentUpon>FrmRptAnyFunding.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptAnyFunding.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmRptAnyProcessing.Designer.vb">
+      <DependentUpon>FrmRptAnyProcessing.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptAnyProcessing.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmRptCashSpeedDayZero.Designer.vb">
+      <DependentUpon>FrmRptCashSpeedDayZero.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptCashSpeedDayZero.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmRptCitiAnyDepositDetail.Designer.vb">
+      <DependentUpon>FrmRptCitiAnyDepositDetail.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptCitiAnyDepositDetail.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmRptSpeedReturn.Designer.vb">
+      <DependentUpon>FrmRptSpeedReturn.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptSpeedReturn.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmRptSpeedDeposit.Designer.vb">
+      <DependentUpon>FrmRptSpeedDeposit.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptSpeedDeposit.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmRptCashDeposit.Designer.vb">
+      <DependentUpon>FrmRptCashDeposit.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptCashDeposit.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmReminderCitiAny.Designer.vb">
+      <DependentUpon>FrmReminderCitiAny.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmReminderCitiAny.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmHolidaySumm.Designer.vb">
+      <DependentUpon>FrmHolidaySumm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmHolidaySumm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmReversalGen.Designer.vb">
+      <DependentUpon>FrmReversalGen.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmReversalGen.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmReversalOutstanding.Designer.vb">
+      <DependentUpon>FrmReversalOutstanding.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmReversalOutstanding.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmRptCashSpeedSummary.Designer.vb">
+      <DependentUpon>FrmRptCashSpeedSummary.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmRptCashSpeedSummary.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmBooking.Designer.vb">
+      <DependentUpon>FrmBooking.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmBooking.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmReportViewer.Designer.vb">
+      <DependentUpon>FrmReportViewer.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmReportViewer.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmScheduleStockSumm.Designer.vb">
+      <DependentUpon>FrmScheduleStockSumm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmScheduleStockSumm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmClientLocChargeSumm.Designer.vb">
+      <DependentUpon>FrmClientLocChargeSumm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmClientLocChargeSumm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmClientLocChargeDet.Designer.vb">
+      <DependentUpon>FrmClientLocChargeDet.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmClientLocChargeDet.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmClientSumm.Designer.vb">
+      <DependentUpon>FrmClientSumm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmClientSumm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmUsersFGSumm.Designer.vb">
+      <DependentUpon>FrmUsersFGSumm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmUsersFGSumm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmBranchSumm.Designer.vb">
+      <DependentUpon>FrmBranchSumm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmBranchSumm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmCitibankBranchSumm.Designer.vb">
+      <DependentUpon>FrmCitibankBranchSumm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmCitibankBranchSumm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmList.Designer.vb">
+      <DependentUpon>FrmList.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmList.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmReturnSumm.Designer.vb">
+      <DependentUpon>FrmReturnSumm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmReturnSumm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmCheckTypeSumm.Designer.vb">
+      <DependentUpon>FrmCheckTypeSumm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmCheckTypeSumm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmZoneSumm.Designer.vb">
+      <DependentUpon>FrmZoneSumm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmZoneSumm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmLocationSumm.Designer.vb">
+      <DependentUpon>FrmLocationSumm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmLocationSumm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmBankSumm.Designer.vb">
+      <DependentUpon>FrmBankSumm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmBankSumm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmScheduleStockDet.Designer.vb">
+      <DependentUpon>FrmScheduleStockDet.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmScheduleStockDet.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmClearingDetail.Designer.vb">
+      <DependentUpon>FrmClearingDetail.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmClearingDetail.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmCitiAnyReturnDet.Designer.vb">
+      <DependentUpon>FrmCitiAnyReturnDet.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmCitiAnyReturnDet.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmDDDetail.Designer.vb">
+      <DependentUpon>FrmDDDetail.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmDDDetail.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmCollSchedule.Designer.vb">
+      <DependentUpon>FrmCollSchedule.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmCollSchedule.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmCitiCheckDetail.Designer.vb">
+      <DependentUpon>FrmCitiCheckDetail.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmCitiCheckDetail.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmCitiSpeedDetail.Designer.vb">
+      <DependentUpon>FrmCitiSpeedDetail.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmCitiSpeedDetail.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmCitiCashDetail.Designer.vb">
+      <DependentUpon>FrmCitiCashDetail.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmCitiCashDetail.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmDepoSchedule.Designer.vb">
+      <DependentUpon>FrmDepoSchedule.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmDepoSchedule.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmCitiBankBranchDet.Designer.vb">
+      <DependentUpon>FrmCitiBankBranchDet.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmCitiBankBranchDet.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmZoneDet.Designer.vb">
+      <DependentUpon>FrmZoneDet.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmZoneDet.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmCheckTypeDet.Designer.vb">
+      <DependentUpon>FrmCheckTypeDet.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmCheckTypeDet.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmReturnDet.Designer.vb">
+      <DependentUpon>FrmReturnDet.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmReturnDet.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmBankDet.Designer.vb">
+      <DependentUpon>FrmBankDet.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmBankDet.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmBranchDet.Designer.vb">
+      <DependentUpon>FrmBranchDet.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmBranchDet.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmClientDet.Designer.vb">
+      <DependentUpon>FrmClientDet.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmClientDet.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmHolidayDet.Designer.vb">
+      <DependentUpon>FrmHolidayDet.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmHolidayDet.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmLocationDet.Designer.vb">
+      <DependentUpon>FrmLocationDet.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmLocationDet.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmPermFGDet.Designer.vb">
+      <DependentUpon>FrmPermFGDet.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmPermFGDet.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmUsersFGDet.Designer.vb">
+      <DependentUpon>FrmUsersFGDet.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmUsersFGDet.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmFGPermSumm.Designer.vb">
+      <DependentUpon>FrmFGPermSumm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmFGPermSumm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmUserSumm.Designer.vb">
+      <DependentUpon>FrmUserSumm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmUserSumm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmUsersDet.Designer.vb">
+      <DependentUpon>FrmUsersDet.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmUsersDet.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmDeptSumm.Designer.vb">
+      <DependentUpon>FrmDeptSumm.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmDeptSumm.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmLogin.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmLogin.Designer.vb">
+      <DependentUpon>FrmLogin.vb</DependentUpon>
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmDeptDet.Designer.vb">
+      <DependentUpon>FrmDeptDet.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmDeptDet.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmMain.Designer.vb">
+      <DependentUpon>FrmMain.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FrmMain.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="My Project\AssemblyInfo.vb" />
+    <Compile Include="My Project\Application.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Application.myapp</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Resources.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Settings.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Compile Include="Report\crCitiAnyCheckCollection.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>crCitiAnyCheckCollection.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Report\crCitiAnyReturn.vb">
+      <DependentUpon>crCitiAnyReturn.rpt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <SubType>Component</SubType>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Report\crCashSpeedDayZero.vb">
+      <DependentUpon>crCashSpeedDayZero.rpt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <SubType>Component</SubType>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Report\crCitiAnyOutstanding.vb">
+      <DependentUpon>crCitiAnyOutstanding.rpt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <SubType>Component</SubType>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Report\crCitiAnyFunding_old.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>crCitiAnyFunding_old.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Report\crCitiAnyProcessing.vb">
+      <DependentUpon>crCitiAnyProcessing.rpt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <SubType>Component</SubType>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Report\crCitiAnyDeposit.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>crCitiAnyDeposit.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Report\crCitiClearDeposit.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>crCitiClearDeposit.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Report\crCitiClearDepositDet.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>crCitiClearDepositDet.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Report\crCitiClearReturn.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>crCitiClearReturn.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Report\crCityAnyF.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>crCityAnyF.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Report\crCityAnyFF.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>crCityAnyFF.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Report\crCityAnyFunding_new.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>crCityAnyFunding_new.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Report\crClearDepositDetPDC.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>crClearDepositDetPDC.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Report\crClearReturnHistCheck.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>crClearReturnHistCheck.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Report\crClearReturnHistFinal.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>crClearReturnHistFinal.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Report\crClearReturnMismatch.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>crClearReturnMismatch.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Report\crClearReturnSeq.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>crClearReturnSeq.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Report\crDDBreakupWithCheck.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>crDDBreakupWithCheck.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Report\crDDFunding.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>crDDFunding.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Report\crDepositBreak.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>crDepositBreak.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Report\crDepositBreak2.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>crDepositBreak2.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Report\crGuaranteedCreditBooking.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>crGuaranteedCreditBooking.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Report\crHighValueCheck.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>crHighValueCheck.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Report\crHoilday.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>crHoilday.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Report\crMonthBillCashCheck.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>crMonthBillCashCheck.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Report\crReversal.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>crReversal.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Report\crReversalClearingCheck.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>crReversalClearingCheck.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Report\crReversalClearingFinal.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>crReversalClearingFinal.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Report\crSpeedReturn.vb">
+      <DependentUpon>crSpeedReturn.rpt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <SubType>Component</SubType>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Report\crSpeedDeposit.vb">
+      <DependentUpon>crSpeedDeposit.rpt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <SubType>Component</SubType>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Report\crCashDeposit.vb">
+      <DependentUpon>crCashDeposit.rpt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <SubType>Component</SubType>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Report\crCashSpeedDetail.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>crCashSpeedDetail.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Report\crSysLogReport.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>crSysLogReport.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Report\crUnclearFund.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>crUnclearFund.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Report\crUsersRole.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>crUsersRole.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Report\DormantAccount.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DormantAccount.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Report\Return.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Return.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Report\RptBooking.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>RptBooking.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Report\RptSearch.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>RptSearch.rpt</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="FrmCitiCashWithBearerSumm.resx">
+      <DependentUpon>FrmCitiCashWithBearerSumm.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmInvoice.resx">
+      <DependentUpon>FrmInvoice.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmPPMFeedExport.resx">
+      <DependentUpon>FrmPPMFeedExport.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmPPMServiceClearing.resx">
+      <DependentUpon>FrmPPMServiceClearing.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmPPMServiceCollection.resx">
+      <DependentUpon>FrmPPMServiceCollection.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmPPMServiceControl.resx">
+      <DependentUpon>FrmPPMServiceControl.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmPPM_Clearing.resx">
+      <DependentUpon>FrmPPM_Clearing.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmPPM_Collection.resx">
+      <DependentUpon>FrmPPM_Collection.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptUsersFormPerm.resx">
+      <DependentUpon>FrmRptUsersFormPerm.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptUsersMenuPerm.resx">
+      <DependentUpon>FrmRptUsersMenuPerm.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptUsersInactivity.resx">
+      <DependentUpon>FrmRptUsersInactivity.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmDepoScheSearch.resx">
+      <DependentUpon>FrmDepoScheSearch.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmCitiCheckSearch.resx">
+      <DependentUpon>FrmCitiCheckSearch.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmAppSettting.resx">
+      <DependentUpon>FrmAppSettting.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmCitiSpeedCollectionReturnProcess.resx">
+      <DependentUpon>FrmCitiSpeedCollectionReturnProcess.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmCitiSpeedReturnFile.resx">
+      <DependentUpon>FrmCitiSpeedReturnFile.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmClearingChargeDet.resx">
+      <DependentUpon>FrmClearingChargeDet.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmClearingChargeFile.resx">
+      <DependentUpon>FrmClearingChargeFile.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmClearingSearch.resx">
+      <DependentUpon>FrmClearingSearch.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmClientMail.resx">
+      <DependentUpon>FrmClientMail.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmCTRRefSearch.resx">
+      <DependentUpon>FrmCTRRefSearch.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmDDBreakup.resx">
+      <DependentUpon>FrmDDBreakup.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmDepositExportGo.resx">
+      <DependentUpon>FrmDepositExportGo.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmEmailSettingDetail.resx">
+      <DependentUpon>FrmEmailSettingDetail.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmEmailSettingSummary.resx">
+      <DependentUpon>FrmEmailSettingSummary.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmGuaranteedCreditBooking.resx">
+      <DependentUpon>FrmGuaranteedCreditBooking.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmImportSameDayMis.resx">
+      <DependentUpon>FrmImportSameDayMis.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmLoginSession.resx">
+      <DependentUpon>FrmLoginSession.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmProcessSameDayMis.resx">
+      <DependentUpon>FrmProcessSameDayMis.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmReportSameDayMis.resx">
+      <DependentUpon>FrmReportSameDayMis.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptClearBACHChargeSummSheet.resx">
+      <DependentUpon>FrmRptClearBACHChargeSummSheet.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptClearChargeSumm.resx">
+      <DependentUpon>FrmRptClearChargeSumm.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptClearClientWiseCharge.resx">
+      <DependentUpon>FrmRptClearClientWiseCharge.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptClearClientWiseChargeSumm.resx">
+      <DependentUpon>FrmRptClearClientWiseChargeSumm.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptClearGovtCheck.resx">
+      <DependentUpon>FrmRptClearGovtCheck.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptClearingCheckHistOld.resx">
+      <DependentUpon>FrmRptClearingCheckHistOld.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmClearDDCheckProcess.resx">
+      <DependentUpon>FrmClearDDCheckProcess.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmCitiSpeedReturnSumm.resx">
+      <DependentUpon>FrmCitiSpeedReturnSumm.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmCitiSpeedReturnDet.resx">
+      <DependentUpon>FrmCitiSpeedReturnDet.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmClearingReturnFile.resx">
+      <DependentUpon>FrmClearingReturnFile.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmClearingReturnSumm.resx">
+      <DependentUpon>FrmClearingReturnSumm.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmClearCheckImport.resx">
+      <DependentUpon>FrmClearCheckImport.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmClearingReturnDet.resx">
+      <DependentUpon>FrmClearingReturnDet.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmLogReport.resx">
+      <DependentUpon>FrmLogReport.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptDepositBreak2.resx">
+      <DependentUpon>FrmRptDepositBreak2.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptGuaranteedCreditBooking.resx">
+      <DependentUpon>FrmRptGuaranteedCreditBooking.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptUsersRole.resx">
+      <DependentUpon>FrmRptUsersRole.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmSameDayMISDetail.resx">
+      <DependentUpon>FrmSameDayMISDetail.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmSameDayMISEmailHistory.resx">
+      <DependentUpon>FrmSameDayMISEmailHistory.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmSameDayMISSummary.resx">
+      <DependentUpon>FrmSameDayMISSummary.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmSetClearDate.resx">
+      <DependentUpon>FrmSetClearDate.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmEERSFeedExport.resx">
+      <DependentUpon>FrmEERSFeedExport.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmClearRetImport.resx">
+      <DependentUpon>FrmClearRetImport.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptClearPDC.resx">
+      <DependentUpon>FrmRptClearPDC.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptClearDepositDet.resx">
+      <DependentUpon>FrmRptClearDepositDet.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptClearDeposit.resx">
+      <DependentUpon>FrmRptClearDeposit.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptClearHighValue.resx">
+      <DependentUpon>FrmRptClearHighValue.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptClearBranchwise.resx">
+      <DependentUpon>FrmRptClearBranchwise.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptClearCheckSumm.resx">
+      <DependentUpon>FrmRptClearCheckSumm.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmPDCTransfer.resx">
+      <DependentUpon>FrmPDCTransfer.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmPDCSumm.resx">
+      <DependentUpon>FrmPDCSumm.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmPDCDet.resx">
+      <DependentUpon>FrmPDCDet.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptClearReturn.resx">
+      <DependentUpon>FrmRptClearReturn.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptHoliday.resx">
+      <DependentUpon>FrmRptHoliday.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmClearingSumm.resx">
+      <DependentUpon>FrmClearingSumm.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmFlexAccSumm.resx">
+      <DependentUpon>FrmFlexAccSumm.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmFlexAccDet.resx">
+      <DependentUpon>FrmFlexAccDet.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmCitiAnyFunding.resx">
+      <DependentUpon>FrmCitiAnyFunding.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmCCMSRefSearch.resx">
+      <DependentUpon>FrmCCMSRefSearch.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmCitiAnyReturnSumm.resx">
+      <DependentUpon>FrmCitiAnyReturnSumm.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmCollScheduleSumm.resx">
+      <DependentUpon>FrmCollScheduleSumm.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmCollectionProcessCitiAny.resx">
+      <DependentUpon>FrmCollectionProcessCitiAny.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmDDSumm.resx">
+      <DependentUpon>FrmDDSumm.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmPendingAuth.resx">
+      <DependentUpon>FrmPendingAuth.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptAnyCheckCollectionReprint.resx">
+      <DependentUpon>FrmRptAnyCheckCollectionReprint.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptMonthBillCashCheck.resx">
+      <DependentUpon>FrmRptMonthBillCashCheck.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmSubSysDDInfo.resx">
+      <DependentUpon>FrmSubSysDDInfo.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmCitiSpeedMismatchTotal.resx">
+      <DependentUpon>FrmCitiSpeedMismatchTotal.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmDepoScheMismatchTotal.resx">
+      <DependentUpon>FrmDepoScheMismatchTotal.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmDepoScheMissingDetail.resx">
+      <DependentUpon>FrmDepoScheMissingDetail.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmClearingClientSumm.resx">
+      <DependentUpon>FrmClearingClientSumm.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmClearingDepositFile.resx">
+      <DependentUpon>FrmClearingDepositFile.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmClearingLocationSumm.resx">
+      <DependentUpon>FrmClearingLocationSumm.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmClearingLocationDet.resx">
+      <DependentUpon>FrmClearingLocationDet.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmClearingBranchSumm.resx">
+      <DependentUpon>FrmClearingBranchSumm.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmClearingBranchDet.resx">
+      <DependentUpon>FrmClearingBranchDet.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmClearingBankSumm.resx">
+      <DependentUpon>FrmClearingBankSumm.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmClearingBankDet.resx">
+      <DependentUpon>FrmClearingBankDet.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmClearingClientDet.resx">
+      <DependentUpon>FrmClearingClientDet.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmCitiCheckSumm.resx">
+      <DependentUpon>FrmCitiCheckSumm.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmCitiSpeedSumm.resx">
+      <DependentUpon>FrmCitiSpeedSumm.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmCitiCashSumm.resx">
+      <DependentUpon>FrmCitiCashSumm.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmDepoScheSumm.resx">
+      <DependentUpon>FrmDepoScheSumm.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmAbout.resx">
+      <DependentUpon>FrmAbout.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptAnyReminder.resx">
+      <DependentUpon>FrmRptAnyReminder.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptAnyCheckCollection.resx">
+      <DependentUpon>FrmRptAnyCheckCollection.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmTempTest.resx">
+      <DependentUpon>FrmTempTest.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmUpWait.resx">
+      <DependentUpon>FrmUpWait.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crCitiAnyFunding.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crCitiAnyFunding.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crAccWiseClearCheckSumm.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crAccWiseClearCheckSumm.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crBankWiseDeliveryCheck.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crBankWiseDeliveryCheck.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crCitiAnyReturnOld.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crCitiAnyReturnOld.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crBooking.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crBooking.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crBookingCheck.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crBookingCheck1.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crCitiAnyReminder.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crCitiAnyReminder.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptDepositBreak.resx">
+      <DependentUpon>FrmRptDepositBreak.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptUnclearFund.resx">
+      <DependentUpon>FrmRptUnclearFund.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptDDFunding.resx">
+      <DependentUpon>FrmRptDDFunding.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptAnyReturn.resx">
+      <DependentUpon>FrmRptAnyReturn.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptAnyOutstanding.resx">
+      <DependentUpon>FrmRptAnyOutstanding.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptAnyFunding.resx">
+      <DependentUpon>FrmRptAnyFunding.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptAnyProcessing.resx">
+      <DependentUpon>FrmRptAnyProcessing.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptCashSpeedDayZero.resx">
+      <DependentUpon>FrmRptCashSpeedDayZero.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptCitiAnyDepositDetail.resx">
+      <DependentUpon>FrmRptCitiAnyDepositDetail.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptSpeedReturn.resx">
+      <DependentUpon>FrmRptSpeedReturn.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptSpeedDeposit.resx">
+      <DependentUpon>FrmRptSpeedDeposit.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptCashDeposit.resx">
+      <DependentUpon>FrmRptCashDeposit.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmReminderCitiAny.resx">
+      <DependentUpon>FrmReminderCitiAny.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmHolidaySumm.resx">
+      <DependentUpon>FrmHolidaySumm.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmReversalGen.resx">
+      <DependentUpon>FrmReversalGen.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmReversalOutstanding.resx">
+      <DependentUpon>FrmReversalOutstanding.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmRptCashSpeedSummary.resx">
+      <DependentUpon>FrmRptCashSpeedSummary.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmBooking.resx">
+      <DependentUpon>FrmBooking.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmReportViewer.resx">
+      <DependentUpon>FrmReportViewer.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmScheduleStockSumm.resx">
+      <DependentUpon>FrmScheduleStockSumm.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmClientLocChargeSumm.resx">
+      <DependentUpon>FrmClientLocChargeSumm.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmClientLocChargeDet.resx">
+      <DependentUpon>FrmClientLocChargeDet.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmClientSumm.resx">
+      <DependentUpon>FrmClientSumm.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmUsersFGSumm.resx">
+      <DependentUpon>FrmUsersFGSumm.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmBranchSumm.resx">
+      <DependentUpon>FrmBranchSumm.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmCitibankBranchSumm.resx">
+      <DependentUpon>FrmCitibankBranchSumm.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmList.resx">
+      <DependentUpon>FrmList.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmReturnSumm.resx">
+      <DependentUpon>FrmReturnSumm.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmCheckTypeSumm.resx">
+      <DependentUpon>FrmCheckTypeSumm.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmZoneSumm.resx">
+      <DependentUpon>FrmZoneSumm.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmLocationSumm.resx">
+      <DependentUpon>FrmLocationSumm.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmBankSumm.resx">
+      <DependentUpon>FrmBankSumm.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmScheduleStockDet.resx">
+      <DependentUpon>FrmScheduleStockDet.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmClearingDetail.resx">
+      <DependentUpon>FrmClearingDetail.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmCitiAnyReturnDet.resx">
+      <DependentUpon>FrmCitiAnyReturnDet.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmDDDetail.resx">
+      <DependentUpon>FrmDDDetail.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmCollSchedule.resx">
+      <DependentUpon>FrmCollSchedule.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmCitiCheckDetail.resx">
+      <DependentUpon>FrmCitiCheckDetail.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmCitiSpeedDetail.resx">
+      <DependentUpon>FrmCitiSpeedDetail.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmCitiCashDetail.resx">
+      <DependentUpon>FrmCitiCashDetail.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmDepoSchedule.resx">
+      <DependentUpon>FrmDepoSchedule.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmCitiBankBranchDet.resx">
+      <DependentUpon>FrmCitiBankBranchDet.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmZoneDet.resx">
+      <DependentUpon>FrmZoneDet.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmCheckTypeDet.resx">
+      <DependentUpon>FrmCheckTypeDet.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmReturnDet.resx">
+      <DependentUpon>FrmReturnDet.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmBankDet.resx">
+      <DependentUpon>FrmBankDet.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmBranchDet.resx">
+      <DependentUpon>FrmBranchDet.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmClientDet.resx">
+      <DependentUpon>FrmClientDet.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmHolidayDet.resx">
+      <DependentUpon>FrmHolidayDet.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmLocationDet.resx">
+      <DependentUpon>FrmLocationDet.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmPermFGDet.resx">
+      <DependentUpon>FrmPermFGDet.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmUsersFGDet.resx">
+      <DependentUpon>FrmUsersFGDet.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmFGPermSumm.resx">
+      <DependentUpon>FrmFGPermSumm.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmUserSumm.resx">
+      <DependentUpon>FrmUserSumm.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmUsersDet.resx">
+      <DependentUpon>FrmUsersDet.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmDeptSumm.resx">
+      <DependentUpon>FrmDeptSumm.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmLogin.resx">
+      <DependentUpon>FrmLogin.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmDeptDet.resx">
+      <DependentUpon>FrmDeptDet.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmMain.resx">
+      <DependentUpon>FrmMain.vb</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="My Project\Resources.resx">
+      <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.vb</LastGenOutput>
+      <CustomToolNamespace>My.Resources</CustomToolNamespace>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crCitiAnyCheckCollection.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crCitiAnyCheckCollection.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crCitiAnyReturn.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crCitiAnyReturn.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crCashSpeedDayZero.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crCashSpeedDayZero.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crCitiAnyOutstanding.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crCitiAnyOutstanding.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crCitiAnyFunding_old.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crCitiAnyFunding_old.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crCitiAnyProcessing.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crCitiAnyProcessing.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crCitiAnyDeposit.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crCitiAnyDeposit.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crCitiClearDeposit.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crCitiClearDeposit.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crCitiClearDepositDet.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crCitiClearDepositDet.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crCitiClearReturn.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crCitiClearReturn.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crCityAnyF.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crCityAnyF.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crCityAnyFF.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crCityAnyFF.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crCityAnyFunding_new.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crCityAnyFunding_new.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crClearDepositDetPDC.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crClearDepositDetPDC.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crClearReturnHistCheck.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crClearReturnHistCheck.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crClearReturnHistFinal.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crClearReturnHistFinal.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crClearReturnMismatch.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crClearReturnMismatch.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crClearReturnSeq.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crClearReturnSeq.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crDDBreakupWithCheck.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crDDBreakupWithCheck.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crDDFunding.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crDDFunding.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crDepositBreak.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crDepositBreak.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crDepositBreak2.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crDepositBreak2.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crGuaranteedCreditBooking.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crGuaranteedCreditBooking.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crHighValueCheck.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crHighValueCheck.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crHoilday.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crHoilday.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crMonthBillCashCheck.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crMonthBillCashCheck.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crReversal.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crReversal.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crReversalClearingCheck.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crReversalClearingCheck.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crReversalClearingFinal.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crReversalClearingFinal.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crSpeedReturn.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crSpeedReturn.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crSpeedDeposit.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crSpeedDeposit.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crCashDeposit.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crCashDeposit.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crCashSpeedDetail.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crCashSpeedDetail.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crSysLogReport.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crSysLogReport.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crUnclearFund.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crUnclearFund.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\crUsersRole.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>crUsersRole.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\DormantAccount.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>DormantAccount.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\Return.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>Return.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\RptBooking.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>RptBooking.vb</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Report\RptSearch.rpt">
+      <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
+      <LastGenOutput>RptSearch.vb</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="My Project\app.manifest" />
+    <None Include="My Project\Application.myapp">
+      <Generator>MyApplicationCodeGenerator</Generator>
+      <LastGenOutput>Application.Designer.vb</LastGenOutput>
+    </None>
+    <None Include="My Project\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <CustomToolNamespace>My</CustomToolNamespace>
+      <LastGenOutput>Settings.Designer.vb</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{967B4E0D-AD0C-4609-AB67-0FA40C0206D8}" />
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="Microsoft.Office.Core">
+      <Guid>{2DF8D04C-5BFA-101B-BDE5-00AA0044DE52}</Guid>
+      <VersionMajor>2</VersionMajor>
+      <VersionMinor>4</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+    </COMReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

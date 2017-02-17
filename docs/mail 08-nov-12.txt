@@ -1,0 +1,33 @@
+Dear Dewan bhai, 
+ 
+Thanks , I have added (in red) some points also  per below…
+ 
+1)Need to change definition and description of collection product details in FRD (Can be taken from BRD)
+2)CitianyWhere will be replaced with normal collection and front screen will require few modification.
+3)Separate entry form is required to maintain Citicheck processing.
+4)Separate CitiCheck report is required for A/C entry in flexcube
+5)Flexcube csv file is required for CitiAnywhere funding 
+6)Query module is required for Citianythere and speed collect with different criteria
+7)Frequency to generate Reminder letter is 1 month
+8)Deposit slip/Schedule length will 12 digit instead of 10 digit and amount field should be store 1000 core
+9)Outstanding screen should have userid and authorizer detail , multiple selection is required in this screen.
+10)Checks for collection reprint will have option to generate report using date range and reference range which will be converted to an excel format.
+11)A new column “Routing no” will be added in Bank branch table .Current bank branch details will be updated by ops team and mapped with routing number.
+12)A report will show what are the checks are outstanding of a client.
+13) Including date of entry option in the report.
+14)Authorize option to be added in every data entry screen and action to be taken by any user.
+15) Some new reports will be required which can confirm at the time of UAT.
+16) Some modification required  in the front end of different screen like, Billing screen, DD  input, Check input etc.
+17) Some small modifications may required as and when face.
+18) We will maintain a log after starting UAT.
+ 
+Please note that we have missed one important point regarding return check for which it will required an csv file to be upload to flexcube, requesting you to communicate
+With Mr. Lodi.
+ 
+Pending points :
+ 
+1.Csv  uploadable file
+2.Is there any scope to throw an excel file to CCMS and system can validate the information’s which is realted to same day mis and day zero arrangement.
+ 
+Regards
+Nahar

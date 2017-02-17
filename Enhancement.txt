@@ -1,0 +1,63 @@
+#######################################
+ver: 0.7.1
+#######################################
+CitiSpeed/CitiCash
+---------------------------------------
+
++ Validation between user uploaded Same Day MIS data and user inputted data based on received deposit slips. Send Validation Mail.
+
++ Generate Flex uploadable CSV file for return processing based on Collection schedule return information entered in CCMS.
+
++ Generate Flex uploadable CSV file for Guaranteed Credit Booking.
+
++ Generate report to match collection schdeules against deposit schedules.
+
++ Add Deposit Type as a search filter in Outstanding Reversal Module.
+
++ Excel export option for every report.
+
++ An Enquery Function Screen to fetch records
+
++ 'Cutomer ref' included In Citicash and Citispeed detailed report 
+
++ Fix CitiSpeed return editing issue.
+
++ Fix CitiSpeed summary form title.
+
+---------------------------------------
+CitiAnywhere
+---------------------------------------
++ An Enquery Function Screen to fetch records
+
++ View Drawer A/C number in DD Detail and Citi-Anywhere return module.
+
++ Excel export option for every report.
+
++ View all reminder date for a given Citi-Anywhere check number.
+
++ Reminder Report reprint with new filtered fileds
+
++ Fix CitiAnywhere Collection Report to show records within exact range provided.
+
++ Fix unauthorize data deletion option in Citianywhere Return module.
+
+---------------------------------------
+CLEARING
+---------------------------------------
++ Charge Calculation Module for Clearing 
+
++ An Enquery Function Screen to fetch records
+
++ Add return code, bank branch code(Routing Code) in Return mismatch report.
+
++ Options to select Bank branch through Routing Code in Clearing Check detail module.
+
++ Fix issue where deleted duplicate entry are failed to mark returned with the process of uploadable return file. 
+
+---------------------------------------
+User Management
+---------------------------------------
++ Pdf report added -> User Role Report, Activity Log Report
+
++ New Report Added (pdf) -> Role Menu Permission Report, Role Form Permission Report, User Inactivity Report
+

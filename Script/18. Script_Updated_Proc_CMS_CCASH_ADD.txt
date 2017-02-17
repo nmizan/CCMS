@@ -1,0 +1,75 @@
+USE [CCMS]
+GO
+/****** Object:  StoredProcedure [dbo].[CMS_CCash_Add]    Script Date: 31/08/2015 12:19:25 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 07-Jan-13
+-- Modify date: 31 Aug 2015
+-- Modified by: Mohammad Yasir Arafat
+-- Description:	Add detail to CCash
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_CCash_Add]	
+	@D_CODE			varchar(12),
+	@CUSTOMER_REF 	varchar(15),
+	--@CASH_REF 		varchar(15), //Yasir
+	@ADD_TEXT varchar(150),
+	@SLIP_DATE 		datetime
+AS
+BEGIN	
+	DECLARE @ErrorVar INT;
+	
+	SET NOCOUNT ON;
+
+	BEGIN TRANSACTION;
+
+	IF EXISTS(SELECT D_CODE FROM CCASH WHERE D_CODE=@D_CODE)
+		BEGIN
+			-- Duplicate Entry
+			ROLLBACK TRANSACTION;		
+			RETURN 2	
+		END
+	
+	DELETE CCASH_HIST WHERE 
+		D_CODE=@D_CODE AND IS_AUTH=0;
+
+	SELECT @ErrorVar = @@ERROR;
+		
+	IF @ErrorVar <> 0
+		BEGIN
+			ROLLBACK TRANSACTION;
+			RETURN 1;
+		END
+	ELSE
+
+	--Commented by Yasir
+	--INSERT INTO CCASH_HIST(D_CODE, CUSTOMER_REF, CASH_REF, SLIP_DATE,
+	--	INPUT_BY,INPUT_DATETIME,INPUT_FROM,MOD_NO,[STATUS],IS_AUTH)
+	--	VALUES(@D_CODE, @CUSTOMER_REF, @CASH_REF, @SLIP_DATE,
+	--	substring(suser_name(),charindex('\',suser_name())+1,20),
+	--	GETDATE(),HOST_NAME(),1,'U',0);
+	
+	--Yasir
+	INSERT INTO CCASH_HIST(D_CODE, CUSTOMER_REF, ADD_TEXT, SLIP_DATE,
+		INPUT_BY,INPUT_DATETIME,INPUT_FROM,MOD_NO,[STATUS],IS_AUTH)
+		VALUES(@D_CODE, @CUSTOMER_REF, @ADD_TEXT, @SLIP_DATE,
+		substring(suser_name(),charindex('\',suser_name())+1,20),
+		GETDATE(),HOST_NAME(),1,'U',0);
+
+	SELECT @ErrorVar = @@ERROR;
+	
+	IF @ErrorVar <> 0
+		BEGIN
+			ROLLBACK TRANSACTION;
+			RETURN 1;
+		END
+	
+	COMMIT TRANSACTION;
+	RETURN 0;
+	   
+END
+

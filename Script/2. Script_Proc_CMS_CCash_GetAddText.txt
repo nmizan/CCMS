@@ -1,0 +1,36 @@
+USE [CCMS]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Mohammad Yasir Arafat
+-- Create date: 02-Sept-2015
+-- Description:	Procedure to get CCashAddText
+-- =============================================
+CREATE PROCEDURE CMS_CCash_GetAddText
+	@D_CODE	varchar(12)
+AS
+BEGIN
+	
+	SET NOCOUNT ON;
+	
+	IF EXISTS(SELECT D_CODE 
+			FROM CCASH  
+			WHERE D_CODE=@D_CODE)
+		BEGIN
+			SELECT ADD_TEXT
+			FROM CCASH 
+			WHERE D_CODE=@D_CODE;
+		END;
+	ELSE
+		BEGIN
+			SELECT ADD_TEXT
+			FROM CCASH_HIST				
+			WHERE D_CODE=@D_CODE AND IS_AUTH=0;
+		END;
+
+   
+END
+GO

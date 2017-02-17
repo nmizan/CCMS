@@ -1,0 +1,130 @@
+
+ALTER VIEW [dbo].[V_DD_FUNDING]
+as
+(
+	SELECT DD.D_CODE AS DEPOSIT_NO, DD.DD_NO, DD.AMOUNT,DD.DD_DATE,
+		b.BANK_NAME as DRAWEE_BANK, br.BRANCH_NAME AS DRAWEE_BRANCH 
+		FROM DD 
+		INNER JOIN BANK b
+		ON b.BANK_CODE=dd.DRAWER_BANKCODE
+		INNER JOIN BRANCH br
+		ON br.BANK_CODE=dd.DRAWER_BANKCODE AND br.BRANCH_CODE=dd.DRAWER_BRANCHCODE
+		AND br.LOCATION_CODE=dd.DRAWER_LOCATION
+		WHERE DD.[STATUS]='L'
+	
+)
+
+
+GO
+
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 21-Aug-13
+-- Description:	Get return outstanding of ClearingTab
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_ClearingTab_GetReturnOutstanding]		
+	@OPR_DATE	datetime,
+	@ENTRY_LOC	varchar(3)	
+AS
+BEGIN	
+	
+	SET NOCOUNT ON;
+
+	SELECT * 
+		FROM CLEARINGTAB ct
+		INNER JOIN CHECKTOTAL c ON c.MID=ct.MID
+		INNER JOIN RETURN_CLEARING rc
+		ON ct.MID=rc.MID AND ct.DSL=rc.DSL		
+		WHERE rc.RTN_FILENAME IS NULL AND rc.[STATUS]='L'
+		AND ct.RTN_STATUS='R' AND c.[STATUS]='L'
+		AND ct.OPR_DATE =@OPR_DATE AND ct.ENTRY_LOC=@ENTRY_LOC
+		ORDER BY ct.OPR_DATE,ct.DS_CODE,ct.CHECK_NUMBER
+	
+END
+
+GO
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 21-Aug-13
+-- Description: Get detail for clearing return flexfile
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_ClearingTab_GetFlexReturn]
+	@OPR_DATE	datetime,	
+	@ENTRY_LOC	varchar(3)
+AS
+BEGIN
+
+	SELECT rc.OPR_DATE,SUM(rc.AMOUNT) AS AMOUNT, COUNT(rc.CHECK_NUMBER) AS TOTCHECK
+		FROM CLEARINGTAB ct
+		INNER JOIN CHECKTOTAL c ON c.MID=ct.MID
+		INNER JOIN RETURN_CLEARING rc
+		ON ct.MID=rc.MID AND ct.DSL=rc.DSL
+		WHERE c.[STATUS]='L' AND rc.[STATUS]='L' 
+		AND rc.OPR_DATE=@OPR_DATE AND ct.ENTRY_LOC=@ENTRY_LOC
+		AND rc.RTN_FILENAME IS NULL AND ct.RTN_STATUS='R'
+		GROUP BY rc.OPR_DATE
+
+			         
+END
+
+GO
+
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 21-Aug-13
+-- Description: Update Clearing Return  Final
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_Process_ClearingDataReturnUpdate]
+	@OPR_DATE		datetime,	
+	@ENTRY_LOC		varchar(3),
+	@FLEX_FILENAME	varchar(15),
+	@REFACC_NO		varchar(16)
+AS
+BEGIN
+
+	INSERT INTO REVERSAL_HIST_CLEARING_RET(AMOUNT, VALUE_DATE, 
+		USERID, 
+		FLEX_FILENAME, REFACC_NO, ACC_NO, ENTRY_LOC, DS_CODE, CHECK_NUMBER)
+		SELECT rc.AMOUNT,@OPR_DATE,
+			substring(suser_name(),charindex('\',suser_name())+1,20),
+			@FLEX_FILENAME,@REFACC_NO,ct.REMARK,@ENTRY_LOC,ct.DS_CODE,rc.CHECK_NUMBER
+			FROM CLEARINGTAB ct
+			INNER JOIN CHECKTOTAL c ON c.MID=ct.MID 
+			INNER JOIN RETURN_CLEARING rc
+			ON ct.MID=rc.MID AND ct.DSL=rc.DSL
+			WHERE c.[STATUS]='L' AND ct.RTN_STATUS='R' AND rc.[STATUS]='L'
+			AND rc.RTN_FILENAME IS NULL
+			AND ct.OPR_DATE =@OPR_DATE AND ct.ENTRY_LOC=@ENTRY_LOC;
+			
+	UPDATE RETURN_CLEARING 
+		SET RTN_FILENAME=@FLEX_FILENAME,
+		RTN_FILE_USERID=substring(suser_name(),charindex('\',suser_name())+1,20)
+		FROM RETURN_CLEARING rc
+		INNER JOIN CLEARINGTAB ct ON ct.MID=rc.MID AND ct.DSL=rc.DSL
+		INNER JOIN CHECKTOTAL c ON c.MID=ct.MID
+		WHERE c.[STATUS]='L' AND rc.[STATUS]='L' AND ct.RTN_STATUS='R'
+		AND rc.RTN_FILENAME IS NULL
+		AND ct.OPR_DATE =@OPR_DATE AND ct.ENTRY_LOC=@ENTRY_LOC;
+		
+	
+END
+
+GO
+
+
+
+

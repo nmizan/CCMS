@@ -1,0 +1,1461 @@
+﻿'
+'Author             : Iftekharul Alam Khan Lodi
+'Purpose            : Maintain Delivery Schedule Detail
+'Creation date      : 12-Dec-2012
+'Stored Procedure(s):  
+'
+Imports CCMS.Common
+Imports System.Data.Common
+Imports Microsoft.Practices.EnterpriseLibrary.Data.Sql
+Imports System.Globalization
+
+Public Class FrmDepoSchedule
+
+
+#Region "Global Variables"
+    Dim _formMode As FormTransMode
+    Dim _strDSCode As String = ""
+    Dim _intModno As Integer = 0
+    Dim _mod_datetime As Date
+    Dim _status As String = ""
+#End Region
+
+#Region "User defined Codes"
+
+
+    Private Sub EnableUnlock()
+        btnUnlock.Enabled = True
+    End Sub
+
+    Private Sub DisableUnlock()
+        btnUnlock.Enabled = False
+    End Sub
+
+    Private Sub EnableNew()
+        btnNew.Enabled = True
+    End Sub
+
+    Private Sub DisableNew()
+        btnNew.Enabled = False
+    End Sub
+
+    Private Sub EnableSave()
+        btnSave.Enabled = True
+    End Sub
+
+    Private Sub DisableSave()
+        btnSave.Enabled = False
+    End Sub
+
+    Private Sub EnableDelete()
+        btnDelete.Enabled = True
+    End Sub
+
+    Private Sub DisableDelete()
+        btnDelete.Enabled = False
+    End Sub
+
+    Private Sub EnableAuth()
+        btnAuthorize.Enabled = True
+    End Sub
+
+    Private Sub DisableAuth()
+        btnAuthorize.Enabled = False
+    End Sub
+
+    Private Sub EnableClear()
+        btnClear.Enabled = True
+    End Sub
+
+    Private Sub DisableClear()
+        btnClear.Enabled = False
+    End Sub
+
+    Private Sub EnableRefresh()
+        btnRefresh.Enabled = True
+    End Sub
+
+    Private Sub DisableRefresh()
+        btnRefresh.Enabled = False
+    End Sub
+
+    Private Sub DisableFields()
+
+        txtDepoScheCode.ReadOnly = True
+        btnSearchDS.Enabled = False
+        txtScheduleDate.ReadOnly = True
+        txtLocationCode.ReadOnly = True
+        btnSearchLocation.Enabled = False
+        txtCorrBankCode.ReadOnly = True
+        btnSearchBank.Enabled = False
+        txtCorrBranchCode.ReadOnly = True
+
+        txtTotalCheckNo.ReadOnly = True
+        txtTotalCheckAmount.ReadOnly = True
+        txtTotalCashAmount.ReadOnly = True
+
+        txtDepoCode.ReadOnly = True
+        txtClientCode.ReadOnly = True
+        btnSearchClient.Enabled = False
+
+        chkDepositType.Enabled = False
+
+        txtCheckNo.ReadOnly = True
+        txtCitiCheckAmount.ReadOnly = True
+        txtCitiCashAmount.ReadOnly = True
+
+
+        btnAddToGrid.Enabled = False
+        btnRemoveFromGrid.Enabled = False
+
+
+
+        'dgView.ReadOnly = True
+
+
+
+    End Sub
+
+    Private Sub EnableFields()
+
+        If _intModno = 0 Then
+            txtDepoScheCode.ReadOnly = False
+            btnSearchDS.Enabled = True
+        End If
+
+        
+        txtScheduleDate.ReadOnly = False
+        txtLocationCode.ReadOnly = False
+        btnSearchLocation.Enabled = True
+        txtCorrBankCode.ReadOnly = False
+        btnSearchBank.Enabled = True
+        txtCorrBranchCode.ReadOnly = False
+
+        txtTotalCheckNo.ReadOnly = False
+        txtTotalCheckAmount.ReadOnly = False
+        txtTotalCashAmount.ReadOnly = False
+
+        txtDepoCode.ReadOnly = False
+        txtClientCode.ReadOnly = False
+        btnSearchClient.Enabled = True
+
+        chkDepositType.Enabled = True
+
+        txtCheckNo.ReadOnly = False
+        txtCitiCheckAmount.ReadOnly = False
+        txtCitiCashAmount.ReadOnly = False
+
+        btnAddToGrid.Enabled = True
+        btnRemoveFromGrid.Enabled = True
+
+        ''''''
+
+        
+        
+
+        'dgView.ReadOnly = False
+        'dgView.Columns(1).ReadOnly = True
+
+
+
+    End Sub
+
+
+    Private Sub ClearFields()
+
+        txtScheduleDate.Clear()
+        txtLocationCode.Clear()
+        lblLocationName.Text = ""
+
+        txtCorrBankCode.Clear()
+        lblCorrBankName.Text = ""
+
+        txtCorrBranchCode.Clear()
+        lblCorrBranchName.Text = ""
+
+        txtTotalCheckNo.Clear()
+        txtTotalCheckAmount.Clear()
+        txtTotalCashAmount.Clear()
+
+        txtDepoCode.Clear()
+        txtClientCode.Clear()
+        lblAccName.Text = ""
+        lblAccNo.Text = ""
+
+        chkDepositType.Checked = False
+
+        txtCheckNo.Clear()
+        txtCitiCheckAmount.Clear()
+        txtCitiCashAmount.Clear()
+
+
+        dgView.AllowUserToAddRows = False
+
+
+
+        dgView.DataSource = Nothing
+
+    End Sub
+
+    Private Sub ClearFieldsAll()
+
+        txtDepoScheCode.Clear()
+        txtScheduleDate.Clear()
+        txtLocationCode.Clear()
+        lblLocationName.Text = ""
+
+        txtCorrBankCode.Clear()
+        lblCorrBankName.Text = ""
+
+        txtCorrBranchCode.Clear()
+        lblCorrBranchName.Text = ""
+
+        txtTotalCheckNo.Clear()
+        txtTotalCheckAmount.Clear()
+        txtTotalCashAmount.Clear()
+
+        txtDepoCode.Clear()
+        txtClientCode.Clear()
+        lblAccName.Text = ""
+        lblAccNo.Text = ""
+
+        chkDepositType.Checked = False
+
+        txtCheckNo.Clear()
+        txtCitiCheckAmount.Clear()
+        txtCitiCashAmount.Clear()
+
+        dgView.AllowUserToAddRows = False
+
+        dgView.DataSource = Nothing
+
+
+        _strDSCode = ""
+        _intModno = 0
+
+        lblVerNo.Text = ""
+        lblVerTot.Text = ""
+
+        lblInputBy.Text = ""
+        lblInputDate.Text = ""
+        lblAuthBy.Text = ""
+        lblAuthDate.Text = ""
+
+        lblModNo.Text = ""
+
+
+    End Sub
+
+    Private Sub ShowOpertionStatus()
+
+        Dim CashTotal As Decimal = 0
+        Dim CheckTotal As Decimal = 0
+        Dim CheckNoTotal As Integer = 0
+
+        Dim MsgStatus As String = ""
+
+
+        For Each row As DataGridViewRow In dgView.Rows
+
+            CashTotal = CashTotal + NullHelper.ToDecNum(row.Cells(4).Value)
+            CheckTotal = CheckTotal + NullHelper.ToDecNum(row.Cells(3).Value)
+
+            CheckNoTotal = CheckNoTotal + NullHelper.ToIntNum(row.Cells(2).Value)
+
+        Next
+
+        If NullHelper.ToDecNum(txtTotalCashAmount.Text.Trim()) <> CashTotal Then
+            Dim diffCash As Decimal = CashTotal - NullHelper.ToDecNum(txtTotalCashAmount.Text.Trim())
+
+            'MsgStatus = "Mismatch in TotalCheck amount:  " & Format(diffCash , "#,##,##,##,##0.00")
+            MsgStatus = "Mismatch in Total Cash amount:  " & diffCash.ToString() & Environment.NewLine
+
+        End If
+
+        If NullHelper.ToDecNum(txtTotalCheckAmount.Text.Trim()) <> CheckTotal Then
+
+            Dim diffCheck As Decimal = CheckTotal - NullHelper.ToDecNum(txtTotalCheckAmount.Text.Trim())
+            MsgStatus = MsgStatus + "Mismatch in Total Check amount:  " & diffCheck.ToString() & Environment.NewLine
+
+        End If
+
+        If NullHelper.ToIntNum(txtTotalCheckNo.Text.Trim()) <> CheckNoTotal Then
+
+            Dim diffCheckNo As Integer = CheckNoTotal - NullHelper.ToIntNum(txtTotalCheckNo.Text.Trim())
+            MsgStatus = MsgStatus + "Mismatch in Total Check No:  " & diffCheckNo.ToString() & Environment.NewLine
+
+        End If
+
+        If MsgStatus.Trim() <> "" Then
+            MessageBox.Show(MsgStatus, "Mismatch Information", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+        End If
+
+
+
+    End Sub
+
+    Private Function CheckValidData() As Boolean
+
+
+        If txtDepoScheCode.Text.Trim() = "" Then
+            MessageBox.Show("Deposit Schedule Code required !!", "Saving Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            txtDepoScheCode.Focus()
+            Return False
+        ElseIf txtScheduleDate.Text.Trim() = "/  /" Then
+            MessageBox.Show("Schedule Date required !!", "Saving Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            txtScheduleDate.Focus()
+            Return False
+        ElseIf txtLocationCode.Text.Trim() = "" Or lblLocationName.Text.Trim() = "" Then
+            MessageBox.Show("Location Code required !!", "Saving Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            txtLocationCode.Focus()
+            Return False
+
+        ElseIf txtCorrBankCode.Text.Trim() = "" Or lblCorrBankName.Text.Trim() = "" Then
+            MessageBox.Show("Bank Code required !!", "Saving Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            txtCorrBankCode.Focus()
+            Return False
+
+        ElseIf txtTotalCashAmount.Text.Trim() = "" Then
+            MessageBox.Show("Total cash amount required !!", "Saving Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            txtTotalCashAmount.Focus()
+            Return False
+
+        ElseIf txtTotalCheckAmount.Text.Trim() = "" Then
+            MessageBox.Show("Total check amount required !!", "Saving Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            txtTotalCheckAmount.Focus()
+            Return False
+
+        ElseIf txtTotalCheckNo.Text.Trim() = "" Then
+            MessageBox.Show("Total check no required !!", "Saving Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            txtTotalCheckNo.Focus()
+            Return False
+
+        ElseIf dgView.Rows.Count = 0 Then
+            MessageBox.Show("You didn't enter any record!!", "Saving Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Return False
+
+        End If
+
+
+        ShowOpertionStatus()
+
+
+
+        Return True
+
+    End Function
+
+
+
+    Private Function SaveData() As TransState
+
+        Dim tStatus As TransState
+
+        Dim intModno As Integer = 0
+
+        tStatus = TransState.UnspecifiedError
+
+        Dim db As New SqlDatabase(CommonAppSet.ConnStr)
+
+        If _formMode = FormTransMode.Add Then
+
+            Using conn As DbConnection = db.CreateConnection()
+
+                conn.Open()
+
+                Dim trans As DbTransaction = conn.BeginTransaction()
+
+                Dim commProc As DbCommand = db.GetStoredProcCommand("CMS_DCollected_Add")
+
+                commProc.Parameters.Clear()
+
+                db.AddInParameter(commProc, "@DS_CODE", DbType.String, txtDepoScheCode.Text.Trim())
+                db.AddInParameter(commProc, "@TOTAL_NOCHK", DbType.Int32, NullHelper.ToIntNum(txtTotalCheckNo.Text.Trim()))
+                db.AddInParameter(commProc, "@TOTAL_CHKAMT", DbType.Decimal, NullHelper.ToDecNum(txtTotalCheckAmount.Text.Trim()))
+                db.AddInParameter(commProc, "@TOTAL_CASHAMT", DbType.Decimal, NullHelper.ToDecNum(txtTotalCashAmount.Text.Trim()))
+
+                db.AddParameter(commProc, "@PROC_RET_VAL", DbType.Int32, ParameterDirection.ReturnValue, DBNull.Value.ToString(), DataRowVersion.Default, DBNull.Value)
+
+                Dim result As Integer
+
+
+                db.ExecuteNonQuery(commProc, trans)
+                result = db.GetParameterValue(commProc, "@PROC_RET_VAL")
+
+                If result <> 0 Then
+                    tStatus = TransState.Exist
+                    trans.Rollback()
+                    Return tStatus
+
+                Else
+
+                    intModno = 1
+
+                    Dim commProcSche As DbCommand = db.GetStoredProcCommand("CMS_DShedule_Add")
+
+                    For i = 0 To dgView.Rows.Count - 1
+
+                        commProcSche.Parameters.Clear()
+
+                        db.AddInParameter(commProcSche, "@DS_CODE", DbType.String, txtDepoScheCode.Text.Trim())
+                        db.AddInParameter(commProcSche, "@D_CODE", DbType.String, dgView.Rows(i).Cells(0).Value)
+                        db.AddInParameter(commProcSche, "@DEPOSIT_TYPE", DbType.String, dgView.Rows(i).Cells(5).Value)
+                        db.AddInParameter(commProcSche, "@CITICASH_AMOUNT", DbType.Decimal, NullHelper.ToDecNum(dgView.Rows(i).Cells(4).Value))
+                        db.AddInParameter(commProcSche, "@CITICHECK_AMOUNT", DbType.Decimal, NullHelper.ToDecNum(dgView.Rows(i).Cells(3).Value))
+                        db.AddInParameter(commProcSche, "@SCHEDULE_DATE", DbType.DateTime, DateTime.ParseExact(txtScheduleDate.Text, "dd/MM/yyyy", CultureInfo.InvariantCulture))
+                        db.AddInParameter(commProcSche, "@NO_CHECK", DbType.Int32, NullHelper.ToIntNum(dgView.Rows(i).Cells(2).Value))
+                        db.AddInParameter(commProcSche, "@CLIENT_CODE", DbType.String, dgView.Rows(i).Cells(1).Value)
+                        db.AddInParameter(commProcSche, "@LOCATION_CODE", DbType.String, txtLocationCode.Text.Trim())
+                        db.AddInParameter(commProcSche, "@CORR_BANK_CODE", DbType.String, txtCorrBankCode.Text.Trim())
+                        db.AddInParameter(commProcSche, "@CORR_BRANCH_CODE", DbType.String, txtCorrBranchCode.Text.Trim())
+
+                        db.AddParameter(commProcSche, "@PROC_RET_VAL", DbType.Int32, ParameterDirection.ReturnValue, DBNull.Value.ToString(), DataRowVersion.Default, DBNull.Value)
+
+                        db.ExecuteNonQuery(commProcSche, trans)
+
+                        If db.GetParameterValue(commProcSche, "@PROC_RET_VAL") <> 0 Then
+
+                            trans.Rollback()
+                            Return TransState.UnspecifiedError
+
+                        End If
+
+
+                    Next
+
+
+                    tStatus = TransState.Add
+                    _strDSCode = txtDepoScheCode.Text.Trim()
+                    _intModno = 1
+
+                End If
+
+                trans.Commit()
+
+            End Using
+
+        ElseIf _formMode = FormTransMode.Update Then
+
+
+            Using conn As DbConnection = db.CreateConnection()
+
+
+                conn.Open()
+
+                Dim trans As DbTransaction = conn.BeginTransaction()
+
+
+                Dim commProc As DbCommand = db.GetStoredProcCommand("CMS_DCollected_Update")
+
+                commProc.Parameters.Clear()
+
+                db.AddInParameter(commProc, "@DS_CODE", DbType.String, _strDSCode)
+                db.AddInParameter(commProc, "@TOTAL_NOCHK", DbType.Int32, NullHelper.ToIntNum(txtTotalCheckNo.Text.Trim()))
+                db.AddInParameter(commProc, "@TOTAL_CHKAMT", DbType.Decimal, NullHelper.ToDecNum(txtTotalCheckAmount.Text.Trim()))
+                db.AddInParameter(commProc, "@TOTAL_CASHAMT", DbType.Decimal, NullHelper.ToDecNum(txtTotalCashAmount.Text.Trim()))
+                db.AddInParameter(commProc, "@MOD_NO", DbType.Int32, _intModno)
+                db.AddOutParameter(commProc, "@RET_MOD_NO", DbType.Int32, 5)
+
+                db.AddParameter(commProc, "@PROC_RET_VAL", DbType.Int32, ParameterDirection.ReturnValue, DBNull.Value.ToString(), DataRowVersion.Default, DBNull.Value)
+
+                Dim result As Integer
+
+                db.ExecuteNonQuery(commProc, trans)
+                result = db.GetParameterValue(commProc, "@PROC_RET_VAL")
+
+                If result = 1 Then
+                    tStatus = TransState.UnspecifiedError
+                    trans.Rollback()
+                    Return tStatus
+                ElseIf result = 4 Then
+                    tStatus = TransState.NoRecord
+                    trans.Rollback()
+                    Return tStatus
+                ElseIf result = 0 Then
+
+                    intModno = db.GetParameterValue(commProc, "@RET_MOD_NO")
+
+
+                    Dim commProcSche As DbCommand = db.GetStoredProcCommand("CMS_DSchedule_Update")
+
+                    For i = 0 To dgView.Rows.Count - 1
+
+                        commProcSche.Parameters.Clear()
+
+                        db.AddInParameter(commProcSche, "@DS_CODE", DbType.String, _strDSCode)
+                        db.AddInParameter(commProcSche, "@D_CODE", DbType.String, dgView.Rows(i).Cells(0).Value)
+                        db.AddInParameter(commProcSche, "@DEPOSIT_TYPE", DbType.String, dgView.Rows(i).Cells(5).Value)
+                        db.AddInParameter(commProcSche, "@CITICASH_AMOUNT", DbType.Decimal, NullHelper.ToDecNum(dgView.Rows(i).Cells(4).Value))
+                        db.AddInParameter(commProcSche, "@CITICHECK_AMOUNT", DbType.Decimal, NullHelper.ToDecNum(dgView.Rows(i).Cells(3).Value))
+                        db.AddInParameter(commProcSche, "@SCHEDULE_DATE", DbType.DateTime, DateTime.ParseExact(txtScheduleDate.Text, "dd/MM/yyyy", CultureInfo.InvariantCulture))
+                        db.AddInParameter(commProcSche, "@NO_CHECK", DbType.Int32, NullHelper.ToIntNum(dgView.Rows(i).Cells(2).Value))
+                        db.AddInParameter(commProcSche, "@CLIENT_CODE", DbType.String, dgView.Rows(i).Cells(1).Value)
+                        db.AddInParameter(commProcSche, "@LOCATION_CODE", DbType.String, txtLocationCode.Text.Trim())
+                        db.AddInParameter(commProcSche, "@CORR_BANK_CODE", DbType.String, txtCorrBankCode.Text.Trim())
+                        db.AddInParameter(commProcSche, "@CORR_BRANCH_CODE", DbType.String, txtCorrBranchCode.Text.Trim())
+                        db.AddInParameter(commProcSche, "@MOD_NO", DbType.Int32, intModno)
+
+                        db.AddParameter(commProcSche, "@PROC_RET_VAL", DbType.Int32, ParameterDirection.ReturnValue, DBNull.Value.ToString(), DataRowVersion.Default, DBNull.Value)
+
+                        db.ExecuteNonQuery(commProcSche, trans)
+
+                        If db.GetParameterValue(commProcSche, "@PROC_RET_VAL") <> 0 Then
+
+                            trans.Rollback()
+                            Return TransState.UnspecifiedError
+
+                        End If
+
+
+                    Next
+
+
+                    tStatus = TransState.Update
+                    _intModno = intModno
+
+                    trans.Commit()
+
+                    Return tStatus
+
+                End If
+
+                trans.Rollback()
+
+
+            End Using
+
+
+        End If
+
+
+        Return tStatus
+
+    End Function
+
+    Private Function AuthorizeData() As TransState
+
+        Dim tStatus As TransState
+
+
+        tStatus = TransState.UnspecifiedError
+
+        Dim db As New SqlDatabase(CommonAppSet.ConnStr)
+
+        Dim commProc As DbCommand = db.GetStoredProcCommand("CMS_DCollected_Auth")
+
+        commProc.Parameters.Clear()
+
+        db.AddInParameter(commProc, "@DS_CODE", DbType.String, _strDSCode)
+        db.AddInParameter(commProc, "@MOD_NO", DbType.Int32, _intModno)
+        db.AddInParameter(commProc, "@MOD_DATETIME", DbType.DateTime, _mod_datetime)
+
+        db.AddParameter(commProc, "@PROC_RET_VAL", DbType.Int32, ParameterDirection.ReturnValue, DBNull.Value.ToString(), DataRowVersion.Default, DBNull.Value)
+
+        Dim result As Integer
+
+        db.ExecuteNonQuery(commProc)
+        result = db.GetParameterValue(commProc, "@PROC_RET_VAL")
+        If result = 0 Then
+
+            tStatus = TransState.Update
+
+        ElseIf result = 1 Then
+
+            tStatus = TransState.UpdateNotPossible
+
+        ElseIf result = 3 Then
+            tStatus = TransState.AlreadyAuthorized
+
+        ElseIf result = 4 Then
+            tStatus = TransState.NoRecord
+
+        ElseIf result = 5 Then
+            tStatus = TransState.MakerCheckerSame
+        ElseIf result = 7 Then
+            tStatus = TransState.ModifiedOutside
+
+        Else
+            tStatus = TransState.UpdateNotPossible
+        End If
+
+
+
+        Return tStatus
+
+
+
+
+
+
+    End Function
+
+
+    Private Sub LoadMainData(ByVal strDSCode As String, ByVal intmod As Integer)
+
+        lblToolStatus.Text = ""
+
+        Try
+
+            Dim db As New SqlDatabase(CommonAppSet.ConnStr)
+
+            Dim ds As New DataSet
+
+            Dim commProc As DbCommand = db.GetStoredProcCommand("CMS_DCollected_GetDetail")
+
+            commProc.Parameters.Clear()
+
+            db.AddInParameter(commProc, "@DS_CODE", DbType.String, strDSCode)
+            db.AddInParameter(commProc, "@MOD_NO", DbType.Int32, intmod)
+
+            ds = db.ExecuteDataSet(commProc)
+
+            If ds.Tables(0).Rows.Count > 0 Then
+
+                _strDSCode = strDSCode
+                _intModno = intmod
+
+                _formMode = FormTransMode.Update
+
+
+
+                txtDepoScheCode.Text = ds.Tables(0).Rows(0)("DS_CODE").ToString()
+                txtTotalCheckNo.Text = ds.Tables(0).Rows(0)("TOTAL_NOCHK").ToString()
+                txtTotalCheckAmount.Text = ds.Tables(0).Rows(0)("TOTAL_CHKAMT").ToString()
+                txtTotalCashAmount.Text = ds.Tables(0).Rows(0)("TOTAL_CASHAMT").ToString()
+
+
+                lblInputBy.Text = ds.Tables(0).Rows(0)("INPUT_BY").ToString()
+                lblInputDate.Text = ds.Tables(0).Rows(0)("INPUT_DATETIME").ToString()
+
+                _mod_datetime = ds.Tables(0).Rows(0)("INPUT_DATETIME")
+
+                lblAuthBy.Text = ds.Tables(0).Rows(0)("AUTH_BY").ToString()
+                lblAuthDate.Text = ds.Tables(0).Rows(0)("AUTH_DATETIME").ToString()
+
+                chkAuthorized.Checked = ds.Tables(0).Rows(0)("IS_AUTH")
+
+                If ds.Tables(0).Rows(0)("STATUS") = "L" Or ds.Tables(0).Rows(0)("STATUS") = "U" Or ds.Tables(0).Rows(0)("STATUS") = "O" Then
+                    chkOpen.Checked = True
+                Else
+                    chkOpen.Checked = False
+                End If
+
+                _status = ds.Tables(0).Rows(0)("STATUS")
+
+                lblModNo.Text = ds.Tables(0).Rows(0)("MOD_NO").ToString()
+                lblVerNo.Text = ds.Tables(0).Rows(0)("MOD_NO").ToString()
+
+                Dim commProc2 As DbCommand = db.GetStoredProcCommand("CMS_DCollected_GetMaxMod")
+
+                commProc2.Parameters.Clear()
+
+                db.AddInParameter(commProc2, "@DS_CODE", DbType.String, strDSCode)
+
+                lblVerTot.Text = db.ExecuteDataSet(commProc2).Tables(0).Rows(0)(0).ToString()
+
+
+                If _status = "L" Or _status = "U" _
+                    Or (_status = "D" And chkAuthorized.Checked = False) Then
+
+
+                    If btnUnlock.Enabled = False Then
+                        EnableFields()
+                        EnableClear()
+                        EnableDelete()
+                        EnableNew()
+                        EnableRefresh()
+                        EnableSave()
+
+                    End If
+                Else
+                    DisableAuth()
+                    DisableClear()
+                    DisableDelete()
+                    DisableRefresh()
+                    DisableSave()
+
+                    DisableFields()
+                End If
+
+                If chkAuthorized.Checked = False And (Not lblInputBy.Text.Trim = CommonAppSet.User) Then
+                    EnableAuth()
+                End If
+
+
+            Else
+
+                ClearFieldsAll()
+
+            End If
+
+        Catch ex As Exception
+            MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+    End Sub
+
+
+    Private Sub LoadDetailData(ByVal strDSCode As String, ByVal intmod As Integer)
+
+        lblToolStatus.Text = ""
+
+        Try
+
+            Dim db As New SqlDatabase(CommonAppSet.ConnStr)
+
+            Dim ds As New DataSet
+
+            Dim commProcSche As DbCommand = db.GetStoredProcCommand("CMS_DSchedule_GetDetails")
+
+            commProcSche.Parameters.Clear()
+
+            db.AddInParameter(commProcSche, "@DS_CODE", DbType.String, strDSCode)
+            db.AddInParameter(commProcSche, "@MOD_NO", DbType.Int32, intmod)
+
+            ds = db.ExecuteDataSet(commProcSche)
+
+
+            If ds.Tables(0).Rows.Count > 0 Then
+                txtScheduleDate.Text = NullHelper.DateToString(ds.Tables(0).Rows(0)("SCHEDULE_DATE"))
+                txtLocationCode.Text = ds.Tables(0).Rows(0)("LOCATION_CODE").ToString()
+                lblLocationName.Text = ds.Tables(0).Rows(0)("LOCATION_NAME").ToString()
+                txtCorrBankCode.Text = ds.Tables(0).Rows(0)("CORR_BANK_CODE").ToString()
+                lblCorrBankName.Text = ds.Tables(0).Rows(0)("BANK_NAME").ToString()
+                txtCorrBranchCode.Text = ds.Tables(0).Rows(0)("CORR_BRANCH_CODE").ToString()
+                lblCorrBranchName.Text = ds.Tables(0).Rows(0)("BRANCH_NAME").ToString()
+                
+
+            End If
+
+
+            dgView.AutoGenerateColumns = False
+            dgView.DataSource = ds
+            dgView.DataMember = ds.Tables(0).TableName
+
+        Catch ex As Exception
+            MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+    End Sub
+
+
+
+    Private Sub LoadDepositScheduleData(ByVal strDSCode As String)
+        lblToolStatus.Text = ""
+
+        Try
+
+            Dim db As New SqlDatabase(CommonAppSet.ConnStr)
+
+            Dim commProc2 As DbCommand = db.GetStoredProcCommand("CMS_DCollected_GetMaxMod")
+
+            commProc2.Parameters.Clear()
+
+            db.AddInParameter(commProc2, "@DS_CODE", DbType.String, strDSCode)
+
+            Dim intModNo As Integer = db.ExecuteDataSet(commProc2).Tables(0).Rows(0)(0).ToString()
+
+            If intModNo > 0 Then
+                LoadMainData(strDSCode, intModNo)
+
+            Else
+                ClearFieldsAll()
+
+            End If
+
+
+
+
+        Catch ex As Exception
+            MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+    End Sub
+
+
+    Private Function DeleteData() As TransState
+
+        Dim tStatus As TransState
+
+        Dim intModno As Integer = 0
+
+        tStatus = TransState.UnspecifiedError
+
+        Dim db As New SqlDatabase(CommonAppSet.ConnStr)
+
+        Dim commProc As DbCommand = db.GetStoredProcCommand("CMS_DCollected_Remove")
+
+        commProc.Parameters.Clear()
+
+        db.AddInParameter(commProc, "@DS_CODE", DbType.Int64, _strDSCode)
+        db.AddInParameter(commProc, "@MOD_NO", DbType.Int32, _intModno)
+        db.AddOutParameter(commProc, "@RET_MOD_NO", DbType.Int32, 5)
+
+        db.AddParameter(commProc, "@PROC_RET_VAL", DbType.Int32, ParameterDirection.ReturnValue, DBNull.Value.ToString(), DataRowVersion.Default, DBNull.Value)
+
+        Dim result As Integer
+
+        db.ExecuteNonQuery(commProc)
+        result = db.GetParameterValue(commProc, "@PROC_RET_VAL")
+        If result = 0 Then
+
+            tStatus = TransState.Delete
+            _intModno = db.GetParameterValue(commProc, "@RET_MOD_NO")
+
+        ElseIf result = 1 Then
+
+            tStatus = TransState.UpdateNotPossible
+
+        ElseIf result = 3 Then
+            tStatus = TransState.UpdateNotPossible
+
+        ElseIf result = 4 Then
+            tStatus = TransState.NoRecord
+
+        ElseIf result = 5 Then
+            tStatus = TransState.UpdateNotPossible
+        ElseIf result = 6 Then
+            tStatus = TransState.AlreadyDeleted
+
+        Else
+            tStatus = TransState.UpdateNotPossible
+        End If
+
+
+        Return tStatus
+
+    End Function
+
+    Public Sub New()
+
+        ' This call is required by the Windows Form Designer.
+        InitializeComponent()
+
+        ' Add any initialization after the InitializeComponent() call.
+
+    End Sub
+
+    Public Sub New(ByVal strDSCode As String, ByVal intmod As Integer)
+
+        ' This call is required by the Windows Form Designer.
+        InitializeComponent()
+
+        ' Add any initialization after the InitializeComponent() call.
+
+        _strDSCode = strDSCode
+
+        _intModno = intmod
+
+    End Sub
+
+
+#End Region
+
+    Private Sub FrmDepoSchedule_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
+
+
+        If _intModno > 0 Then
+            LoadMainData(_strDSCode, _intModno)
+            LoadDetailData(_strDSCode, _intModno)
+        End If
+
+
+
+        EnableUnlock()
+
+        DisableNew()
+        DisableSave()
+        DisableDelete()
+        DisableAuth()
+
+        DisableClear()
+        DisableRefresh()
+
+        DisableFields()
+    End Sub
+
+    Private Sub btnUnlock_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnUnlock.Click
+
+        lblToolStatus.Text = ""
+
+        EnableNew()
+        If Not (_strDSCode = "") Then
+
+            If _status = "L" Or _status = "U" _
+                    Or (_status = "D" And chkAuthorized.Checked = False) Then
+                EnableFields()
+
+
+                EnableClear()
+                EnableDelete()
+                EnableNew()
+                EnableRefresh()
+                EnableSave()
+
+
+            Else
+                DisableAuth()
+                DisableClear()
+                DisableDelete()
+                DisableRefresh()
+                DisableSave()
+
+                DisableFields()
+            End If
+
+
+            If chkAuthorized.Checked = False And (Not lblInputBy.Text.Trim = CommonAppSet.User) Then
+                EnableAuth()
+            Else
+                DisableAuth()
+            End If
+
+        Else
+
+            DisableFields()
+
+
+
+
+
+        End If
+
+
+
+        DisableUnlock()
+
+    End Sub
+
+    Private Sub btnNew_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnNew.Click
+
+        lblToolStatus.Text = ""
+        _formMode = FormTransMode.Add
+
+        EnableSave()
+
+        ClearFieldsAll()
+        EnableFields()
+
+
+        DisableRefresh()
+        DisableDelete()
+
+
+        If txtDepoScheCode.Enabled = True Then
+            txtDepoScheCode.Focus()
+        End If
+
+
+    End Sub
+
+
+    Private Sub btnSave_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnSave.Click
+
+        Dim tState As TransState
+
+        lblToolStatus.Text = ""
+
+        Try
+            If MessageBox.Show("Do you really want to Save?", "Confirmation Message", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = Windows.Forms.DialogResult.Yes Then
+
+                If CheckValidData() Then
+
+                    tState = SaveData()
+
+                    If tState = TransState.Add Then
+
+                        LoadMainData(_strDSCode, _intModno)
+                        LoadDetailData(_strDSCode, _intModno)
+
+                        lblToolStatus.Text = "!! Information Added Successfully !!"
+
+                        _formMode = FormTransMode.Update
+
+
+                        EnableUnlock()
+                        DisableNew()
+                        DisableSave()
+                        DisableDelete()
+                        DisableAuth()
+                        DisableClear()
+                        DisableRefresh()
+                        DisableFields()
+
+
+
+                    ElseIf tState = TransState.Update Then
+
+                        LoadMainData(_strDSCode, _intModno)
+                        LoadDetailData(_strDSCode, _intModno)
+
+                        lblToolStatus.Text = "!! Information Updated Successfully !!"
+
+                        EnableUnlock()
+                        DisableNew()
+                        DisableSave()
+                        DisableDelete()
+                        DisableAuth()
+                        DisableClear()
+                        DisableRefresh()
+                        DisableFields()
+
+
+
+
+                    ElseIf tState = TransState.Exist Then
+                        lblToolStatus.Text = "!! Already Exist !!"
+                    ElseIf tState = TransState.NoRecord Then
+                        lblToolStatus.Text = "!! Nothing to Update !!"
+                    ElseIf tState = TransState.DBError Then
+                        lblToolStatus.Text = "!! Database error occured. Please, Try Again !!"
+                    ElseIf tState = TransState.UnspecifiedError Then
+                        lblToolStatus.Text = "!! Unpecified Error Occured !!"
+                    End If
+
+                End If
+
+            End If
+        Catch ex As Exception
+            MessageBox.Show(ex.Message, "Error!!", MessageBoxButtons.OK, MessageBoxIcon.Error)
+
+        End Try
+
+    End Sub
+
+    Private Sub btnClear_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnClear.Click
+
+        ClearFields()
+
+    End Sub
+
+    Private Sub btnRefresh_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnRefresh.Click
+        
+        LoadMainData(_strDSCode, _intModno)
+        LoadDetailData(_strDSCode, _intModno)
+
+    End Sub
+
+    Private Sub btnDelete_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnDelete.Click
+
+        Dim tState As TransState
+
+        lblToolStatus.Text = ""
+
+        Try
+
+
+            If MessageBox.Show("Do you really want to delete?", "Confirmation Message", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = Windows.Forms.DialogResult.Yes Then
+
+                tState = DeleteData()
+
+                If tState = TransState.Delete Then
+
+
+                    _formMode = FormTransMode.Add
+
+                    LoadMainData(_strDSCode, _intModno)
+                    LoadDetailData(_strDSCode, _intModno)
+
+                    DisableAuth()
+
+                    If _strDSCode = "" Then
+
+                        DisableDelete()
+                        DisableSave()
+                        DisableRefresh()
+                        DisableFields()
+
+
+
+                    End If
+
+                    lblToolStatus.Text = "!! Information Deleted Successfully !!"
+
+                ElseIf tState = TransState.AlreadyDeleted Then
+                    lblToolStatus.Text = "!! Failed. Data is already deleted !!"
+                ElseIf tState = TransState.UpdateNotPossible Then
+                    lblToolStatus.Text = "!! Delete Not Possible !!"
+
+                ElseIf tState = TransState.Exist Then
+                    lblToolStatus.Text = "!! New Delete status insertion failed !!"
+
+                ElseIf tState = TransState.NoRecord Then
+                    lblToolStatus.Text = "!! Nothing to Delete !!"
+                Else
+                    lblToolStatus.Text = "!! Unpecified Error Occured !!"
+                End If
+
+            End If
+
+
+
+
+        Catch ex As Exception
+            MessageBox.Show(ex.Message, "Error!!", MessageBoxButtons.OK, MessageBoxIcon.Error)
+
+        End Try
+
+    End Sub
+
+    Private Sub btnPrevVer_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnPrevVer.Click
+
+        If _intModno - 1 > 0 Then
+
+            LoadMainData(_strDSCode, _intModno - 1)
+            LoadDetailData(_strDSCode, _intModno)
+
+        End If
+
+    End Sub
+
+    Private Sub btnNextVer_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnNextVer.Click
+
+        Dim strDSCode As String = _strDSCode
+        Dim intModno As Integer = _intModno
+
+        If intModno > 0 Then
+            LoadMainData(_strDSCode, _intModno + 1)
+
+            If _intModno = 0 Then
+                LoadMainData(strDSCode, intModno)
+            End If
+
+            LoadDetailData(_strDSCode, _intModno)
+        End If
+
+    End Sub
+
+    Private Sub btnAuthorize_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnAuthorize.Click
+
+        Dim tState As TransState
+
+        lblToolStatus.Text = ""
+
+        Try
+            If MessageBox.Show("Do you really want to Authorize?", "Confirmation Message", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = Windows.Forms.DialogResult.Yes Then
+
+
+
+                tState = AuthorizeData()
+
+                If tState = TransState.Update Then
+
+                    LoadMainData(_strDSCode, _intModno)
+                    LoadDetailData(_strDSCode, _intModno)
+
+                    lblToolStatus.Text = "!! Authorized Successfully !!"
+                    EnableUnlock()
+
+                    DisableNew()
+                    DisableSave()
+                    DisableDelete()
+                    DisableAuth()
+
+                    DisableClear()
+                    DisableRefresh()
+
+                    DisableFields()
+                ElseIf tState = TransState.AlreadyAuthorized Then
+                    lblToolStatus.Text = "!! Authorized Data cannot be authorized again !!"
+                ElseIf tState = TransState.MakerCheckerSame Then
+                    lblToolStatus.Text = "!! You cannot authorize the transaction !!"
+                ElseIf tState = TransState.UpdateNotPossible Then
+                    lblToolStatus.Text = "!! Failed! Authorization Failed !!"
+                ElseIf tState = TransState.ModifiedOutside Then
+                    lblToolStatus.Text = "!! Failed! Data Mismatch. Reload, Check and Authorise again !!"
+                ElseIf tState = TransState.DBError Then
+                    lblToolStatus.Text = "!! Database error occured. Please, Try Again !!"
+                ElseIf tState = TransState.UnspecifiedError Then
+                    lblToolStatus.Text = "!! Unpecified Error Occured !!"
+                End If
+
+
+
+            End If
+        Catch ex As Exception
+            MessageBox.Show(ex.Message, "Error!!", MessageBoxButtons.OK, MessageBoxIcon.Error)
+
+        End Try
+
+
+    End Sub
+
+    Private Sub btnExit_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnExit.Click
+
+        Me.Close()
+        
+    End Sub
+
+    Private Sub btnAddToGrid_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnAddToGrid.Click
+
+        For Each row As DataGridViewRow In dgView.Rows
+            If row.Cells(0).Value.ToString().Trim() = txtDepoCode.Text.Trim() Then
+                MessageBox.Show("Duplicate Deposit Slip", "Error!!", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                Exit Sub
+            End If
+        Next
+
+
+        dgView.Rows.Add()
+
+        Dim maxRow As Integer = dgView.Rows.Count - 1
+
+        dgView.Item(0, maxRow).Value = txtDepoCode.Text.Trim()
+        dgView.Item(1, maxRow).Value = txtClientCode.Text.Trim()
+        dgView.Item(2, maxRow).Value = txtCheckNo.Text.Trim()
+        dgView.Item(3, maxRow).Value = NullHelper.ToDecNum(txtCitiCheckAmount.Text.Trim())
+        dgView.Item(4, maxRow).Value = NullHelper.ToDecNum(txtCitiCashAmount.Text.Trim())
+        dgView.Item(5, maxRow).Value = IIf(chkDepositType.Checked = True, "Check", "Cash")
+
+        dgView.Rows(0).Selected = True
+        dgView.Rows(0).Selected = False
+        dgView.Rows(maxRow).Selected = True
+
+        txtDepoCode.Clear()
+        txtClientCode.Clear()
+        lblAccName.Text = ""
+        lblAccNo.Text = ""
+        chkDepositType.Checked = False
+
+        txtCheckNo.Clear()
+        txtCitiCheckAmount.Clear()
+        txtCitiCashAmount.Clear()
+
+        
+
+    End Sub
+
+    Private Sub btnRemoveFromGrid_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnRemoveFromGrid.Click
+
+        If dgView.SelectedRows.Count = 0 Then Exit Sub
+
+        For Each row As DataGridViewRow In dgView.SelectedRows
+            dgView.Rows.Remove(row)
+        Next
+
+    End Sub
+
+    
+    Private Sub chkDepositType_CheckedChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles chkDepositType.CheckedChanged
+
+        If chkDepositType.Checked = True Then
+            txtCheckNo.Enabled = True
+            txtCitiCheckAmount.Enabled = True
+            txtCitiCashAmount.Enabled = False
+            txtCitiCashAmount.Text = ""
+
+        Else
+            txtCheckNo.Text = ""
+            txtCitiCheckAmount.Text = ""
+            txtCheckNo.Enabled = False
+            txtCitiCheckAmount.Enabled = False
+            txtCitiCashAmount.Enabled = True
+
+        End If
+
+    End Sub
+
+    Private Sub btnSearchBank_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnSearchBank.Click
+        Dim frmList As New FrmList()
+        frmList.Text = "Corr. Bank Branch List"
+        frmList.ProcName = "CMS_Branch_GetCorrBranchListByLoc"
+
+        frmList.AddParamToDB("@LOCATION_CODE", DbType.String, txtLocationCode.Text.Trim())
+
+        frmList.filter = New String(,) {{"BRANCH_NAME", "Branch Name"}, {"BRANCH_CODE", "Branch Code"}, {"BANK_NAME", "Bank Name"}, {"BANK_CODE", "Bank Code"}}
+        frmList.colwidth = New Integer(,) {{1, 150}, {3, 150}}
+        frmList.colrename = New String(,) {{"0", "Branch Code"}, {"1", "Branch Name"}, {"2", "Bank Code"}, {"3", "Bank Name"}}
+        frmList.ShowDialog()
+
+        If (frmList.RowResult.Cells.Count > 0) Then
+
+            txtCorrBankCode.Text = frmList.RowResult.Cells(2).Value.ToString()
+            lblCorrBankName.Text = frmList.RowResult.Cells(3).Value.ToString()
+
+            txtCorrBranchCode.Text = frmList.RowResult.Cells(0).Value.ToString()
+            lblCorrBranchName.Text = frmList.RowResult.Cells(1).Value.ToString()
+
+
+        End If
+
+        frmList.Dispose()
+
+    End Sub
+
+    Private Sub txtLocationCode_KeyDown(ByVal sender As System.Object, ByVal e As System.Windows.Forms.KeyEventArgs) Handles txtLocationCode.KeyDown
+        If e.KeyCode = Keys.Enter Then
+            If txtLocationCode.Text.Trim() = "" Then
+
+                Dim frmList As New FrmList()
+                frmList.Text = "Location List"
+                frmList.ProcName = "CMS_Location_GetList"
+                frmList.filter = New String(,) {{"LOCATION_NAME", "Location Name"}, {"LOCATION_CODE", "Location Code"}}
+                frmList.colwidth = New Integer(,) {{1, 300}}
+                frmList.colrename = New String(,) {{"0", "Code"}, {"1", "Location Name"}}
+                frmList.ShowDialog()
+
+                If (frmList.RowResult.Cells.Count > 0) Then
+
+                    txtLocationCode.Text = frmList.RowResult.Cells(0).Value.ToString()
+                    lblLocationName.Text = frmList.RowResult.Cells(1).Value.ToString()
+                End If
+
+                frmList.Dispose()
+
+            Else
+
+
+                Try
+
+                    Dim db As New SqlDatabase(CommonAppSet.ConnStr)
+
+                    Dim dt As New DataTable
+
+                    Dim commProc As DbCommand = db.GetStoredProcCommand("CMS_Location_GetDetailByCode")
+
+                    commProc.Parameters.Clear()
+
+                    db.AddInParameter(commProc, "@LOCATION_CODE", DbType.String, txtLocationCode.Text.Trim())
+
+                    dt = db.ExecuteDataSet(commProc).Tables(0)
+
+                    If dt.Rows.Count > 0 Then
+                        lblLocationName.Text = dt.Rows(0)("LOCATION_NAME").ToString()
+                    Else
+                        txtLocationCode.Clear()
+                        lblLocationName.Text = ""
+                    End If
+
+
+                Catch ex As Exception
+                    MessageBox.Show(ex.Message, "Error!!", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                End Try
+
+
+
+            End If
+        End If
+    End Sub
+
+    Private Sub btnSearchLocation_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnSearchLocation.Click
+
+        Dim frmList As New FrmList()
+        frmList.Text = "Location List"
+        frmList.ProcName = "CMS_Location_GetList"
+        frmList.filter = New String(,) {{"LOCATION_NAME", "Location Name"}, {"LOCATION_CODE", "Location Code"}}
+        frmList.colwidth = New Integer(,) {{1, 300}}
+        frmList.colrename = New String(,) {{"0", "Code"}, {"1", "Location Name"}}
+        frmList.ShowDialog()
+
+        If (frmList.RowResult.Cells.Count > 0) Then
+
+            txtLocationCode.Text = frmList.RowResult.Cells(0).Value.ToString()
+            lblLocationName.Text = frmList.RowResult.Cells(1).Value.ToString()
+        End If
+
+        frmList.Dispose()
+
+    End Sub
+
+    
+    Private Sub txtClientCode_KeyDown(ByVal sender As System.Object, ByVal e As System.Windows.Forms.KeyEventArgs) Handles txtClientCode.KeyDown
+
+        If e.KeyCode = Keys.Enter Then
+            If txtClientCode.Text.Trim() = "" Then
+
+                Dim frmList As New FrmList()
+                frmList.Text = "Client List"
+                frmList.ProcName = "CMS_Client_GetList"
+
+                frmList.filter = New String(,) {{"ACC_NAME", "A/C Name"}, {"ACC_NO", "A/C No"}, {"CLIENT_CODE", "Code"}}
+
+                frmList.colwidth = New Integer(,) {{1, 300}}
+                frmList.colrename = New String(,) {{"0", "Code"}, {"1", "A/C No"}, {"2", "A/C Name"}}
+                frmList.ShowDialog()
+
+                If (frmList.RowResult.Cells.Count > 0) Then
+
+                    txtClientCode.Text = frmList.RowResult.Cells(0).Value.ToString()
+                    lblAccNo.Text = frmList.RowResult.Cells(1).Value.ToString()
+                    lblAccName.Text = frmList.RowResult.Cells(2).Value.ToString()
+
+                End If
+
+                frmList.Dispose()
+
+            Else
+
+
+                Try
+
+                    Dim db As New SqlDatabase(CommonAppSet.ConnStr)
+
+                    Dim dt As New DataTable
+
+                    Dim commProc As DbCommand = db.GetStoredProcCommand("CMS_Client_GetDetailByCode")
+
+                    commProc.Parameters.Clear()
+
+                    db.AddInParameter(commProc, "@CLIENT_CODE", DbType.String, txtClientCode.Text.Trim())
+
+                    dt = db.ExecuteDataSet(commProc).Tables(0)
+
+                    If dt.Rows.Count > 0 Then
+
+                        lblAccNo.Text = dt.Rows(0)("ACC_NO").ToString()
+                        lblAccName.Text = dt.Rows(0)("ACC_NAME").ToString()
+
+                    Else
+
+                        txtClientCode.Clear()
+                        lblAccNo.Text = ""
+                        lblAccName.Text = ""
+
+                    End If
+
+
+                Catch ex As Exception
+                    MessageBox.Show(ex.Message, "Error!!", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                End Try
+
+
+
+            End If
+        End If
+
+    End Sub
+
+    Private Sub btnSearchClient_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnSearchClient.Click
+
+        Dim frmList As New FrmList()
+        frmList.Text = "Client List"
+        frmList.ProcName = "CMS_Client_GetList"
+
+        frmList.filter = New String(,) {{"ACC_NAME", "A/C Name"}, {"ACC_NO", "A/C No"}, {"CLIENT_CODE", "Code"}}
+
+        frmList.colwidth = New Integer(,) {{1, 300}}
+        frmList.colrename = New String(,) {{"0", "Code"}, {"1", "A/C No"}, {"2", "A/C Name"}}
+        frmList.ShowDialog()
+
+        If (frmList.RowResult.Cells.Count > 0) Then
+
+            txtClientCode.Text = frmList.RowResult.Cells(0).Value.ToString()
+            lblAccNo.Text = frmList.RowResult.Cells(1).Value.ToString()
+            lblAccName.Text = frmList.RowResult.Cells(2).Value.ToString()
+
+        End If
+
+        frmList.Dispose()
+
+    End Sub
+
+    Private Sub txtDepoScheCode_Validated(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles txtDepoScheCode.Validated
+
+    End Sub
+
+    Private Sub btnSearchDS_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnSearchDS.Click
+        If Not (txtDepoScheCode.Text.Trim() = "") Then
+            LoadDepositScheduleData(txtDepoScheCode.Text.Trim())
+        End If
+        If _intModno > 0 Then
+            LoadDetailData(_strDSCode, _intModno)
+        End If
+    End Sub
+End Class

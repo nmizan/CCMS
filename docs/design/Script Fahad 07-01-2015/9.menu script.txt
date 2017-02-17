@@ -1,0 +1,212 @@
+
+INSERT INTO  MENU_LIST(SLNO,MENU_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (116,'DepositSameDayMIS','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+              
+GO
+
+
+INSERT INTO  MENU_LIST(SLNO,MENU_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (117,'DepositSameDayMisDetail','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+              
+GO
+
+INSERT INTO  MENU_LIST(SLNO,MENU_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (118,'DepositSameDayMisSummary','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+              
+GO
+
+INSERT INTO  MENU_LIST(SLNO,MENU_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (119,'DepositSameDayMISUpload','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+              
+GO
+
+INSERT INTO  MENU_LIST(SLNO,MENU_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (120,'DepositSameDayMisProcess','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+              
+GO
+
+INSERT INTO  MENU_LIST(SLNO,MENU_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (121,'DepositSameDayMISReport','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+              
+GO
+
+INSERT INTO  MENU_LIST(SLNO,MENU_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (122,'DepositSameDayMISEmailHistory','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+              
+GO
+
+INSERT INTO  MENU_LIST(SLNO,MENU_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (123,'MaintenanceEmailSettingDetail','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+              
+GO
+
+INSERT INTO  MENU_LIST(SLNO,MENU_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (124,'MaintenanceEmailSettingSummary','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+              
+GO
+
+INSERT INTO  MENU_LIST(SLNO,MENU_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (125,'CollectionCitiSpeedReturnFile','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+              
+GO
+
+INSERT INTO  MENU_LIST(SLNO,MENU_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (126,'GuaranteedCreditBooking','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+              
+GO
+
+INSERT INTO  MENU_LIST(SLNO,MENU_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (127,'ReportReportsGuaranteedCreditBooking','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+              
+GO
+
+
+
+
+
+
+
+INSERT INTO  FORM_LIST(SLNO,FORMS_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (111,'DepositSameDayMISDetail','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+
+GO
+
+INSERT INTO  FORM_LIST(SLNO,FORMS_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (112,'DepositSameDayMisSummary','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+
+GO
+INSERT INTO  FORM_LIST(SLNO,FORMS_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (113,'DepositSameDayMisUpload','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+
+GO
+
+INSERT INTO  FORM_LIST(SLNO,FORMS_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (114,'DepositSameDayMISProcess','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+
+GO
+
+INSERT INTO  FORM_LIST(SLNO,FORMS_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (115,'DepositSameDayMisReport','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+
+GO
+
+INSERT INTO  FORM_LIST(SLNO,FORMS_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (116,'DepositSameDayMISEmailHistory','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+
+GO
+
+INSERT INTO  FORM_LIST(SLNO,FORMS_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (117,'MaintenanceEmailSettingDetail','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+
+GO
+
+INSERT INTO  FORM_LIST(SLNO,FORMS_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (118,'MaintenanceEmailSettingSummary','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+
+GO
+
+INSERT INTO  FORM_LIST(SLNO,FORMS_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (119,'CollectionCitiSpeedReturnFile','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+
+GO
+
+INSERT INTO  FORM_LIST(SLNO,FORMS_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (120,'CollectionGuaranteedCreditBookingFile','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+
+GO
+INSERT INTO  FORM_LIST(SLNO,FORMS_NAME,INPUT_BY,INPUT_DATETIME,INPUT_FROM,AUTH_BY,AUTH_DATETIME,AUTH_FROM,
+             MOD_NO,STATUS)
+             VALUES      
+
+             (121,'ReportReportsGuaranteedCreditBooking','System',GETDATE(),HOST_NAME(),
+              'System',GETDATE(),HOST_NAME(),1,'L');
+
+GO

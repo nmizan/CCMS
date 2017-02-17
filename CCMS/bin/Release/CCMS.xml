@@ -1,0 +1,66 @@
+﻿<?xml version="1.0"?>
+<doc>
+<assembly>
+<name>
+CCMS
+</name>
+</assembly>
+<members>
+<member name="M:CCMS.FrmPendingAuth.BuildPendingLink1(System.String,System.String,System.String)">
+	<summary>
+ Pending Link from procedure that need del_flag,auth_flag
+ </summary>
+	<param name="formSysName"></param>
+	<param name="formName"></param>
+	<param name="procName"></param>
+	<remarks></remarks>
+</member><member name="M:CCMS.FrmPendingAuth.BuildPendingLink2(System.String,System.String,System.String)">
+	<summary>
+ Pending Link from procedure that need auth_flag
+ </summary>
+	<param name="formSysName"></param>
+	<param name="formName"></param>
+	<param name="procName"></param>
+	<remarks></remarks>
+</member><member name="M:CCMS.FrmDepoSchedule.CheckGridFileStatus">
+	<summary>
+ Check grid data if any item has filename
+ </summary>
+	<remarks></remarks>
+</member><member name="P:CCMS.My.Resources.Resources.ResourceManager">
+	<summary>
+  Returns the cached ResourceManager instance used by this class.
+</summary>
+</member><member name="P:CCMS.My.Resources.Resources.Culture">
+	<summary>
+  Overrides the current thread's CurrentUICulture property for all
+  resource lookups using this strongly typed resource class.
+</summary>
+</member><member name="T:CCMS.My.Resources.Resources">
+	<summary>
+  A strongly-typed resource class, for looking up localized strings, etc.
+</summary>
+</member><member name="M:CCMS.FrmClearingDetail.ShowOpertionStatus">
+	<summary>
+ Show validation status and return true if mismatch found
+ </summary>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:CCMS.FrmLogin.LoadConfSettings">
+	<summary>
+ Load Configuration Settings
+ </summary>
+	<remarks></remarks>
+</member><member name="T:CCMS.Common.TransState">
+	<summary>
+ Transaction State Enumura
+ </summary>
+	<remarks></remarks>
+</member><member name="M:CCMS.FrmLoginSession.LoadConfSettings">
+	<summary>
+ Load Configuration Settings
+ </summary>
+	<remarks></remarks>
+</member>
+</members>
+</doc>

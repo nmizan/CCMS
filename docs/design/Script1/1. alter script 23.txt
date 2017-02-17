@@ -1,0 +1,63 @@
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 18-Sep-13
+-- Description:	get list records of branch by bank,Location name
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_Branch_GetListByBankLocName]
+	@BANK_CODE		varchar(4),
+	@LOCATION_CODE	varchar(4),
+	@LOCATION_NAME	varchar(35)
+AS
+BEGIN		
+	SET NOCOUNT ON;
+
+	SELECT br.BRANCH_CODE,br.BRANCH_NAME
+	FROM BRANCH br
+	INNER JOIN LOCATION l ON br.LOCATION_CODE=l.LOCATION_CODE		
+	WHERE br.STATUS='L' 
+	AND br.BANK_CODE=@BANK_CODE AND br.LOCATION_CODE=@LOCATION_CODE
+	AND l.LOCATION_NAME=@LOCATION_NAME
+	ORDER BY BRANCH_NAME;	
+	   
+END
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_Branch_GetListByBankLocName] TO [ccms_sp_only]
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 18-Sep-13
+-- Description:	get list records of location by bank Branch COde,Name
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_Location_GetListByBankBranchName]
+	@BANK_CODE		varchar(4),
+	@BRANCH_CODE	varchar(4),
+	@BRANCH_NAME	varchar(35)
+AS
+BEGIN	
+		
+	SET NOCOUNT ON;
+
+	SELECT distinct l.LOCATION_CODE,l.LOCATION_NAME 
+	FROM BRANCH br 
+	INNER JOIN LOCATION l on l.LOCATION_CODE=br.LOCATION_CODE
+	WHERE br.BANK_CODE=@BANK_CODE AND br.BRANCH_CODE=@BRANCH_CODE 
+	AND br.BRANCH_NAME=@BRANCH_NAME AND l.STATUS='L'
+	ORDER BY LOCATION_NAME;
+	
+	   
+END
+
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_Location_GetListByBankBranchName] TO [ccms_sp_only]
+
+GO
+

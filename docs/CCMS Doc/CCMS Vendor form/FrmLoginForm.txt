@@ -1,0 +1,74 @@
+﻿Imports System.Security.Principal
+Imports System.Threading.Thread
+Imports RTS_CLASS
+Imports System.DirectoryServices
+Imports Microsoft.Win32
+
+Public Class FrmLoginForm
+
+    ' TODO: Insert code to perform custom authentication using the provided username and password 
+    ' (See http://go.microsoft.com/fwlink/?LinkId=35339).  
+    ' The custom principal can then be attached to the current thread's principal as follows: 
+    '     My.User.CurrentPrincipal = CustomPrincipal
+    ' where CustomPrincipal is the IPrincipal implementation used to perform authentication. 
+    ' Subsequently, My.User will return identity information encapsulated in the CustomPrincipal object
+    ' such as the username, display name, etc.
+
+    Private Sub OK_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles OK.Click
+        Dim domain As String : Dim userName As String : Dim pwd As String
+        Dim entry As New DirectoryEntry
+        Dim genPrincipal As GenericPrincipal
+        Dim winIdent As WindowsIdentity = WindowsIdentity.GetCurrent()
+        'Console.WriteLine(winIdent.Name())
+        Dim ident As WindowsIdentity = WindowsIdentity.GetCurrent()
+        Dim roles() As String
+
+
+        Dim domainAndUsername As String = txtDomain.Text.Trim & "\" & txtusername.Text
+
+        'entry.Username = domainAndUsername
+
+        entry.Username = txtusername.Text
+
+        entry.Password = txtpassword.Text
+
+        Try
+
+            'Bind to the native AdsObject to force authentication. 
+
+            Dim obj As Object = entry.NativeObject
+
+            'Return True
+            Dim objFrmMain As New FrmMain
+            objFrmMain.Show()
+            Me.Hide()
+
+        Catch ex As Exception
+            MsgBox(ex.Message)
+            ' If Exception is Raised, Authentication is Failed, If Failure Details are Required , Un-Comment the line below
+            'Throw New Exception("Authentication failed with following Error : " & ex.Message)
+
+
+            'Return False
+
+
+        End Try
+
+    End Sub
+
+    Private Sub Cancel_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Cancel.Click
+        Me.Close()
+    End Sub
+
+    Private Sub FrmLoginForm_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Dim domain As String : Dim userName As String : Dim pwd As String
+        Dim entry As New DirectoryEntry
+        Dim genPrincipal As GenericPrincipal
+        Dim winIdent As WindowsIdentity = WindowsIdentity.GetCurrent()
+        'Console.WriteLine(winIdent.Name())
+        Dim ident As WindowsIdentity = WindowsIdentity.GetCurrent()
+        Dim roles() As String
+
+        txtusername.Text = ident.Name
+    End Sub
+End Class

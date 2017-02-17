@@ -1,0 +1,485 @@
+USE [CCMS]
+GO
+/****** Object:  StoredProcedure [dbo].[CMS_Bank_Add]    Script Date: 11/08/2012 17:39:26 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 07-Nov-12
+-- Description:	Add detail to bank table
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_Bank_Add]	
+	@BANK_CODE		varchar(4),
+	@BANK_NAME 		varchar(100),
+	@HEAD_ADD1 		varchar(35),
+	@HEAD_ADD2 		varchar(35),
+	@HEAD_ADD3		varchar(20),
+	@BANK_BBK_CODE	varchar(4)	
+AS
+BEGIN	
+	DECLARE @ErrorVar INT;
+	
+	SET NOCOUNT ON;
+
+	IF EXISTS(SELECT BANK_CODE from BANK WHERE BANK_CODE=@BANK_CODE)
+		BEGIN
+			-- Duplicate Entry			
+			RETURN 2	
+		END
+	
+	INSERT INTO BANK_HIST(BANK_CODE, BANK_NAME,	HEAD_ADD1,HEAD_ADD2,HEAD_ADD3,
+		BANK_BBK_CODE,INPUT_BY,INPUT_DATETIME,INPUT_FROM,MOD_NO,[STATUS],IS_AUTH)
+		VALUES(@BANK_CODE, @BANK_NAME,@HEAD_ADD1,@HEAD_ADD2,@HEAD_ADD3,
+		@BANK_BBK_CODE,SUSER_NAME(),GETDATE(),HOST_NAME(),1,'U',0);
+
+	SELECT @ErrorVar = @@ERROR;
+		
+
+	IF @ErrorVar = 0
+		BEGIN
+			RETURN 0;
+		END
+	ELSE
+		BEGIN
+			RETURN 1;
+		END
+    
+END
+
+GO
+
+
+USE [CCMS]
+GO
+/****** Object:  StoredProcedure [dbo].[CMS_Bank_Auth]    Script Date: 11/08/2012 17:40:00 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 07-Nov-12
+-- Description:	Authorize record to bank table
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_Bank_Auth]	
+	@BANK_CODE		varchar,	
+	@MOD_NO			int	
+AS
+BEGIN	
+	DECLARE @STATUS			char(1),
+			@BANK_NAME 		varchar(100),
+			@HEAD_ADD1 		varchar(35),
+			@HEAD_ADD2 		varchar(35),
+			@HEAD_ADD3		varchar(20),
+			@BANK_BBK_CODE	varchar(4),
+			@INPUT_BY		varchar(20),
+			@INPUT_DATETIME datetime,
+			@INPUT_FROM		varchar(30),
+			@AUTH_BY		varchar(20),
+			@AUTH_DATETIME	datetime,
+			@AUTH_FROM		varchar(30),
+			@LAST_MOD_NO	int,
+			@IS_AUTH		bit;			
+	
+	DECLARE @ErrorVar1		int; 
+			
+
+	SET NOCOUNT ON;
+
+	SET @STATUS = '';
+
+	BEGIN TRANSACTION
+
+	IF EXISTS(SELECT BANK_CODE from BANK_HIST 
+			  WHERE BANK_CODE=@BANK_CODE AND MOD_NO=@MOD_NO)
+		BEGIN
+			SELECT @STATUS=[STATUS],@BANK_NAME=BANK_NAME,
+				@HEAD_ADD1=HEAD_ADD1,@HEAD_ADD2=HEAD_ADD2,
+				@HEAD_ADD3=HEAD_ADD3,@BANK_BBK_CODE=BANK_BBK_CODE,
+				@INPUT_BY=INPUT_BY,	@INPUT_DATETIME=INPUT_DATETIME,
+				@INPUT_FROM=INPUT_FROM,@IS_AUTH=IS_AUTH
+				FROM BANK_HIST 
+				WHERE BANK_CODE=@BANK_CODE AND MOD_NO=@MOD_NO;
+			IF (@IS_AUTH = 1)
+				BEGIN
+					-- already authorized
+					ROLLBACK TRANSACTION;
+					RETURN 3;
+				END;
+			IF (@INPUT_BY = SUSER_NAME())
+				BEGIN
+					-- maker and checker same person
+					ROLLBACK TRANSACTION;
+					RETURN 5;
+				END;			
+		END;
+	ELSE
+		BEGIN			
+			-- not exist
+			ROLLBACK TRANSACTION;
+			RETURN 4;
+		END	;
+
+	IF @MOD_NO > 1
+		BEGIN	
+		
+			INSERT INTO BANK_HIST 
+				SELECT * FROM BANK
+				WHERE BANK_CODE=@BANK_CODE;
+			
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+
+			UPDATE BANK_HIST
+				SET [STATUS] = 'O' 
+				WHERE BANK_CODE=@BANK_CODE 
+				AND [STATUS] = 'L';
+
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+			UPDATE BANK
+				SET BANK_NAME=@BANK_NAME,
+				HEAD_ADD1=@HEAD_ADD1,HEAD_ADD2=@HEAD_ADD2,
+				HEAD_ADD3=@HEAD_ADD3,BANK_BBK_CODE=@BANK_BBK_CODE,
+				INPUT_BY=@INPUT_BY,	INPUT_DATETIME=@INPUT_DATETIME,
+				INPUT_FROM=@INPUT_FROM,AUTH_BY=SUSER_NAME(),
+				AUTH_DATETIME=GETDATE(),AUTH_FROM=HOST_NAME(),
+				MOD_NO=@MOD_NO,[STATUS]=@STATUS,IS_AUTH=1
+			WHERE BANK_CODE=@BANK_CODE;
+
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+		END
+	ELSE
+		BEGIN
+			INSERT INTO BANK
+				SELECT * FROM BANK_HIST
+					WHERE BANK_CODE=@BANK_CODE AND MOD_NO=@MOD_NO;
+			
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+			
+			UPDATE BANK
+				SET [STATUS]='L',AUTH_BY=SUSER_NAME(),
+				AUTH_DATETIME=GETDATE(),AUTH_FROM=HOST_NAME(),IS_AUTH=1
+				WHERE BANK_CODE=@BANK_CODE;
+			
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END		
+		END
+
+		COMMIT TRANSACTION
+		
+		SELECT @ErrorVar1 = @@error;
+		
+		IF @ErrorVar1 = 0
+			BEGIN		
+				RETURN 0;
+			END
+		ELSE
+			BEGIN
+				RETURN 1;
+			END
+
+
+	
+    
+END
+
+
+GO
+
+USE [CCMS]
+GO
+/****** Object:  StoredProcedure [dbo].[CMS_Bank_GetDetail]    Script Date: 11/08/2012 17:40:12 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 07-Nov-12
+-- Description:	Get detail of bank table
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_Bank_GetDetail]	
+	@BANK_CODE		varchar,	
+	@MOD_NO			int	
+AS
+BEGIN	
+	
+	SET NOCOUNT ON;
+	
+	SELECT * 
+	FROM BANK 
+	WHERE BANK_CODE=@BANK_CODE AND MOD_NO = @MOD_NO
+
+END
+
+GO
+
+USE [CCMS]
+GO
+/****** Object:  StoredProcedure [dbo].[CMS_Bank_GetMaxMod]    Script Date: 11/08/2012 17:40:21 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 08-Nov-12
+-- Description:	Get Total # of modification of bank table
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_Bank_GetMaxMod]	
+	@BANK_CODE		varchar	
+AS
+BEGIN	
+
+	DECLARE @Max1	int,
+			@Max2	int;
+
+	SET NOCOUNT ON;
+	
+	SELECT @Max1=0,@Max2=0;
+
+	SELECT @Max1=ISNULL(MAX(MOD_NO),0) FROM BANK_HIST 
+		WHERE BANK_CODE=@BANK_CODE AND IS_AUTH=0;
+		
+	IF @Max1=0
+		BEGIN
+			SELECT @Max2=ISNULL(MAX(MOD_NO),0) FROM BANK 
+				WHERE BANK_CODE=1;
+			SELECT @Max2;
+			RETURN 0;			
+		END
+	
+	SELECT @Max1;
+	RETURN 0;
+
+END
+
+GO
+
+USE [CCMS]
+GO
+/****** Object:  StoredProcedure [dbo].[CMS_Bank_Remove]    Script Date: 11/08/2012 17:40:32 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 08-Nov-12
+-- Description:	Remove record from bank table
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_Bank_Remove]	
+	@BANK_CODE		varchar,	
+	@MOD_NO			int	
+AS
+BEGIN	
+	DECLARE @STATUS			char(1),
+			@BANK_NAME 		varchar(100),
+			@HEAD_ADD1 		varchar(35),
+			@HEAD_ADD2 		varchar(35),
+			@HEAD_ADD3		varchar(20),
+			@BANK_BBK_CODE	varchar(4),
+			@INPUT_BY		varchar(20),
+			@INPUT_DATETIME datetime,
+			@INPUT_FROM		varchar(30),			
+			@IS_AUTH		bit;			
+	
+	DECLARE @ErrorVar		int; 
+			
+
+	SET NOCOUNT ON;
+
+	SET @STATUS = '';
+
+	BEGIN TRANSACTION
+
+	IF EXISTS(SELECT BANK_CODE from BANK 
+			  WHERE BANK_CODE=@BANK_CODE AND MOD_NO=@MOD_NO)
+		BEGIN
+			SELECT @STATUS=[STATUS],@BANK_NAME=BANK_NAME,
+				@HEAD_ADD1=HEAD_ADD1,@HEAD_ADD2=HEAD_ADD2,
+				@HEAD_ADD3=HEAD_ADD3,@BANK_BBK_CODE=BANK_BBK_CODE,
+				@INPUT_BY=INPUT_BY,	@INPUT_DATETIME=INPUT_DATETIME,
+				@INPUT_FROM=INPUT_FROM,@IS_AUTH=IS_AUTH
+				FROM BANK 
+				WHERE BANK_CODE=@BANK_CODE AND MOD_NO=@MOD_NO;
+			
+			IF (@STATUS = 'D')
+				BEGIN
+					-- already deleted
+					ROLLBACK TRANSACTION;
+					RETURN 6;
+				END;
+
+			DELETE BANK_HIST WHERE BANK_CODE=@BANK_CODE AND IS_AUTH=0;
+
+			SELECT @ErrorVar = @@ERROR;		
+
+			IF @ErrorVar <> 0				
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+			
+			INSERT INTO 
+				BANK_HIST (BANK_CODE, BANK_NAME, HEAD_ADD1, HEAD_ADD2, HEAD_ADD3, 
+				BANK_BBK_CODE, INPUT_BY, INPUT_DATETIME, INPUT_FROM, MOD_NO, 
+				[STATUS], IS_AUTH)
+				VALUES(@BANK_CODE, @BANK_NAME, @HEAD_ADD1, @HEAD_ADD2, @HEAD_ADD3, 
+				@BANK_BBK_CODE, SUSER_NAME(), GETDATE(), HOST_NAME(), @MOD_NO+1, 
+				'D', 0)
+
+			SELECT @ErrorVar = @@ERROR;		
+
+			IF @ErrorVar <> 0				
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+			
+			COMMIT TRANSACTION;
+			RETURN 0;
+				
+		END;
+	ELSE 
+		BEGIN			
+			-- item might exist in hist table
+			IF EXISTS(SELECT BANK_CODE from BANK_HIST 
+					  WHERE BANK_CODE=@BANK_CODE AND MOD_NO=@MOD_NO )
+				BEGIN
+					DELETE BANK_HIST
+						WHERE BANK_CODE=@BANK_CODE AND MOD_NO=@MOD_NO AND IS_AUTH=0;
+
+					SELECT @ErrorVar = @@ERROR;		
+
+					IF @ErrorVar <> 0				
+						BEGIN
+							ROLLBACK TRANSACTION;
+							RETURN 1;
+						END
+					
+					COMMIT TRANSACTION;
+					RETURN 0;			
+
+
+				END
+			ELSE
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 4;
+				END
+			
+		END		
+    
+END
+
+GO
+
+USE [CCMS]
+GO
+/****** Object:  StoredProcedure [dbo].[CMS_Bank_Update]    Script Date: 11/08/2012 17:40:43 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 08-Nov-12
+-- Description:	update detail to bank table
+-- =============================================
+
+CREATE PROCEDURE [dbo].[CMS_Bank_Update]	
+	@BANK_CODE		varchar(4),
+	@BANK_NAME 		varchar(100),
+	@HEAD_ADD1 		varchar(35),
+	@HEAD_ADD2 		varchar(35),
+	@HEAD_ADD3		varchar(20),
+	@BANK_BBK_CODE	varchar(4),
+	@MOD_NO			int
+AS
+BEGIN	
+	DECLARE @ErrorVar INT;
+	
+	SET NOCOUNT ON;
+
+	BEGIN TRANSACTION;
+
+	IF NOT EXISTS(SELECT BANK_CODE from BANK 
+				WHERE BANK_CODE=@BANK_CODE AND MOD_NO=@MOD_NO)
+		BEGIN
+			-- Not Exist		
+			ROLLBACK TRANSACTION;
+			RETURN 4;	
+		END
+	
+	DELETE BANK_HIST WHERE BANK_CODE=@BANK_CODE AND IS_AUTH=0;
+
+	SELECT @ErrorVar = @@ERROR;		
+
+	IF @ErrorVar = 0
+		BEGIN
+			COMMIT TRANSACTION;
+			RETURN 0;
+		END
+	ELSE
+		BEGIN
+			ROLLBACK TRANSACTION;
+			RETURN 1;
+		END
+
+	INSERT INTO BANK_HIST(BANK_CODE, BANK_NAME,	HEAD_ADD1,HEAD_ADD2,HEAD_ADD3,
+		BANK_BBK_CODE,INPUT_BY,INPUT_DATETIME,INPUT_FROM,MOD_NO,[STATUS],IS_AUTH)
+		VALUES(@BANK_CODE, @BANK_NAME,@HEAD_ADD1,@HEAD_ADD2,@HEAD_ADD3,
+		@BANK_BBK_CODE,SUSER_NAME(),GETDATE(),HOST_NAME(),@MOD_NO + 1,'U',0);
+
+	SELECT @ErrorVar = @@ERROR;
+		
+
+	IF @ErrorVar = 0
+		BEGIN
+			COMMIT TRANSACTION;
+			RETURN 0;
+		END
+	ELSE
+		BEGIN
+			ROLLBACK TRANSACTION;
+			RETURN 1;
+		END
+    
+END
+
+GO

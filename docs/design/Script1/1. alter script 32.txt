@@ -1,0 +1,27 @@
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 21-Apr-13
+-- Description: Get detail of tmp_reversal_clearing
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_TmpReversalClearing_GetDetail]
+	@REV_DATE	datetime,	
+	@ENTRY_LOC	varchar(3),
+	@VALUE_TYPE	numeric(1,0)
+AS
+BEGIN	
+	
+	SELECT a.*,ISNULL(b.CUSTOMER_REF,'') CUSTOMER_REF
+	FROM TMP_REVERSAL_CLEARING a
+	LEFT OUTER JOIN 
+	(SELECT DS_CODE,ENTRY_LOC,OPR_DATE,CUSTOMER_REF FROM CHECKTOTAL WHERE [STATUS]='L') b 
+		ON a.DS_CODE=b.DS_CODE AND a.ENTRY_LOC=b.ENTRY_LOC
+		AND a.REV_DATE=b.OPR_DATE
+	WHERE a.REV_DATE=@REV_DATE AND a.ENTRY_LOC=@ENTRY_LOC
+		AND a.VALUE_TYPE=@VALUE_TYPE
+	ORDER BY a.ACC_NO,a.DS_CODE asc
+	         
+END
+
+GO

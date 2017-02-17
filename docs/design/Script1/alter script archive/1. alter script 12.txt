@@ -1,0 +1,2448 @@
+USE [CCMS]
+GO
+
+
+ALTER TABLE DSCHEDULE
+ADD SLNO numeric(4,0) NULL
+
+GO
+
+ALTER TABLE DSCHEDULE
+ADD IS_ROW_CHG bit NULL
+
+GO
+
+ALTER TABLE DSCHEDULE_HIST
+ADD SLNO numeric(4,0) NULL
+
+GO
+
+ALTER TABLE DSCHEDULE_HIST
+ADD IS_ROW_CHG bit NULL
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 02-Jan-13
+-- Description:	Add detail to Deposit Schedule
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_DSchedule_Add]
+	@DS_CODE			varchar(12),
+	@D_CODE				varchar(12), 
+	@DEPOSIT_TYPE		varchar(5), 
+	@CITICASH_AMOUNT	numeric(12,2), 
+	@CITICHECK_AMOUNT	numeric(12,2), 
+	@SCHEDULE_DATE		datetime, 
+	@NO_CHECK			numeric(4,0), 
+	@CLIENT_CODE		varchar(6), 
+	@LOCATION_CODE		varchar(4), 
+	@CORR_BANK_CODE		varchar(4), 
+	@CORR_BRANCH_CODE	varchar(4),
+	@SLNO				numeric(4,0),
+	@IS_ROW_CHG			bit
+AS
+BEGIN	
+	DECLARE @ErrorVar	int;
+		
+	SET NOCOUNT ON;
+			
+	INSERT INTO DSCHEDULE_HIST(DS_CODE, D_CODE, DEPOSIT_TYPE, 
+		CITICASH_AMOUNT, CITICHECK_AMOUNT, SCHEDULE_DATE, NO_CHECK, 
+		CLIENT_CODE, LOCATION_CODE, CORR_BANK_CODE, CORR_BRANCH_CODE, 
+		MOD_NO,IS_AUTH,
+		SLNO,IS_ROW_CHG)
+		VALUES(@DS_CODE, @D_CODE, @DEPOSIT_TYPE, 
+		@CITICASH_AMOUNT, @CITICHECK_AMOUNT, @SCHEDULE_DATE, @NO_CHECK, 
+		@CLIENT_CODE, @LOCATION_CODE, @CORR_BANK_CODE, @CORR_BRANCH_CODE,
+		1,0,
+		@SLNO,@IS_ROW_CHG);
+
+	SELECT @ErrorVar = @@ERROR;
+	
+	IF @ErrorVar <> 0
+		BEGIN			
+			RETURN 1;
+		END
+		
+	RETURN 0;
+	   
+END
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 03-Jan-13
+-- Description:	update detail to DSchedule
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_DSchedule_Update]
+	@DS_CODE			varchar(12),
+	@D_CODE				varchar(12), 
+	@DEPOSIT_TYPE		varchar(5), 
+	@CITICASH_AMOUNT	numeric(12,2), 
+	@CITICHECK_AMOUNT	numeric(12,2), 
+	@SCHEDULE_DATE		datetime, 
+	@NO_CHECK			numeric(4,0), 
+	@CLIENT_CODE		varchar(6), 
+	@LOCATION_CODE		varchar(4), 
+	@CORR_BANK_CODE		varchar(4), 
+	@CORR_BRANCH_CODE	varchar(4),
+	@MOD_NO				int	,
+	@FILENAME			varchar(15), 
+	@REF_NO				varchar(10), 
+	@FILE_USER_ID		varchar(20), 
+	@SEQ_NO				numeric(4,0), 
+	@CHECKED			tinyint,
+	@FLEXGEN_DATE		datetime,
+	@SLNO				numeric(4,0),
+	@IS_ROW_CHG			bit
+AS
+BEGIN	
+	DECLARE @ErrorVar INT;
+	
+	SET NOCOUNT ON;
+
+	INSERT INTO DSCHEDULE_HIST(DS_CODE, D_CODE, DEPOSIT_TYPE, 
+		CITICASH_AMOUNT, CITICHECK_AMOUNT, SCHEDULE_DATE, NO_CHECK, 
+		CLIENT_CODE, LOCATION_CODE, CORR_BANK_CODE, CORR_BRANCH_CODE,
+		MOD_NO, IS_AUTH,[FILENAME], REF_NO, FILE_USER_ID, SEQ_NO, 
+		CHECKED, FLEXGEN_DATE,
+		SLNO,IS_ROW_CHG)
+		VALUES(@DS_CODE, @D_CODE, @DEPOSIT_TYPE, 
+		@CITICASH_AMOUNT, @CITICHECK_AMOUNT, @SCHEDULE_DATE, @NO_CHECK, 
+		@CLIENT_CODE, @LOCATION_CODE, @CORR_BANK_CODE, @CORR_BRANCH_CODE,
+		@MOD_NO, 0,@FILENAME, @REF_NO, @FILE_USER_ID, @SEQ_NO, 
+		@CHECKED, @FLEXGEN_DATE,
+		@SLNO,@IS_ROW_CHG)
+
+	SELECT @ErrorVar = @@ERROR;
+
+	IF @ErrorVar <> 0
+		BEGIN
+			RETURN 1;
+		END	
+	
+	RETURN 0;			
+	    
+END
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 03-Jan-13
+-- Description:	Authorize record to DCollected
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_DCollected_Auth]	
+	@DS_CODE		varchar(12),	
+	@MOD_NO			int,
+	@MOD_DATETIME	datetime
+AS
+BEGIN	
+	DECLARE @STATUS			char(1),
+			@TOTAL_NOCHK	numeric(4,0), 
+			@TOTAL_CHKAMT	numeric(12,2), 
+			@TOTAL_CASHAMT	numeric(12,2),			
+			@INPUT_BY		varchar(20),
+			@INPUT_DATETIME datetime,
+			@INPUT_FROM		varchar(30),
+			@LAST_MOD_NO	int,
+			@IS_AUTH		bit,
+			@vSlipDate		datetime,
+			@vDCode			varchar(12);			
+	
+	DECLARE @ErrorVar1		int; 
+			
+	SET NOCOUNT ON;
+
+	SELECT @STATUS = '';
+
+	BEGIN TRANSACTION;
+
+	IF EXISTS(SELECT DS_CODE from DCOLLECTED_HIST 
+			  WHERE DS_CODE=@DS_CODE AND MOD_NO=@MOD_NO)
+		BEGIN
+			SELECT @STATUS=[STATUS],
+				@TOTAL_NOCHK=TOTAL_NOCHK, 
+				@TOTAL_CHKAMT=TOTAL_CHKAMT, @TOTAL_CASHAMT=TOTAL_CASHAMT,	
+				@INPUT_BY=INPUT_BY,	@INPUT_DATETIME=INPUT_DATETIME,
+				@INPUT_FROM=INPUT_FROM,@IS_AUTH=IS_AUTH
+				FROM DCOLLECTED_HIST 
+				WHERE DS_CODE=@DS_CODE AND MOD_NO=@MOD_NO;
+			IF (@IS_AUTH = 1)
+				BEGIN
+					-- already authorized
+					ROLLBACK TRANSACTION;
+					RETURN 3;
+				END;
+			IF (@INPUT_BY = substring(suser_name(),charindex('\',suser_name())+1,20))
+				BEGIN
+					-- maker and checker same person
+					ROLLBACK TRANSACTION;
+					RETURN 5;
+				END;
+			IF (@INPUT_DATETIME <> @MOD_DATETIME)
+				BEGIN
+					-- Data hase been changed. Need notification
+					ROLLBACK TRANSACTION;
+					RETURN 7;
+				END;			
+		END;
+	ELSE
+		BEGIN			
+			-- not exist
+			ROLLBACK TRANSACTION;
+			RETURN 4;
+		END	;
+
+	IF @MOD_NO > 1
+		BEGIN	
+		
+			INSERT INTO DCOLLECTED_HIST(DS_CODE, TOTAL_NOCHK, TOTAL_CHKAMT, 
+				TOTAL_CASHAMT, INPUT_BY, INPUT_DATETIME, INPUT_FROM, AUTH_BY, 
+				AUTH_DATETIME, AUTH_FROM, MOD_NO, [STATUS], IS_AUTH, ENTRY_DATE) 
+				SELECT DS_CODE, TOTAL_NOCHK, TOTAL_CHKAMT, 
+					TOTAL_CASHAMT, INPUT_BY, INPUT_DATETIME, INPUT_FROM, AUTH_BY, 
+					AUTH_DATETIME, AUTH_FROM, MOD_NO, [STATUS], 1,ENTRY_DATE 
+					FROM DCOLLECTED
+					WHERE DS_CODE=@DS_CODE;
+			
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+
+			UPDATE DCOLLECTED_HIST
+				SET [STATUS] = 'O' 
+				WHERE DS_CODE=@DS_CODE
+				AND [STATUS] = 'L';
+
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+			IF @STATUS='U'
+				BEGIN
+					SELECT @STATUS='L';
+				END
+
+			UPDATE DCOLLECTED
+				SET
+				TOTAL_NOCHK=@TOTAL_NOCHK,
+				TOTAL_CHKAMT=@TOTAL_CHKAMT, TOTAL_CASHAMT=@TOTAL_CASHAMT,
+				INPUT_BY=@INPUT_BY,	INPUT_DATETIME=@INPUT_DATETIME,
+				INPUT_FROM=@INPUT_FROM,
+				AUTH_BY=substring(suser_name(),charindex('\',suser_name())+1,20),
+				AUTH_DATETIME=GETDATE(),AUTH_FROM=HOST_NAME(),
+				MOD_NO=@MOD_NO,[STATUS]=@STATUS
+			WHERE DS_CODE=@DS_CODE;
+
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+			
+			DELETE DCOLLECTED_HIST WHERE DS_CODE=@DS_CODE
+				AND IS_AUTH=0;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END	
+
+		END
+	ELSE -- first record
+		BEGIN
+			INSERT INTO DCOLLECTED
+				SELECT DS_CODE,TOTAL_NOCHK, TOTAL_CHKAMT, TOTAL_CASHAMT, 
+					INPUT_BY, INPUT_DATETIME, INPUT_FROM, 
+					substring(suser_name(),charindex('\',suser_name())+1,20), 
+					GETDATE(), HOST_NAME(), MOD_NO, 'L', ENTRY_DATE 
+					FROM DCOLLECTED_HIST
+					WHERE DS_CODE=@DS_CODE AND MOD_NO=@MOD_NO;
+			
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+			DELETE DCOLLECTED_HIST WHERE DS_CODE=@DS_CODE
+				AND IS_AUTH=0;
+			
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END			
+					
+		END
+	
+	-- Now update DSCHEDULE
+
+	INSERT INTO DSCHEDULE_HIST(DS_CODE, D_CODE, DEPOSIT_TYPE, 
+		CITICASH_AMOUNT, CITICHECK_AMOUNT, SCHEDULE_DATE, NO_CHECK, 
+		CLIENT_CODE, LOCATION_CODE, CORR_BANK_CODE, CORR_BRANCH_CODE, 
+		MOD_NO, IS_AUTH, [FILENAME], REF_NO, FILE_USER_ID, SEQ_NO, 
+		CHECKED, FLEXGEN_DATE,
+		SLNO,IS_ROW_CHG)
+		SELECT DS_CODE, D_CODE, DEPOSIT_TYPE, 
+		CITICASH_AMOUNT, CITICHECK_AMOUNT, SCHEDULE_DATE, NO_CHECK, 
+		CLIENT_CODE, LOCATION_CODE, CORR_BANK_CODE, CORR_BRANCH_CODE, 
+		MOD_NO, 1, [FILENAME], REF_NO, FILE_USER_ID, SEQ_NO, 
+		CHECKED, FLEXGEN_DATE,
+		SLNO,IS_ROW_CHG
+		FROM DSCHEDULE
+		WHERE DS_CODE=@DS_CODE;
+	
+	SELECT @ErrorVar1 = @@error;
+
+	IF @ErrorVar1 <> 0
+		BEGIN
+			ROLLBACK TRANSACTION;
+			RETURN 1;
+		END
+	
+	DELETE DSCHEDULE WHERE DS_CODE=@DS_CODE;
+
+	SELECT @ErrorVar1 = @@error;
+
+	IF @ErrorVar1 <> 0
+		BEGIN
+			ROLLBACK TRANSACTION;
+			RETURN 1;
+		END
+
+	INSERT INTO DSCHEDULE(DS_CODE, D_CODE, DEPOSIT_TYPE, CITICASH_AMOUNT, 
+		CITICHECK_AMOUNT, SCHEDULE_DATE, NO_CHECK, CLIENT_CODE, 
+		LOCATION_CODE, CORR_BANK_CODE, CORR_BRANCH_CODE, MOD_NO, 
+		[FILENAME], REF_NO, FILE_USER_ID, SEQ_NO, CHECKED, 
+		FLEXGEN_DATE, SLNO, IS_ROW_CHG)
+		SELECT DS_CODE, D_CODE, DEPOSIT_TYPE, CITICASH_AMOUNT, 
+		CITICHECK_AMOUNT, SCHEDULE_DATE, NO_CHECK, CLIENT_CODE, 
+		LOCATION_CODE, CORR_BANK_CODE, CORR_BRANCH_CODE, MOD_NO, 
+		[FILENAME], REF_NO, FILE_USER_ID, SEQ_NO, CHECKED, 
+		FLEXGEN_DATE, SLNO, IS_ROW_CHG
+		FROM DSCHEDULE_HIST 
+		WHERE DS_CODE=@DS_CODE AND MOD_NO=@MOD_NO;
+	
+	SELECT @ErrorVar1 = @@error;
+
+	IF @ErrorVar1 <> 0
+		BEGIN
+			ROLLBACK TRANSACTION;
+			RETURN 1;
+		END	
+
+	DELETE DSCHEDULE_HIST WHERE DS_CODE=@DS_CODE AND MOD_NO=@MOD_NO;
+
+	SELECT @ErrorVar1 = @@error;
+
+	IF @ErrorVar1 <> 0
+		BEGIN
+			ROLLBACK TRANSACTION;
+			RETURN 1;
+		END
+	---------------- update slip_date of ccash and csd_det -----------
+
+	DECLARE tmpCursor1 CURSOR FOR
+		SELECT D_CODE,SCHEDULE_DATE
+        FROM DSCHEDULE WHERE DS_CODE=@DS_CODE ;
+
+	OPEN tmpCursor1;
+	FETCH NEXT FROM tmpCursor1 
+        INTO @vDCode,@vSlipDate;
+	
+	WHILE @@FETCH_STATUS=0 
+ 	BEGIN
+		UPDATE CCASH SET SLIP_DATE=@vSlipDate
+			WHERE D_CODE=@vDCode;
+		
+		UPDATE CCASH_HIST SET SLIP_DATE=@vSlipDate
+			WHERE D_CODE=@vDCode AND IS_AUTH=0;
+
+		UPDATE CSD_DET SET SLIP_DATE=@vSlipDate
+			WHERE D_CODE=@vDCode;
+		
+		UPDATE CSD_DET_HIST SET SLIP_DATE=@vSlipDate
+			WHERE D_CODE=@vDCode AND IS_AUTH=0;
+		
+		FETCH NEXT FROM tmpCursor1 
+			INTO @vDCode,@vSlipDate;
+
+	END
+
+	CLOSE tmpCursor1;
+	DEALLOCATE tmpCursor1;
+
+	-------------------------------
+	COMMIT TRANSACTION;
+		
+	SELECT @ErrorVar1 = @@error;
+		
+	IF @ErrorVar1 = 0
+		BEGIN		
+			RETURN 0;
+		END
+	ELSE
+		BEGIN
+			RETURN 1;
+		END
+
+    
+END
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 03-Jan-13
+-- Description:	Remove record from DCollected
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_DCollected_Remove]	
+	@DS_CODE		varchar(12),
+	@MOD_NO			int,
+	@RET_MOD_NO		int output
+AS
+BEGIN	
+	DECLARE @STATUS			char(1),
+			@TOTAL_NOCHK	numeric(4,0), 
+			@TOTAL_CHKAMT	numeric(12,2), 
+			@TOTAL_CASHAMT	numeric(12,2),						
+			@IS_AUTH		bit,
+			@ENTRY_DATE		datetime;	
+	
+	DECLARE @ErrorVar		int; 
+			
+	SET NOCOUNT ON;
+
+	SET @STATUS = '';
+
+	BEGIN TRANSACTION
+
+	IF EXISTS(SELECT DS_CODE from DCOLLECTED
+			  WHERE DS_CODE=@DS_CODE AND MOD_NO=@MOD_NO)
+		BEGIN
+			SELECT @STATUS=[STATUS],
+				@TOTAL_NOCHK=TOTAL_NOCHK, 
+				@TOTAL_CHKAMT=TOTAL_CHKAMT, @TOTAL_CASHAMT=TOTAL_CASHAMT,
+				@ENTRY_DATE=ENTRY_DATE				
+				FROM DCOLLECTED
+				WHERE DS_CODE=@DS_CODE AND MOD_NO=@MOD_NO;
+			
+			IF (@STATUS = 'D')
+				BEGIN
+					-- already deleted
+					ROLLBACK TRANSACTION;
+					RETURN 6;
+				END;
+
+			DELETE DCOLLECTED_HIST WHERE DS_CODE=@DS_CODE AND IS_AUTH=0;
+
+			SELECT @ErrorVar = @@ERROR;		
+
+			IF @ErrorVar <> 0				
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+			SELECT @RET_MOD_NO = @MOD_NO + 1;
+
+			INSERT INTO 
+				DCOLLECTED_HIST (DS_CODE,
+				TOTAL_NOCHK, TOTAL_CHKAMT, TOTAL_CASHAMT, 
+				INPUT_BY, INPUT_DATETIME, INPUT_FROM, MOD_NO, 
+				[STATUS], IS_AUTH, ENTRY_DATE)
+				VALUES(@DS_CODE,
+				@TOTAL_NOCHK, @TOTAL_CHKAMT, @TOTAL_CASHAMT, 
+				substring(suser_name(),charindex('\',suser_name())+1,20), 
+				GETDATE(), HOST_NAME(), @RET_MOD_NO, 
+				'D', 0, @ENTRY_DATE)
+
+			SELECT @ErrorVar = @@ERROR;		
+
+			IF @ErrorVar <> 0				
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+
+-----------
+
+			DELETE DSCHEDULE_HIST
+				WHERE DS_CODE=@DS_CODE AND IS_AUTH=0 ;
+
+			SELECT @ErrorVar = @@error;
+
+			IF @ErrorVar <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+			INSERT INTO DSCHEDULE_HIST(DS_CODE, D_CODE, DEPOSIT_TYPE, CITICASH_AMOUNT, 
+				CITICHECK_AMOUNT, SCHEDULE_DATE, NO_CHECK, CLIENT_CODE, 
+				LOCATION_CODE, CORR_BANK_CODE, CORR_BRANCH_CODE, 
+				MOD_NO, IS_AUTH, [FILENAME], REF_NO, FILE_USER_ID, SEQ_NO, 
+				CHECKED, FLEXGEN_DATE,SLNO,IS_ROW_CHG)
+				SELECT DS_CODE, D_CODE, DEPOSIT_TYPE, CITICASH_AMOUNT,
+					CITICHECK_AMOUNT, SCHEDULE_DATE, NO_CHECK, CLIENT_CODE, 
+					LOCATION_CODE, CORR_BANK_CODE, CORR_BRANCH_CODE, 
+					@RET_MOD_NO,0, [FILENAME], REF_NO, FILE_USER_ID, SEQ_NO, 
+					CHECKED, FLEXGEN_DATE,SLNO,1
+				FROM DSCHEDULE
+				WHERE DS_CODE=@DS_CODE AND MOD_NO=@MOD_NO;
+			
+			SELECT @ErrorVar = @@error;
+
+			IF @ErrorVar <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+			
+-----------
+			
+
+			COMMIT TRANSACTION;
+			RETURN 0;
+				
+		END;
+	ELSE 
+		BEGIN			
+			-- item might exist in hist table
+			IF EXISTS(SELECT DS_CODE from DCOLLECTED_HIST 
+					  WHERE DS_CODE=@DS_CODE AND MOD_NO=@MOD_NO )
+				BEGIN
+
+------------------
+					IF @MOD_NO=1
+						BEGIN
+							IF EXISTS(SELECT ds.DS_CODE,ds.D_CODE,ds.MOD_NO 
+										FROM DSCHEDULE_HIST ds 
+										INNER JOIN CCASH_HIST cc ON cc.D_CODE=ds.D_CODE
+										WHERE ds.IS_AUTH=0 AND ds.MOD_NO=1 
+										AND DS_CODE=@DS_CODE)
+								BEGIN
+									-- child exist
+									ROLLBACK TRANSACTION;
+									RETURN 10;
+								END
+
+							IF EXISTS(SELECT ds.DS_CODE,ds.D_CODE,ds.MOD_NO 
+										FROM DSCHEDULE_HIST ds 
+										INNER JOIN CSD_HIST cd ON cd.D_CODE=ds.D_CODE
+										WHERE ds.IS_AUTH=0 AND ds.MOD_NO=1 
+										AND DS_CODE=@DS_CODE)
+								BEGIN
+									-- child exist
+									ROLLBACK TRANSACTION;
+									RETURN 10;
+								END
+
+						END
+
+--------------------
+
+
+					DELETE DCOLLECTED_HIST
+						WHERE DS_CODE=@DS_CODE AND MOD_NO=@MOD_NO AND IS_AUTH=0;
+
+					SELECT @ErrorVar = @@ERROR;		
+
+					IF @ErrorVar <> 0				
+						BEGIN
+							ROLLBACK TRANSACTION;
+							RETURN 1;
+						END
+					
+					DELETE DSCHEDULE_HIST 
+						WHERE DS_CODE=@DS_CODE AND MOD_NO=@MOD_NO AND IS_AUTH=0 ;
+					
+					SELECT @ErrorVar = @@ERROR;		
+
+					IF @ErrorVar <> 0				
+						BEGIN
+							ROLLBACK TRANSACTION;
+							RETURN 1;
+						END
+	
+					SELECT @RET_MOD_NO = @MOD_NO-1;
+
+					COMMIT TRANSACTION;
+					RETURN 0;			
+
+
+				END
+			ELSE
+				BEGIN
+					-- not exist
+					ROLLBACK TRANSACTION;
+					RETURN 4;
+				END
+			
+		END		
+    
+END
+
+GO
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 03-Jan-13
+-- Description:	Get detail of Dschedule
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_DSchedule_GetDetails]	
+	@DS_CODE	varchar(12),	
+	@MOD_NO		int	
+AS
+BEGIN	
+	
+	SET NOCOUNT ON;
+
+	IF EXISTS( SELECT DS_CODE 
+			   FROM DSCHEDULE WHERE DS_CODE=@DS_CODE AND MOD_NO=@MOD_NO)
+		BEGIN
+			SELECT ds.*,'IS_AUTH'=1,
+				l.LOCATION_NAME,b.BANK_NAME,br.BRANCH_NAME,cl.ACC_NO,cl.ACC_NAME
+			FROM DSCHEDULE ds
+				LEFT OUTER JOIN LOCATION l
+				ON l.LOCATION_CODE=ds.LOCATION_CODE
+				LEFT OUTER JOIN BANK b
+				ON b.BANK_CODE=ds.CORR_BANK_CODE
+				LEFT OUTER JOIN BRANCH br
+				ON br.BRANCH_CODE=ds.CORR_BRANCH_CODE
+				LEFT OUTER JOIN CLIENT cl
+				ON cl.CLIENT_CODE=ds.CLIENT_CODE
+			WHERE ds.DS_CODE=@DS_CODE AND ds.MOD_NO = @MOD_NO
+			ORDER BY ds.SLNO
+		END	
+	ELSE
+		BEGIN
+			SELECT dsh.* ,
+				l.LOCATION_NAME,b.BANK_NAME,br.BRANCH_NAME,cl.ACC_NO,cl.ACC_NAME
+			FROM DSCHEDULE_HIST dsh
+				LEFT OUTER JOIN LOCATION l
+				ON l.LOCATION_CODE=dsh.LOCATION_CODE
+				LEFT OUTER JOIN BANK b
+				ON b.BANK_CODE=dsh.CORR_BANK_CODE
+				LEFT OUTER JOIN BRANCH br
+				ON br.BRANCH_CODE=dsh.CORR_BRANCH_CODE
+				LEFT OUTER JOIN CLIENT cl
+				ON cl.CLIENT_CODE=dsh.CLIENT_CODE
+			WHERE dsh.DS_CODE=@DS_CODE AND dsh.MOD_NO = @MOD_NO
+			ORDER BY dsh.SLNO
+		END
+END
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 24-Jan-13
+-- Description:	Get detail of Dschedule by code
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_DSchedule_GetDetailsByCode]	
+	@DS_CODE	varchar(12)	
+AS
+BEGIN	
+	
+	SET NOCOUNT ON;
+
+	
+	SELECT ds.*,
+		l.LOCATION_NAME,b.BANK_NAME,br.BRANCH_NAME
+	FROM DSCHEDULE ds
+		LEFT OUTER JOIN LOCATION l
+		ON l.LOCATION_CODE=ds.LOCATION_CODE
+		LEFT OUTER JOIN BANK b
+		ON b.BANK_CODE=ds.CORR_BANK_CODE
+		LEFT OUTER JOIN BRANCH br
+		ON br.BRANCH_CODE=ds.CORR_BRANCH_CODE
+	WHERE ds.DS_CODE=@DS_CODE
+	ORDER BY ds.SLNO
+	
+	
+END
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 27-Aug-13
+-- Description:	Get outstanind Checks by Bank, Branch 
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_CCheck_GetOutstanding]	
+	@DRAWEE_BANK_CODE	varchar(4),
+    @LOCATION_CODE    	varchar(4),
+    @BRANCH_CODE    	varchar(4)
+AS
+BEGIN	
+	
+	SET NOCOUNT ON;
+	
+	SELECT cs.*,cl.ACC_NAME,cl.ACC_NO,cl.CITIANY_CHARGE,cl.CITIANY_STD_CHARGE,CITIANY_VAT
+		FROM CCHECK cs
+		INNER JOIN CLIENT cl ON cs.CLIENT_CODE=cl.CLIENT_CODE
+		WHERE cs.DRAWEE_BANK_CODE = @DRAWEE_BANK_CODE AND cs.LOCATION_CODE = @LOCATION_CODE
+		AND cs.BRANCH_CODE= @BRANCH_CODE AND cs.RTN_STATUS='O' AND cs.NONZONE_REF > '0'
+		AND cs.NONZONE_REF NOT IN (SELECT NONZONE_REF FROM DD_CCHECK_HIST WHERE
+			IS_AUTH=0 )
+	
+END
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_CCheck_GetOutstanding] TO [ccms_sp_only]
+
+GO
+
+
+
+CREATE TABLE [dbo].[RETURN_CSD](
+	[D_CODE] [varchar](12) NOT NULL,
+	[SLNO] [numeric](3,0) NOT NULL,
+	[RTN_STATUS] [char](1) NULL,
+	[RTN_CODE] [varchar](2) NULL,
+	[INPUT_BY] [varchar](20) NULL,
+	[INPUT_DATETIME] [datetime] NULL,
+	[INPUT_FROM] [varchar](30) NULL,
+	[AUTH_BY] [varchar](20) NULL,
+	[AUTH_DATETIME] [datetime] NULL,
+	[AUTH_FROM] [varchar](30) NULL,
+	[MOD_NO] [numeric](3, 0) NOT NULL,
+	[STATUS] [char](1) NOT NULL,
+	PRIMARY KEY(D_CODE,SLNO) 
+)
+
+GO
+
+CREATE TABLE [dbo].[RETURN_CSD_HIST](
+	[D_CODE] [varchar](12) NOT NULL,
+	[SLNO] [numeric](3,0) NOT NULL,
+	[RTN_STATUS] [char](1) NULL,
+	[RTN_CODE] [varchar](2) NULL,
+	[INPUT_BY] [varchar](20) NULL,
+	[INPUT_DATETIME] [datetime] NULL,
+	[INPUT_FROM] [varchar](30) NULL,
+	[AUTH_BY] [varchar](20) NULL,
+	[AUTH_DATETIME] [datetime] NULL,
+	[AUTH_FROM] [varchar](30) NULL,
+	[MOD_NO] [numeric](3, 0) NOT NULL,
+	[STATUS] [char](1) NOT NULL,
+	IS_AUTH [bit] NOT NULL,
+	PRIMARY KEY(D_CODE,SLNO,MOD_NO) 
+)
+
+GO
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 27-Aug-13
+-- Description:	Get detail of CSDDet by d_code
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_CSDDet_GetDetailsByDCode]	
+	@D_CODE	varchar(12)	
+AS
+BEGIN	
+	
+	SET NOCOUNT ON;
+	
+	SELECT csd.D_CODE,csd.SLNO,csd.CHECK_NO,csd.AMOUNT,b.BANK_NAME AS DRAWEE_BANK_NAME,
+		csd.RTN_STATUS
+	FROM CSD_DET csd 
+	LEFT OUTER JOIN BANK b on b.BANK_CODE=csd.DRAWEE_BANK_CODE
+	WHERE csd.D_CODE=@D_CODE
+		
+END
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_CSDDet_GetDetailsByDCode] TO [ccms_sp_only]
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 27-Aug-13
+-- Description:	Get detail of CSDDet by d_code,slno
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_CSDDet_GetDetailByCode]	
+	@D_CODE	varchar(12)	,
+	@SLNO numeric(3,0)
+AS
+BEGIN	
+	
+	SET NOCOUNT ON;
+	
+	SELECT csd.D_CODE,csd.SLNO,csd.CHECK_NO,csd.AMOUNT,b.BANK_NAME AS DRAWEE_BANK_NAME,
+		csd.RTN_STATUS
+	FROM CSD_DET csd 
+	LEFT OUTER JOIN BANK b on b.BANK_CODE=csd.DRAWEE_BANK_CODE
+	WHERE csd.D_CODE=@D_CODE AND csd.SLNO=@SLNO
+		
+END
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_CSDDet_GetDetailByCode] TO [ccms_sp_only]
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 27-Aug-13
+-- Description:	Add detail to RETURN_CSD
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_ReturnCSD_Add]	
+	@D_CODE				varchar(12), 
+	@SLNO				numeric(3,0), 
+	@RTN_STATUS			char(1), 
+	@RTN_CODE			varchar(2)
+AS
+BEGIN	
+	DECLARE @ErrorVar	int;
+		
+	SET NOCOUNT ON;
+			
+	INSERT INTO RETURN_CSD_HIST(D_CODE, SLNO, RTN_STATUS, RTN_CODE, 
+		INPUT_BY, 
+		INPUT_DATETIME, INPUT_FROM, MOD_NO, [STATUS], IS_AUTH)
+		VALUES(@D_CODE, @SLNO, @RTN_STATUS, @RTN_CODE, 
+		substring(suser_name(),charindex('\',suser_name())+1,20),
+		GETDATE(),HOST_NAME(),1,'U',0);
+
+	SELECT @ErrorVar = @@ERROR;
+	
+	IF @ErrorVar <> 0
+		BEGIN			
+			RETURN 1;
+		END
+		
+	RETURN 0;
+	   
+END
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_ReturnCSD_Add] TO [ccms_sp_only]
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 27-Aug-13
+-- Description:	update detail to Return_CSD table
+-- =============================================
+
+CREATE PROCEDURE [dbo].[CMS_ReturnCSD_Update]	
+	@D_CODE				varchar(12), 
+	@SLNO				numeric(3,0), 
+	@RTN_STATUS			char(1), 
+	@RTN_CODE			varchar(2),
+	@MOD_NO			int,
+	@RET_MOD_NO		int output
+AS
+BEGIN	
+	DECLARE @ErrorVar INT;
+	
+	SET NOCOUNT ON;
+
+	BEGIN TRANSACTION;
+
+	IF EXISTS(SELECT D_CODE FROM RETURN_CSD 
+				WHERE D_CODE=@D_CODE AND SLNO=@SLNO AND MOD_NO=@MOD_NO)
+		BEGIN
+
+			DELETE RETURN_CSD_HIST WHERE D_CODE=@D_CODE AND SLNO=@SLNO AND IS_AUTH=0;
+
+			SELECT @ErrorVar = @@ERROR;		
+
+			IF @ErrorVar <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+			
+			SELECT @RET_MOD_NO = @MOD_NO +1;
+			
+			INSERT INTO RETURN_CSD_HIST(D_CODE, SLNO, RTN_STATUS, RTN_CODE, 
+				INPUT_BY, 
+				INPUT_DATETIME,INPUT_FROM,  
+				MOD_NO, [STATUS], IS_AUTH)
+				VALUES(@D_CODE, @SLNO, @RTN_STATUS, @RTN_CODE,
+				substring(suser_name(),charindex('\',suser_name())+1,20),
+				GETDATE(),HOST_NAME(),
+				@RET_MOD_NO,'U',0);
+
+			SELECT @ErrorVar = @@ERROR;
+
+			IF @ErrorVar <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END				
+
+			COMMIT TRANSACTION;
+			
+			RETURN 0;
+
+				
+		END
+	ELSE -- might be in hist table
+		BEGIN
+
+			IF EXISTS(SELECT D_CODE from RETURN_CSD_HIST 
+						WHERE D_CODE=@D_CODE AND SLNO=@SLNO AND MOD_NO=@MOD_NO AND IS_AUTH=0)
+				BEGIN
+
+					DELETE RETURN_CSD_HIST WHERE D_CODE=@D_CODE AND SLNO=@SLNO AND IS_AUTH=0;
+
+					SELECT @ErrorVar = @@ERROR;		
+
+					IF @ErrorVar <> 0
+						BEGIN
+							ROLLBACK TRANSACTION;
+							RETURN 1;
+						END
+
+					INSERT INTO RETURN_CSD_HIST(D_CODE, SLNO, RTN_STATUS, RTN_CODE, 
+						INPUT_BY, 
+						INPUT_DATETIME,INPUT_FROM,  
+						MOD_NO, [STATUS], IS_AUTH)
+						VALUES(@D_CODE, @SLNO, @RTN_STATUS, @RTN_CODE,
+						substring(suser_name(),charindex('\',suser_name())+1,20),
+						GETDATE(),HOST_NAME(),
+						@MOD_NO,'U',0);
+
+					SELECT @ErrorVar = @@ERROR;
+		
+					IF @ErrorVar <> 0
+						BEGIN
+							ROLLBACK TRANSACTION;
+							RETURN 1;
+						END
+					
+					SELECT @RET_MOD_NO=@MOD_NO;
+					
+					COMMIT TRANSACTION;
+					RETURN 0;
+			
+				END
+			ELSE
+				BEGIN
+					-- not exist
+					ROLLBACK TRANSACTION;
+					RETURN 4;
+				END
+
+		END
+    
+END
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_ReturnCSD_Update] TO [ccms_sp_only]
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 27-Aug-13
+-- Description:	Get detail of RETURN_CSD
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_ReturnCSD_GetDetail]	
+	@D_CODE		varchar(12),
+	@SLNO		numeric(3,0), 	
+	@MOD_NO		int	
+AS
+BEGIN	
+	
+	SET NOCOUNT ON;
+
+	IF EXISTS( SELECT D_CODE 
+			   FROM RETURN_CSD WHERE D_CODE=@D_CODE AND SLNO=@SLNO AND MOD_NO=@MOD_NO)
+		BEGIN
+			SELECT rc.*,'IS_AUTH'=1 ,rr.REJECT_REASON, cd.CHECK_NO,cd.AMOUNT
+			FROM RETURN_CSD rc
+			INNER JOIN CSD_DET cd ON cd.D_CODE = rc.D_CODE AND cd.SLNO=rc.SLNO 
+			LEFT OUTER JOIN RETURN_REJECT rr ON rr.REJECT_CODE=rc.RTN_CODE
+			WHERE rc.D_CODE=@D_CODE AND rc.SLNO=@SLNO AND rc.MOD_NO = @MOD_NO
+
+		END	
+	ELSE
+		BEGIN
+			SELECT rch.* ,rr.REJECT_REASON, cd.CHECK_NO,cd.AMOUNT
+			FROM RETURN_CSD_HIST rch
+			INNER JOIN CSD_DET cd ON cd.D_CODE = rch.D_CODE AND cd.SLNO=rch.SLNO 
+			LEFT OUTER JOIN RETURN_REJECT rr ON rr.REJECT_CODE=rch.RTN_CODE
+			WHERE rch.D_CODE=@D_CODE AND rch.SLNO=@SLNO AND rch.MOD_NO = @MOD_NO
+		END
+END
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_ReturnCSD_GetDetail] TO [ccms_sp_only]
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 27-Aug-13
+-- Description:	Get Total # of modification of RETURN_CSD table
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_ReturnCSD_GetMaxMod]	
+	@D_CODE		varchar(12),
+	@SLNO		numeric(3,0)
+AS
+BEGIN	
+
+	DECLARE @Max1	int,
+			@Max2	int;
+
+	SET NOCOUNT ON;
+	
+	SELECT @Max1=0,@Max2=0;
+
+	SELECT @Max1=ISNULL(MAX(MOD_NO),0) FROM RETURN_CSD_HIST 
+		WHERE D_CODE=@D_CODE AND SLNO=@SLNO AND IS_AUTH=0;
+		
+	IF @Max1=0
+		BEGIN
+			SELECT @Max2=ISNULL(MAX(MOD_NO),0) FROM RETURN_CSD 
+				WHERE D_CODE=@D_CODE AND SLNO=@SLNO;
+			SELECT @Max2;
+			RETURN 0;			
+		END
+	
+	SELECT @Max1;
+	RETURN 0;
+
+END
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_ReturnCSD_GetMaxMod] TO [ccms_sp_only]
+
+GO
+
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 27-Aug-13
+-- Description:	Get detail to RETURN_CSD table
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_ReturnCSD_GetDetailList]		
+	@AUTH_FLAG	bit
+AS
+BEGIN	
+		
+	SET NOCOUNT ON;
+
+
+	IF @AUTH_FLAG=0
+		BEGIN						
+			SELECT rch.*,'S' = 'U',cdh.CHECK_NO,cdh.AMOUNT,d.DS_CODE			 
+				FROM RETURN_CSD_HIST rch
+				INNER JOIN CSD_DET cdh 
+				ON cdh.D_CODE = rch.D_CODE AND cdh.SLNO=rch.SLNO
+				INNER JOIN DSCHEDULE d ON d.D_CODE=cdh.D_CODE
+				WHERE rch.IS_AUTH=0
+				ORDER BY rch.D_CODE,rch.SLNO;			
+		END;
+	ELSE
+		BEGIN
+			
+				SELECT rc.*,1,'S' = 'U',cdh.CHECK_NO,cdh.AMOUNT,d.DS_CODE			 
+				FROM RETURN_CSD rc
+				INNER JOIN CSD_DET cdh 
+				ON cdh.D_CODE = rc.D_CODE AND cdh.SLNO=rc.SLNO
+				INNER JOIN DSCHEDULE d ON d.D_CODE=cdh.D_CODE
+				ORDER BY rc.D_CODE,rc.SLNO;
+			
+				
+		END;	
+	   
+END
+
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_ReturnCSD_GetDetailList] TO [ccms_sp_only]
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 27-Aug-13
+-- Description:	Remove record from RETURN_CSD
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_ReturnCSD_Remove]	
+	@D_CODE				varchar(12), 
+	@SLNO				numeric(3,0),
+	@MOD_NO			int,
+	@RET_MOD_NO		int output
+AS
+BEGIN	
+	DECLARE @STATUS			char(1),
+			@RTN_STATUS 	char(1),
+			@RTN_CODE 		varchar(2);			
+	
+	DECLARE @ErrorVar		int; 
+			
+
+	SET NOCOUNT ON;
+
+	SET @STATUS = '';
+
+	BEGIN TRANSACTION
+
+	IF EXISTS(SELECT D_CODE from RETURN_CSD 
+			  WHERE D_CODE=@D_CODE AND SLNO=@SLNO AND MOD_NO=@MOD_NO)
+		BEGIN
+			SELECT @STATUS=[STATUS],@RTN_STATUS=RTN_STATUS,
+				@RTN_CODE=RTN_CODE
+				FROM RETURN_CSD 
+				WHERE D_CODE=@D_CODE AND SLNO=@SLNO AND MOD_NO=@MOD_NO;
+			
+			IF (@STATUS = 'D')
+				BEGIN
+					-- already deleted
+					ROLLBACK TRANSACTION;
+					RETURN 6;
+				END;
+
+			DELETE RETURN_CSD_HIST WHERE D_CODE=@D_CODE AND SLNO=@SLNO AND IS_AUTH=0;
+
+			SELECT @ErrorVar = @@ERROR;		
+
+			IF @ErrorVar <> 0				
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+			SELECT @RET_MOD_NO = @MOD_NO + 1;
+
+			INSERT INTO 
+				RETURN_CSD_HIST (D_CODE, SLNO, RTN_STATUS, RTN_CODE, 
+				INPUT_BY, 
+				INPUT_DATETIME, INPUT_FROM, MOD_NO, 
+				[STATUS], IS_AUTH)
+				VALUES(@D_CODE, @SLNO, @RTN_STATUS, @RTN_CODE, 
+				substring(suser_name(),charindex('\',suser_name())+1,20), 
+				GETDATE(), HOST_NAME(), @RET_MOD_NO, 
+				'D', 0)
+
+			SELECT @ErrorVar = @@ERROR;		
+
+			IF @ErrorVar <> 0				
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+			
+			COMMIT TRANSACTION;
+			RETURN 0;
+				
+		END;
+	ELSE 
+		BEGIN			
+			-- item might exist in hist table
+			IF EXISTS(SELECT D_CODE from RETURN_CSD_HIST 
+					  WHERE D_CODE=@D_CODE AND SLNO=@SLNO AND MOD_NO=@MOD_NO )
+				BEGIN
+					DELETE RETURN_CSD_HIST
+						WHERE D_CODE=@D_CODE AND SLNO=@SLNO AND MOD_NO=@MOD_NO AND IS_AUTH=0;
+
+					SELECT @ErrorVar = @@ERROR;		
+
+					IF @ErrorVar <> 0				
+						BEGIN
+							ROLLBACK TRANSACTION;
+							RETURN 1;
+						END
+					
+					SELECT @RET_MOD_NO = @MOD_NO-1;
+
+					COMMIT TRANSACTION;
+					RETURN 0;			
+
+
+				END
+			ELSE
+				BEGIN
+					-- not exist
+					ROLLBACK TRANSACTION;
+					RETURN 4;
+				END
+			
+		END		
+    
+END
+
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_ReturnCSD_Remove] TO [ccms_sp_only]
+
+GO
+
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 27-Aug-13
+-- Description:	Authorize record to RETURN_CSD table
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_ReturnCSD_Auth]	
+	@D_CODE				varchar(12), 
+	@SLNO				numeric(3,0),
+	@MOD_NO			int,
+	@MOD_DATETIME	datetime
+AS
+BEGIN	
+	DECLARE @STATUS			char(1),
+			@RTN_STATUS 	char(1),
+			@RTN_CODE 		varchar(2),
+			@INPUT_BY		varchar(20),
+			@INPUT_DATETIME datetime,
+			@INPUT_FROM		varchar(30),
+			@AUTH_BY		varchar(20),
+			@AUTH_DATETIME	datetime,
+			@AUTH_FROM		varchar(30),
+			@LAST_MOD_NO	int,
+			@IS_AUTH		bit;			
+	
+	DECLARE @ErrorVar1		int; 
+			
+
+	SET NOCOUNT ON;
+
+	SELECT @STATUS = '';
+
+	BEGIN TRANSACTION
+
+	IF EXISTS(SELECT D_CODE from RETURN_CSD_HIST 
+			  WHERE D_CODE=@D_CODE AND SLNO=@SLNO AND MOD_NO=@MOD_NO)
+		BEGIN
+			SELECT @STATUS=[STATUS],@RTN_STATUS=RTN_STATUS,@RTN_CODE=RTN_CODE,				
+				@INPUT_BY=INPUT_BY,	@INPUT_DATETIME=INPUT_DATETIME,
+				@INPUT_FROM=INPUT_FROM,@IS_AUTH=IS_AUTH
+				FROM RETURN_CSD_HIST 
+				WHERE D_CODE=@D_CODE AND SLNO=@SLNO AND MOD_NO=@MOD_NO;
+			IF (@IS_AUTH = 1)
+				BEGIN
+					-- already authorized
+					ROLLBACK TRANSACTION;
+					RETURN 3;
+				END;
+			IF (@INPUT_BY = substring(suser_name(),charindex('\',suser_name())+1,20))
+				BEGIN
+					-- maker and checker same person
+					ROLLBACK TRANSACTION;
+					RETURN 5;
+				END;
+			IF (@INPUT_DATETIME <> @MOD_DATETIME)
+				BEGIN
+					-- Data hase been changed. Need notification
+					ROLLBACK TRANSACTION;
+					RETURN 7;
+				END;			
+		END;
+	ELSE
+		BEGIN			
+			-- not exist
+			ROLLBACK TRANSACTION;
+			RETURN 4;
+		END	;
+
+	IF @MOD_NO > 1
+		BEGIN	
+		
+			INSERT INTO RETURN_CSD_HIST(D_CODE, SLNO, RTN_STATUS, RTN_CODE, 
+				INPUT_BY, INPUT_DATETIME, INPUT_FROM, 
+				AUTH_BY, AUTH_DATETIME, AUTH_FROM, MOD_NO, [STATUS], IS_AUTH)
+				SELECT D_CODE, SLNO, RTN_STATUS, RTN_CODE, 
+				INPUT_BY, INPUT_DATETIME, INPUT_FROM, 
+				AUTH_BY, AUTH_DATETIME, AUTH_FROM, MOD_NO, [STATUS],1 
+				FROM RETURN_CSD
+				WHERE D_CODE=@D_CODE AND SLNO=@SLNO;
+			
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+
+			UPDATE RETURN_CSD_HIST
+				SET [STATUS] = 'O' 
+				WHERE D_CODE=@D_CODE AND SLNO=@SLNO 
+				AND [STATUS] = 'L';
+
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+			IF @STATUS='U'
+				BEGIN
+					SELECT @STATUS='L';
+				END
+
+			UPDATE RETURN_CSD
+				SET RTN_STATUS=@RTN_STATUS,RTN_CODE=@RTN_CODE,			
+				INPUT_BY=@INPUT_BY,	INPUT_DATETIME=@INPUT_DATETIME,
+				INPUT_FROM=@INPUT_FROM,
+				AUTH_BY=substring(suser_name(),charindex('\',suser_name())+1,20),
+				AUTH_DATETIME=GETDATE(),AUTH_FROM=HOST_NAME(),
+				MOD_NO=@MOD_NO,[STATUS]=@STATUS
+			WHERE D_CODE=@D_CODE AND SLNO=@SLNO;
+
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+			
+			DELETE RETURN_CSD_HIST WHERE D_CODE=@D_CODE AND SLNO=@SLNO
+				AND IS_AUTH=0;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END	
+
+		END
+	ELSE -- first record
+		BEGIN
+			INSERT INTO RETURN_CSD(D_CODE, SLNO, RTN_STATUS, RTN_CODE, 
+				INPUT_BY, INPUT_DATETIME, INPUT_FROM, 
+				AUTH_BY, AUTH_DATETIME, AUTH_FROM, MOD_NO, [STATUS])
+				SELECT D_CODE, SLNO, RTN_STATUS, RTN_CODE, 					 
+					INPUT_BY, INPUT_DATETIME, INPUT_FROM, 
+					substring(suser_name(),charindex('\',suser_name())+1,20), 
+					GETDATE(), HOST_NAME(), MOD_NO, 'L' 
+					FROM RETURN_CSD_HIST
+					WHERE D_CODE=@D_CODE AND SLNO=@SLNO AND MOD_NO=@MOD_NO;
+			
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+			DELETE RETURN_CSD_HIST WHERE D_CODE=@D_CODE AND SLNO=@SLNO
+				AND IS_AUTH=0;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END			
+					
+		END
+
+	DELETE CSD_HIST WHERE D_CODE=@D_CODE AND IS_AUTH=0;
+	DELETE CSD_DET_HIST WHERE D_CODE=@D_CODE AND IS_AUTH=0;
+
+	UPDATE CSD_DET SET RTN_STATUS=@RTN_STATUS,RTN_CODE=@RTN_CODE
+		WHERE D_CODE=@D_CODE AND SLNO=@SLNO;
+
+	COMMIT TRANSACTION
+	
+	SELECT @ErrorVar1 = @@error;
+	
+	IF @ErrorVar1 = 0
+		BEGIN		
+			RETURN 0;
+		END
+	ELSE
+		BEGIN
+			RETURN 1;
+		END
+
+    
+END
+
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_ReturnCSD_Auth] TO [ccms_sp_only]
+
+GO
+
+
+ALTER TABLE USERS
+ADD IS_ADMIN bit NULL
+GO
+
+
+ALTER TABLE USERS_HIST
+ADD IS_ADMIN bit NULL
+GO
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 15-Nov-12
+-- Description:	Add detail to Users table
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_Users_Add]		
+	@USERS_ID		varchar(20),
+	@USERS_NAME		varchar(50),
+	@DEPT_SLNO		numeric(3,0) ,
+	@DOMAIN			varchar(30),
+	@USER_STAT		char(1),
+	@IS_ADMIN		bit
+AS
+BEGIN	
+	DECLARE @ErrorVar INT;
+	
+	SET NOCOUNT ON;
+
+	BEGIN TRANSACTION;
+
+	IF EXISTS(SELECT USERS_ID FROM USERS WHERE USERS_ID=@USERS_ID)
+		BEGIN
+			-- Duplicate Entry
+			ROLLBACK TRANSACTION;		
+			RETURN 2	
+		END
+	
+	DELETE USERS_HIST WHERE 
+		USERS_ID=@USERS_ID AND IS_AUTH=0;
+
+	SELECT @ErrorVar = @@ERROR;
+		
+	IF @ErrorVar <> 0
+		BEGIN
+			ROLLBACK TRANSACTION;
+			RETURN 1;
+		END
+	ELSE
+
+	INSERT INTO USERS_HIST(USERS_ID, USERS_NAME,DEPT_SLNO,DOMAIN,USER_STAT,
+		INPUT_BY,INPUT_DATETIME,INPUT_FROM,MOD_NO,[STATUS],IS_AUTH,IS_ADMIN)
+		VALUES(@USERS_ID, @USERS_NAME,@DEPT_SLNO,@DOMAIN,@USER_STAT,
+		substring(suser_name(),charindex('\',suser_name())+1,20),
+		GETDATE(),HOST_NAME(),1,'U',0,@IS_ADMIN);
+
+	SELECT @ErrorVar = @@ERROR;
+	
+	IF @ErrorVar <> 0
+		BEGIN
+			ROLLBACK TRANSACTION;
+			RETURN 1;
+		END
+	
+	COMMIT TRANSACTION;
+	RETURN 0;
+	   
+END
+
+GO
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 15-Nov-12
+-- Description:	Authorize record to users table
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_Users_Auth]	
+	@USERS_ID		varchar(20),
+	@MOD_NO			int,
+	@MOD_DATETIME	datetime
+AS
+BEGIN	
+	DECLARE @STATUS				char(1),
+			@USERS_NAME			varchar(50),
+			@DEPT_SLNO			numeric(3,0) ,
+			@DOMAIN				varchar(30),
+			@USER_STAT			char(1),
+			@LAST_LOGIN_DATE	datetime,
+			@IS_ADMIN			bit,
+			@INPUT_BY			varchar(20),
+			@INPUT_DATETIME		datetime,
+			@INPUT_FROM			varchar(30),
+			@AUTH_BY			varchar(20),
+			@AUTH_DATETIME		datetime,
+			@AUTH_FROM			varchar(30),
+			@LAST_MOD_NO		int,
+			@IS_AUTH			bit,
+			@INV_ATTEMPT		numeric(1,0);
+	
+	DECLARE @ErrorVar1		int; 
+			
+
+	SET NOCOUNT ON;
+
+	SELECT @STATUS = '';
+
+	BEGIN TRANSACTION
+
+	IF EXISTS(SELECT USERS_ID from USERS_HIST 
+			  WHERE USERS_ID=@USERS_ID AND MOD_NO=@MOD_NO)
+		BEGIN
+			SELECT @STATUS=[STATUS],@USERS_NAME=USERS_NAME,
+				@DEPT_SLNO=DEPT_SLNO,@DOMAIN=DOMAIN,@USER_STAT=USER_STAT,
+				@IS_ADMIN=IS_ADMIN,				
+				@INPUT_BY=INPUT_BY,	@INPUT_DATETIME=INPUT_DATETIME,
+				@INPUT_FROM=INPUT_FROM,@IS_AUTH=IS_AUTH
+				FROM USERS_HIST 
+				WHERE USERS_ID=@USERS_ID AND MOD_NO=@MOD_NO;
+			IF (@IS_AUTH = 1)
+				BEGIN
+					-- already authorized
+					ROLLBACK TRANSACTION;
+					RETURN 3;
+				END;
+			IF (@INPUT_BY = substring(suser_name(),charindex('\',suser_name())+1,20))
+				BEGIN
+					-- maker and checker same person
+					ROLLBACK TRANSACTION;
+					RETURN 5;
+				END;
+			IF (@INPUT_DATETIME <> @MOD_DATETIME)
+				BEGIN
+					-- Data hase been changed. Need notification
+					ROLLBACK TRANSACTION;
+					RETURN 7;
+				END;
+
+			SELECT @LAST_LOGIN_DATE=LAST_LOGIN_DATE,@INV_ATTEMPT=INV_ATTEMPT 
+				FROM USERS 
+				WHERE USERS_ID=@USERS_ID;			
+		END;
+	ELSE
+		BEGIN			
+			-- not exist
+			ROLLBACK TRANSACTION;
+			RETURN 4;
+		END	;
+
+	IF @MOD_NO > 1
+		BEGIN	
+		
+			INSERT INTO USERS_HIST(USERS_ID, USERS_NAME, DEPT_SLNO, DOMAIN, 
+				USER_STAT, LAST_LOGIN_DATE, INPUT_BY, INPUT_DATETIME, INPUT_FROM, 
+				AUTH_BY, AUTH_DATETIME, AUTH_FROM, MOD_NO, [STATUS], IS_AUTH, 
+				INV_ATTEMPT,IS_ADMIN)
+				SELECT USERS_ID, USERS_NAME, DEPT_SLNO, DOMAIN, 
+					USER_STAT, LAST_LOGIN_DATE, INPUT_BY, INPUT_DATETIME, INPUT_FROM, 
+					AUTH_BY, AUTH_DATETIME, AUTH_FROM, MOD_NO, [STATUS], 1, 
+					INV_ATTEMPT,IS_ADMIN FROM USERS
+					WHERE USERS_ID=@USERS_ID;
+			
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+
+			UPDATE USERS_HIST
+				SET [STATUS] = 'O' 
+				WHERE USERS_ID=@USERS_ID 
+				AND [STATUS] = 'L';
+
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+			IF @STATUS='U'
+				BEGIN
+					SELECT @STATUS='L';
+				END
+
+			UPDATE USERS
+				SET USERS_NAME=@USERS_NAME,
+				DEPT_SLNO=@DEPT_SLNO,DOMAIN=@DOMAIN,USER_STAT=@USER_STAT,
+				LAST_LOGIN_DATE=@LAST_LOGIN_DATE,INV_ATTEMPT=@INV_ATTEMPT,
+				IS_ADMIN=@IS_ADMIN,
+				INPUT_BY=@INPUT_BY,	INPUT_DATETIME=@INPUT_DATETIME,
+				INPUT_FROM=@INPUT_FROM,
+				AUTH_BY=substring(suser_name(),charindex('\',suser_name())+1,20),
+				AUTH_DATETIME=GETDATE(),AUTH_FROM=HOST_NAME(),
+				MOD_NO=@MOD_NO,[STATUS]=@STATUS
+			WHERE USERS_ID=@USERS_ID;
+
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+			
+			DELETE USERS_HIST WHERE USERS_ID=@USERS_ID
+				AND IS_AUTH=0;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END	
+
+		END
+	ELSE -- first record
+		BEGIN
+			INSERT INTO USERS(USERS_ID, USERS_NAME,
+				DEPT_SLNO, DOMAIN, USER_STAT, 
+				LAST_LOGIN_DATE, 
+				INPUT_BY, INPUT_DATETIME, INPUT_FROM, 
+				AUTH_BY, 
+				AUTH_DATETIME, AUTH_FROM, MOD_NO, [STATUS], INV_ATTEMPT,
+				IS_ADMIN)
+				SELECT USERS_ID, USERS_NAME,
+					DEPT_SLNO,DOMAIN,USER_STAT,
+					LAST_LOGIN_DATE,
+					INPUT_BY, INPUT_DATETIME, INPUT_FROM, 
+					substring(suser_name(),charindex('\',suser_name())+1,20), 
+					GETDATE(), HOST_NAME(), MOD_NO, 'L', INV_ATTEMPT,
+					IS_ADMIN
+					FROM USERS_HIST
+					WHERE USERS_ID=@USERS_ID AND MOD_NO=@MOD_NO;
+			
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+			DELETE USERS_HIST WHERE USERS_ID=@USERS_ID
+				AND IS_AUTH=0;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END			
+					
+		END
+
+		COMMIT TRANSACTION
+		
+		SELECT @ErrorVar1 = @@error;
+		
+		IF @ErrorVar1 = 0
+			BEGIN		
+				RETURN 0;
+			END
+		ELSE
+			BEGIN
+				RETURN 1;
+			END
+    
+END
+
+GO
+
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 15-Nov-12
+-- Description:	Remove record from Users table
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_Users_Remove]	
+	@USERS_ID		varchar(20),	
+	@MOD_NO			int,
+	@RET_MOD_NO		int output
+AS
+BEGIN	
+	DECLARE @STATUS				char(1),
+			@USERS_NAME			varchar(50),
+			@DEPT_SLNO			numeric(3,0) ,
+			@DOMAIN				varchar(30),
+			@USER_STAT			char(1),
+			@LAST_LOGIN_DATE	datetime,
+			@IS_ADMIN			bit,			
+			@INPUT_BY			varchar(20),
+			@INPUT_DATETIME		datetime,
+			@INPUT_FROM			varchar(30),			
+			@IS_AUTH			bit,
+			@INV_ATTEMPT		numeric(1,0);			
+	
+	DECLARE @ErrorVar		int; 
+			
+
+	SET NOCOUNT ON;
+
+	SET @STATUS = '';
+
+	BEGIN TRANSACTION
+
+	SELECT @LAST_LOGIN_DATE=LAST_LOGIN_DATE,@INV_ATTEMPT=INV_ATTEMPT 
+		FROM USERS 
+		WHERE USERS_ID=@USERS_ID;
+
+	IF EXISTS(SELECT USERS_ID from USERS 
+			  WHERE USERS_ID=@USERS_ID AND MOD_NO=@MOD_NO)
+		BEGIN
+			SELECT @STATUS=[STATUS],@USERS_NAME=USERS_NAME,
+				@DEPT_SLNO=DEPT_SLNO,@DOMAIN=DOMAIN,@USER_STAT=USER_STAT,
+				@IS_ADMIN=IS_ADMIN,							
+				@INPUT_BY=INPUT_BY,	@INPUT_DATETIME=INPUT_DATETIME,
+				@INPUT_FROM=INPUT_FROM
+				FROM USERS 
+				WHERE USERS_ID=@USERS_ID AND MOD_NO=@MOD_NO;
+			
+			IF (@STATUS = 'D')
+				BEGIN
+					-- already deleted
+					ROLLBACK TRANSACTION;
+					RETURN 6;
+				END;
+
+			DELETE USERS_HIST WHERE USERS_ID=@USERS_ID AND IS_AUTH=0;
+
+			SELECT @ErrorVar = @@ERROR;		
+
+			IF @ErrorVar <> 0				
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+			SELECT @RET_MOD_NO = @MOD_NO + 1;
+
+			INSERT INTO 
+				USERS_HIST (USERS_ID, USERS_NAME,
+				DEPT_SLNO,DOMAIN,USER_STAT,
+				LAST_LOGIN_DATE,INV_ATTEMPT,IS_ADMIN,
+				INPUT_BY, INPUT_DATETIME, INPUT_FROM, MOD_NO, 
+				[STATUS], IS_AUTH)
+				VALUES(@USERS_ID, @USERS_NAME,
+				@DEPT_SLNO,@DOMAIN,@USER_STAT,
+				@LAST_LOGIN_DATE, @INV_ATTEMPT,@IS_ADMIN,
+				substring(suser_name(),charindex('\',suser_name())+1,20), 
+				GETDATE(), HOST_NAME(), @RET_MOD_NO, 
+				'D', 0)
+
+			SELECT @ErrorVar = @@ERROR;		
+
+			IF @ErrorVar <> 0				
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+			
+			COMMIT TRANSACTION;
+			RETURN 0;
+				
+		END;
+	ELSE 
+		BEGIN			
+			-- item might exist in hist table
+			IF EXISTS(SELECT USERS_ID from USERS_HIST 
+					  WHERE USERS_ID=@USERS_ID AND MOD_NO=@MOD_NO )
+				BEGIN
+					DELETE USERS_HIST
+						WHERE USERS_ID=@USERS_ID AND MOD_NO=@MOD_NO AND IS_AUTH=0;
+
+					SELECT @ErrorVar = @@ERROR;		
+
+					IF @ErrorVar <> 0				
+						BEGIN
+							ROLLBACK TRANSACTION;
+							RETURN 1;
+						END
+					
+					SELECT @RET_MOD_NO = @MOD_NO-1;
+
+					COMMIT TRANSACTION;
+					RETURN 0;			
+
+
+				END
+			ELSE
+				BEGIN
+					-- not exist
+					ROLLBACK TRANSACTION;
+					RETURN 4;
+				END
+			
+		END		
+    
+END
+
+GO
+
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 16-Nov-12
+-- Description:	update detail to Users table
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_Users_Update]	
+	@USERS_ID		varchar(20),
+	@USERS_NAME		varchar(50),
+	@DEPT_SLNO		numeric(3,0) ,
+	@DOMAIN			varchar(30),
+	@USER_STAT		char(1),
+	@IS_ADMIN		bit,
+	@MOD_NO			int,
+	@RET_MOD_NO		int output
+AS
+BEGIN	
+	DECLARE @ErrorVar INT;
+
+	DECLARE	@LAST_LOGIN_DATE	datetime,
+			@INV_ATTEMPT		numeric(1,0);
+	
+	SET NOCOUNT ON;
+
+	BEGIN TRANSACTION;
+
+	SELECT @LAST_LOGIN_DATE=LAST_LOGIN_DATE,@INV_ATTEMPT=INV_ATTEMPT 
+		FROM USERS 
+		WHERE USERS_ID=@USERS_ID;
+
+	IF EXISTS(SELECT USERS_ID FROM USERS 
+				WHERE USERS_ID=@USERS_ID AND MOD_NO=@MOD_NO)
+		BEGIN
+
+			DELETE USERS_HIST WHERE USERS_ID=@USERS_ID AND IS_AUTH=0;
+
+			SELECT @ErrorVar = @@ERROR;		
+
+			IF @ErrorVar <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+			
+			SELECT @RET_MOD_NO = @MOD_NO +1;
+			
+			INSERT INTO USERS_HIST(USERS_ID, USERS_NAME,DEPT_SLNO,DOMAIN,USER_STAT,
+				INPUT_BY,INPUT_DATETIME,INPUT_FROM,MOD_NO,[STATUS],IS_AUTH,
+				LAST_LOGIN_DATE,INV_ATTEMPT,IS_ADMIN)
+				VALUES(@USERS_ID, @USERS_NAME,@DEPT_SLNO,@DOMAIN,@USER_STAT,
+				substring(suser_name(),charindex('\',suser_name())+1,20),
+				GETDATE(),HOST_NAME(),@RET_MOD_NO,'U',0,
+				@LAST_LOGIN_DATE,@INV_ATTEMPT,@IS_ADMIN);
+
+			SELECT @ErrorVar = @@ERROR;
+
+			IF @ErrorVar <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END				
+
+			COMMIT TRANSACTION;
+			
+			RETURN 0;
+
+				
+		END
+	ELSE -- might be in hist table
+		BEGIN
+
+			IF EXISTS(SELECT USERS_ID from USERS_HIST 
+						WHERE USERS_ID=@USERS_ID AND MOD_NO=@MOD_NO AND IS_AUTH=0)
+				BEGIN
+
+					DELETE USERS_HIST WHERE USERS_ID=@USERS_ID AND IS_AUTH=0;
+
+					SELECT @ErrorVar = @@ERROR;		
+
+					IF @ErrorVar <> 0
+						BEGIN
+							ROLLBACK TRANSACTION;
+							RETURN 1;
+						END
+
+					INSERT INTO USERS_HIST(USERS_ID, USERS_NAME,DEPT_SLNO,DOMAIN,USER_STAT,
+						INPUT_BY,INPUT_DATETIME,INPUT_FROM,MOD_NO,[STATUS],IS_AUTH,
+						LAST_LOGIN_DATE,INV_ATTEMPT,IS_ADMIN)
+						VALUES(@USERS_ID, @USERS_NAME,@DEPT_SLNO,@DOMAIN,@USER_STAT,
+						substring(suser_name(),charindex('\',suser_name())+1,20),
+						GETDATE(),HOST_NAME(),@MOD_NO,'U',0,
+						@LAST_LOGIN_DATE,@INV_ATTEMPT,@IS_ADMIN);
+
+					SELECT @ErrorVar = @@ERROR;
+		
+					IF @ErrorVar <> 0
+						BEGIN
+							ROLLBACK TRANSACTION;
+							RETURN 1;
+						END
+					
+					SELECT @RET_MOD_NO=@MOD_NO;
+					
+					COMMIT TRANSACTION;
+					RETURN 0;
+			
+				END
+			ELSE
+				BEGIN
+					-- not exist
+					ROLLBACK TRANSACTION;
+					RETURN 4;
+				END
+
+		END
+    
+END
+
+GO
+
+
+DROP TABLE [dbo].[SYSTEM_LOG];
+GO
+
+CREATE TABLE [dbo].[SYSTEM_LOG](
+	[LOG_DATETIME] [datetime] NOT NULL,
+	[LOG_DESCRIPTION] [varchar](2000) NOT NULL,
+	[LOG_USER] [varchar](20)  NOT NULL
+) 
+
+GO
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 29-Aug-13
+-- Description:	Get detail of System Log
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_SystemLog_GetDetail]	
+	@DATE_FROM	DateTime,	
+	@DATE_TO	DateTime,
+	@USER_NAME	varchar(20),
+	@TEXT	varchar(100)
+AS
+BEGIN	
+	
+	SET NOCOUNT ON;
+
+	SELECT @TEXT = '%'+@TEXT+'%'
+    
+	IF  (@DATE_FROM is NULL) AND (@DATE_TO is NULL) 
+		AND (@USER_NAME is NULL) AND (@TEXT is NULL)
+		BEGIN
+			SELECT * FROM SYSTEM_LOG ORDER BY LOG_DATETIME DESC;
+		END
+	ELSE IF (@DATE_FROM is NULL) AND (@DATE_TO is NULL) 
+		AND (@TEXT is NULL) AND (@USER_NAME is Not NULL)
+		BEGIN
+			SELECT * FROM SYSTEM_LOG 
+				WHERE LOG_USER = @USER_NAME ORDER BY LOG_DATETIME DESC;
+		END
+	Else IF  (@DATE_FROM is not NULL) AND (@DATE_TO is not NULL) AND (@TEXT is NULL) AND (@USER_NAME is not NULL) 
+		BEGIN
+			SELECT * FROM SYSTEM_LOG 
+				WHERE LOG_DATETIME >= @DATE_FROM AND LOG_DATETIME <= @DATE_TO 
+				AND LOG_USER = @USER_NAME ORDER BY LOG_DATETIME DESC;
+		END
+	Else IF  (@DATE_FROM is not NULL) AND (@DATE_TO is not NULL) AND (@USER_NAME is NULL)  AND (@TEXT is not NULL)
+		BEGIN
+			  SELECT * FROM SYSTEM_LOG WHERE LOG_DATETIME >= @DATE_FROM AND 
+					   LOG_DATETIME <= @DATE_TO AND LOG_DESCRIPTION like @TEXT ORDER BY LOG_DATETIME DESC;
+		END
+	ELSE IF (@DATE_FROM is NULL) AND (@DATE_TO is NULL) AND (@USER_NAME is NULL) AND (@TEXT is not NULL)
+		BEGIN
+			  SELECT * FROM SYSTEM_LOG WHERE LOG_DESCRIPTION like @TEXT ORDER BY LOG_DATETIME DESC;
+		END
+	Else IF  (@DATE_FROM is  NULL) AND (@DATE_TO is  NULL) AND (@USER_NAME is not NULL) AND  (@TEXT is not NULL) 
+		BEGIN
+			  SELECT * FROM SYSTEM_LOG WHERE  LOG_USER = @USER_NAME AND LOG_DESCRIPTION like @TEXT ORDER BY LOG_DATETIME DESC; 
+		END
+	Else IF  (@DATE_FROM is not NULL) AND (@DATE_TO is not NULL) AND (@TEXT is NULL) AND (@USER_NAME is NULL)
+		BEGIN
+			  SELECT * FROM SYSTEM_LOG WHERE LOG_DATETIME >= @DATE_FROM AND LOG_DATETIME <= @DATE_TO ORDER BY LOG_DATETIME DESC;
+		END
+	ELSE   
+		BEGIN
+			  SELECT * FROM SYSTEM_LOG WHERE LOG_USER = @USER_NAME 
+					AND LOG_DESCRIPTION like @TEXT
+					AND  LOG_DATETIME >= @DATE_FROM and LOG_DATETIME <= @DATE_TO ORDER BY LOG_DATETIME DESC;
+		END
+END
+
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_SystemLog_GetDetail] TO [ccms_sp_only]
+
+GO
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 9-May-13
+-- Description:	try login
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_Users_TryLogin]	
+AS
+BEGIN	
+	
+	DECLARE @USERS_ID		varchar(20),
+			@USERS_NAME		varchar(50),
+			@DEPT_SLNO		numeric(3,0) ,
+			@DOMAIN			varchar(30),
+			@USER_STAT		char(1),
+			@v_UserId		varchar(20); 	
+
+	DECLARE @ErrorVar INT;
+			
+	SET NOCOUNT ON;
+
+	SELECT @DOMAIN=substring(suser_name(),1,charindex('\',suser_name())-1);
+
+	SELECT @USERS_ID=substring(suser_name(),charindex('\',suser_name())+1,20);
+
+	IF NOT EXISTS(SELECT USERS_ID FROM USERS WHERE USERS_ID=@USERS_ID AND
+		DOMAIN=@DOMAIN)
+		BEGIN
+			-- Not Exists
+				
+			RETURN 4;
+		END
+
+	DECLARE tmpcursor1 CURSOR FOR
+		SELECT USERS_ID FROM USERS
+			WHERE (IS_ADMIN IS NULL OR IS_ADMIN=0) 
+			AND USER_STAT='E'
+			AND DATEDIFF(d,LAST_LOGIN_DATE,GETDATE())>100;
+
+	OPEN tmpcursor1;
+	FETCH NEXT FROM tmpcursor1 
+        INTO @v_UserId;
+
+	WHILE @@FETCH_STATUS=0 
+ 	BEGIN
+ 		
+ 		UPDATE USERS SET USER_STAT='D'
+ 			WHERE USERS_ID=@v_UserId;
+ 			
+ 		INSERT INTO SYSTEM_LOG(LOG_DATETIME, LOG_DESCRIPTION, LOG_USER)
+			VALUES(GETDATE(), @v_UserId + ' is locked due to inactivity of 100 days',
+			substring(suser_name(),charindex('\',suser_name())+1,20));
+ 	
+ 		FETCH NEXT FROM tmpcursor1 
+				INTO @v_UserId;
+
+	END
+
+	CLOSE tmpcursor1;	
+	DEALLOCATE tmpcursor1;
+
+	SELECT @USER_STAT=USER_STAT FROM USERS WHERE USERS_ID=@USERS_ID;
+	
+	IF @USER_STAT ='D'
+		BEGIN
+			
+			RETURN 8;
+		END
+	ELSE
+
+	UPDATE USERS SET LAST_LOGIN_DATE=GETDATE(),INV_ATTEMPT=0
+		WHERE USERS_ID=@USERS_ID;
+	
+	SELECT @ErrorVar = @@ERROR;
+	
+	IF @ErrorVar <> 0
+		BEGIN
+			
+			RETURN 1;
+		END
+	
+
+	RETURN 0;
+	   
+END
+
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_Users_TryLogin] TO [ccms_sp_only]
+
+GO
+
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 9-May-13
+-- Description:	Invalid Login
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_Users_InvalidLogin]	
+AS
+BEGIN	
+	
+	DECLARE @USERS_ID		varchar(20),
+			@USERS_NAME		varchar(50),
+			@DEPT_SLNO		numeric(3,0) ,
+			@DOMAIN			varchar(30),
+			@USER_STAT		char(1),
+			@INV_ATTEMPT	numeric(1,0),
+			@v_UserId		varchar(20); 	
+
+	DECLARE @ErrorVar INT;
+			
+	SET NOCOUNT ON;
+
+	SELECT @DOMAIN=substring(suser_name(),1,charindex('\',suser_name())-1);
+
+	SELECT @USERS_ID=substring(suser_name(),charindex('\',suser_name())+1,20);
+
+	IF NOT EXISTS(SELECT USERS_ID FROM USERS WHERE USERS_ID=@USERS_ID AND
+		DOMAIN=@DOMAIN)
+		BEGIN
+			-- Not Exists
+				
+			RETURN 4;
+		END
+
+	DECLARE tmpcursor1 CURSOR FOR
+		SELECT USERS_ID FROM USERS
+			WHERE (IS_ADMIN IS NULL OR IS_ADMIN=0) 
+			AND USER_STAT='E'
+			AND DATEDIFF(d,LAST_LOGIN_DATE,GETDATE())>100;
+
+	OPEN tmpcursor1;
+	FETCH NEXT FROM tmpcursor1 
+        INTO @v_UserId;
+
+	WHILE @@FETCH_STATUS=0 
+ 	BEGIN
+ 		
+ 		UPDATE USERS SET USER_STAT='D'
+ 			WHERE USERS_ID=@v_UserId;
+ 			
+ 		INSERT INTO SYSTEM_LOG(LOG_DATETIME, LOG_DESCRIPTION, LOG_USER)
+			VALUES(GETDATE(), @v_UserId + ' is locked due to inactivity of 100 days',
+			substring(suser_name(),charindex('\',suser_name())+1,20));
+ 	
+ 		FETCH NEXT FROM tmpcursor1 
+				INTO @v_UserId;
+
+	END
+
+	CLOSE tmpcursor1;	
+	DEALLOCATE tmpcursor1;
+
+	SELECT @USER_STAT=USER_STAT,@INV_ATTEMPT=ISNULL(INV_ATTEMPT,0) 
+		FROM USERS WHERE USERS_ID=@USERS_ID;
+	
+	IF @USER_STAT ='D'
+		BEGIN
+			
+			RETURN 8;
+		END
+	ELSE
+	
+	IF @INV_ATTEMPT >4
+		BEGIN
+		
+			UPDATE USERS SET USER_STAT='D'
+				WHERE USERS_ID=@USERS_ID;
+			
+			INSERT INTO SYSTEM_LOG(LOG_DATETIME, LOG_DESCRIPTION, LOG_USER)
+				VALUES(GETDATE(), @USERS_ID + ' is locked due to multiple failed attempt',
+				substring(suser_name(),charindex('\',suser_name())+1,20));
+			
+			RETURN 8;
+		END
+	ELSE
+	
+
+	UPDATE USERS SET INV_ATTEMPT=ISNULL(INV_ATTEMPT,0)+1
+		WHERE USERS_ID=@USERS_ID;
+	
+	SELECT @ErrorVar = @@ERROR;
+	
+	IF @ErrorVar <> 0
+		BEGIN
+			
+			RETURN 1;
+		END
+	
+
+	RETURN 0;
+	   
+END
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_Users_InvalidLogin] TO [ccms_sp_only]
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 23-Feb-13
+-- Description: Process for holiday
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_Process_Holiday]		
+AS
+BEGIN	
+	DECLARE @ErrorVar INT,
+			@vcnt1 	int,
+			@vcnt2 	int,
+			@vcnt3 	int,
+			@vFdt 	datetime,
+			@vDelDt	datetime,
+			@vDcode	varchar(12);
+	
+	SET NOCOUNT ON;
+--1
+
+	DECLARE GLTCURSOR CURSOR FOR
+		SELECT D_CODE,VALUE_DATE,CONVERT(numeric(2),days) as DAYS,
+		DATEADD(DAY,CONVERT(numeric(2),DAYS),VALUE_DATE) as DELIVERY
+        FROM TMP_BOOKING;
+
+	OPEN GLTCURSOR;
+	FETCH NEXT FROM GLTCURSOR 
+        INTO @VDcode,@vFdt,@vCnt2,@vDelDt;
+
+	WHILE @@FETCH_STATUS=0 
+ 	BEGIN
+		SET @vcnt1=1;
+		
+		WHILE @vcnt1<=@vcnt2
+		BEGIN                    
+			SET @vFdt=(SELECT DATEADD(DAY,1,@vFdt));
+			SET @vcnt3=0;
+			SET @vcnt3=(SELECT COUNT(1) AS cnt FROM HOLIDAY WHERE HOLI_DAY=@vFdt
+				AND [STATUS]='L'
+				);
+	                     
+			IF @vcnt3>0     
+			BEGIN
+				SET @vDelDt=(SELECT DATEADD(DAY,1,@vDelDt));
+				SET @vcnt2=@vcnt2+1;
+			END
+			
+			SET @vcnt1=@vcnt1+1;
+		END
+		--print @vDelDt
+		
+		UPDATE TMP_BOOKING set REV_DATE = @vDelDt where D_CODE=@VDcode           
+
+		FETCH NEXT FROM GLTCURSOR 
+		INTO @VDcode,@vFdt,@vCnt2,@vDelDt
+	END
+	
+	CLOSE GLTCURSOR;
+	DEALLOCATE GLTCURSOR;
+
+	SELECT @ErrorVar = @@ERROR;		
+
+	IF @ErrorVar <> 0
+		BEGIN	
+			RETURN 1;
+		END
+
+	RETURN 0;
+
+END
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 20-Aug-13
+-- Description:	Authorize record to RETURN_CLEARING
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_ReturnClearing_Auth]	
+	@MID	numeric(10,0),
+	@DSL	numeric(4,0)
+AS
+BEGIN	
+	DECLARE @STATUS			char(1),
+			@RTN_CODE		varchar(2),		
+			@INPUT_BY		varchar(20);			
+	
+	DECLARE @ErrorVar1		int; 
+			
+	SET NOCOUNT ON;
+
+	SELECT @STATUS = '';
+
+	BEGIN TRANSACTION;
+
+	IF EXISTS(SELECT MID from RETURN_CLEARING 
+			  WHERE MID=@MID AND DSL=@DSL)
+		BEGIN
+			SELECT @STATUS=[STATUS],@RTN_CODE=RTN_CODE,
+				@INPUT_BY=INPUT_BY
+				FROM RETURN_CLEARING 
+				WHERE MID=@MID AND DSL=@DSL;
+			IF (@STATUS = 'L')
+				BEGIN
+					-- already authorized
+					ROLLBACK TRANSACTION;
+					RETURN 3;
+				END;
+			IF (@INPUT_BY = substring(suser_name(),charindex('\',suser_name())+1,20))
+				BEGIN
+					-- maker and checker same person
+					ROLLBACK TRANSACTION;
+					RETURN 5;
+				END;
+			
+
+		END;
+	ELSE
+		BEGIN			
+			-- not exist
+			ROLLBACK TRANSACTION;
+			RETURN 4;
+		END	;
+	
+	DELETE CHECKTOTAL_HIST WHERE MID=@MID AND IS_AUTH=0;
+	DELETE CLEARINGTAB_HIST WHERE MID=@MID AND IS_AUTH=0;
+
+	UPDATE CLEARINGTAB
+		SET RTN_STATUS='R',RTN_CODE=@RTN_CODE,
+			RETURN_DATE=CONVERT(datetime,CONVERT(varchar(12), GETDATE()))
+		WHERE MID=@MID AND DSL=@DSL;
+
+	UPDATE RETURN_CLEARING
+		SET [STATUS]='L',
+			AUTH_BY=substring(suser_name(),charindex('\',suser_name())+1,20),
+			AUTH_DATETIME=GETDATE(),AUTH_FROM=HOST_NAME()
+		WHERE MID=@MID AND DSL=@DSL;
+
+	COMMIT TRANSACTION;
+
+	RETURN 0;
+
+
+    
+END
+
+GO
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 07-Feb-13
+-- Description:	Add to system log
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_SystemLog_Add]		
+	@LOG_DESCRIPTION 		varchar(2000)	
+AS 
+BEGIN	
+	DECLARE @ErrorVar INT;
+	
+	SET NOCOUNT ON;
+
+	INSERT INTO SYSTEM_LOG(LOG_DATETIME, LOG_DESCRIPTION, LOG_USER)
+		VALUES(GETDATE(), @LOG_DESCRIPTION,
+		substring(suser_name(),charindex('\',suser_name())+1,20));
+
+	SELECT @ErrorVar = @@ERROR;
+	
+	IF @ErrorVar <> 0
+		BEGIN			
+			RETURN 1;
+		END
+		
+	RETURN 0;
+	   
+END
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_SystemLog_Add] TO [ccms_sp_only]
+
+GO
+
+
+
+
+
+

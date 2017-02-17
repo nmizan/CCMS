@@ -1,0 +1,61 @@
+USE [CCMS]
+GO
+/****** Object:  StoredProcedure [dbo].[CMS_CCheck_Add]    Script Date: 07/09/2015 5:27:30 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 14-Jan-13
+-- Modified by: Mohammad Yasir Arafat
+-- Modify date: 07 Sep 15
+-- Description:	Add detail to CCheck
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_CCheck_Add]
+	@SLNO				numeric(3,0),
+	@D_CODE				varchar(12), 
+	@CLIENT_CODE		varchar(6), 
+	@DLOCATION_CODE		varchar(4), 
+	@CUSTOMER_REF		varchar(15), 
+	@SLIP_DATE			datetime, 
+	@VALUE_DATE			datetime, 
+	@CHECK_NO			varchar(15), 
+	@AMOUNT				numeric(12,2), 
+	@CHECK_DATE			datetime, 
+	@CHECK_TYPE			varchar(7),
+	@DRAWER				varchar(50),
+	@DRAWEE_BANK_CODE	varchar(4),
+	@LOCATION_CODE		varchar(4),
+	@BRANCH_CODE		varchar(4),
+	@CHECK_REF			varchar(14)
+AS
+BEGIN	
+
+	DECLARE @ErrorVar	int;
+		
+	SET NOCOUNT ON;
+			
+	INSERT INTO CCHECK_HIST(SLNO, D_CODE, CLIENT_CODE, DLOCATION_CODE, 
+		CUSTOMER_REF, SLIP_DATE, VALUE_DATE, CHECK_NO, AMOUNT, 
+		CHECK_DATE, CHECK_TYPE, DRAWER, DRAWEE_BANK_CODE, 
+		LOCATION_CODE, BRANCH_CODE, CHECK_REF, RTN_STATUS,
+		MOD_NO,IS_AUTH)
+		VALUES(@SLNO, @D_CODE, @CLIENT_CODE, @DLOCATION_CODE, 
+		@CUSTOMER_REF, convert(date, @SLIP_DATE), @VALUE_DATE, @CHECK_NO, @AMOUNT, 
+		@CHECK_DATE, @CHECK_TYPE, @DRAWER, @DRAWEE_BANK_CODE, 
+		@LOCATION_CODE, @BRANCH_CODE, @CHECK_REF,'O',
+		1,0);
+
+	SELECT @ErrorVar = @@ERROR;
+	
+	IF @ErrorVar <> 0
+		BEGIN			
+			RETURN 1;
+		END
+		
+	RETURN 0;
+	   
+END
+

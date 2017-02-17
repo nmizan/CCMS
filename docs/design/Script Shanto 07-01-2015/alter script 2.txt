@@ -1,0 +1,140 @@
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 04-Dec-14
+-- Description:	get detail of old checktotal and nikashtab table
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_ClearingTab_GetFilterData]		
+	@ENTRY_LOC		varchar(3),
+	@OPR_DATE_FROM	datetime,
+	@OPR_DATE_TO	datetime,
+	@REMARK			varchar(15),
+	@DS_CODE		varchar(8),
+	@BANK_CODE		varchar(4),
+	@NIKBRANCH_CODE	varchar(9),
+	@CHECK_NUMBER	varchar(15),
+	@AMOUNT			numeric(14,2)
+AS
+BEGIN	
+		
+	SET NOCOUNT ON;
+	
+	DECLARE @query as nvarchar(2000),
+			@query1 as nvarchar(2000),
+			@query2 as nvarchar(2000);
+		
+	SET @query1 = 'SELECT ct.*,cbr.BRANCH_NAME,cba.BANK_NAME,cba.BANK_CODE,
+	cbb.BRANCH_NAME ''ENTRY_LOC_NAME'' FROM 
+	(SELECT MID, DSL, OPR_DATE, ISSUE_DATE, NIKBRANCH_CODE, PAYEE_NAME, 
+	CHECK_NUMBER, DEBIT_CREDIT, REMARK, CHECK_REF, ENTRY_LOC, DS_CODE, 
+	RTN_STATUS, RTN_CODE, RETURN_DATE, MOD_NO, VALUE_TYPE, 
+	''A'' [STATUS], GOV_CHQ, IQA_FAILED
+	FROM CLEARINGTAB
+	WHERE [STATUS]=''L'' ';
+	
+	SET @query2=' UNION SELECT MID, DSL, OPR_DATE, ISSUE_DATE, NIKBRANCH_CODE, PAYEE_NAME, 
+	CHECK_NUMBER, DEBIT_CREDIT, REMARK, CHECK_REF, ENTRY_LOC, DS_CODE, 
+	RTN_STATUS, RTN_CODE, RETURN_DATE, MOD_NO, VALUE_TYPE, 
+	''U'' [STATUS], GOV_CHQ, IQA_FAILED
+	FROM CLEARINGTAB_HIST 
+	WHERE IS_AUTH=0 ';
+	
+	IF @ENTRY_LOC<>'' 
+	BEGIN
+		SET @query1=@query1 + ' AND ENTRY_LOC=@ENTRY_LOC ';
+		SET @query2=@query2 + ' AND ENTRY_LOC=@ENTRY_LOC ';
+	END
+	
+	IF (@OPR_DATE_FROM IS NOT NULL) AND (@OPR_DATE_TO IS NOT NULL)
+		BEGIN
+			SET @query1=@query1 + ' AND OPR_DATE>=@OPR_DATE_FROM AND OPR_DATE<=@OPR_DATE_TO ';
+			SET @query2=@query2 + ' AND OPR_DATE>=@OPR_DATE_FROM AND OPR_DATE<=@OPR_DATE_TO ';
+		END
+		
+	IF @REMARK<>'' 
+	BEGIN
+		SET @query1=@query1 + ' AND REMARK=@REMARK ';
+		SET @query2=@query2 + ' AND REMARK=@REMARK ';
+	END
+	
+	IF @DS_CODE<>'' 
+	BEGIN
+		SET @query1=@query1 + ' AND DS_CODE=@DS_CODE ';
+		SET @query2=@query2 + ' AND DS_CODE=@DS_CODE ';
+	END	
+	
+	IF @NIKBRANCH_CODE<>'' 
+	BEGIN
+		SET @query1=@query1 + ' AND NIKBRANCH_CODE=@NIKBRANCH_CODE ';
+		SET @query2=@query2 + ' AND NIKBRANCH_CODE=@NIKBRANCH_CODE ';
+	END
+	
+	IF @CHECK_NUMBER<>'' 
+	BEGIN
+		SET @query1=@query1 + ' AND CHECK_NUMBER=@CHECK_NUMBER ';
+		SET @query2=@query2 + ' AND CHECK_NUMBER=@CHECK_NUMBER ';
+	END
+	
+	IF @AMOUNT<>0 
+	BEGIN
+		SET @query1=@query1 + ' AND DEBIT_CREDIT=@AMOUNT ';
+		SET @query2=@query2 + ' AND DEBIT_CREDIT=@AMOUNT ';
+	END
+	
+	SET @query=@query1 + @query2 + ') ct
+	LEFT OUTER JOIN CITIBANK_BRANCH cbb ON cbb.BRANCH_CODE=ct.ENTRY_LOC 
+	LEFT OUTER JOIN CLEARING_BRANCH cbr ON cbr.NIKBRANCH_CODE=ct.NIKBRANCH_CODE 
+	LEFT OUTER JOIN CLEARING_BANK cba 
+	ON cba.BANK_CODE=cbr.BANK_CODE ';
+
+	IF @BANK_CODE<>'' 
+	BEGIN
+		SET @query=@query + ' WHERE cbr.BANK_CODE=@BANK_CODE ';
+	END
+	
+	EXEC sp_executesql @query,N'@ENTRY_LOC		varchar(3),
+	@OPR_DATE_FROM	datetime,
+	@OPR_DATE_TO	datetime,
+	@REMARK			varchar(15),
+	@DS_CODE		varchar(8),
+	@BANK_CODE		varchar(4),
+	@NIKBRANCH_CODE	varchar(9),
+	@CHECK_NUMBER	varchar(15),
+	@AMOUNT			numeric(14,2)' ,                    
+                   @ENTRY_LOC=@ENTRY_LOC,@OPR_DATE_FROM=@OPR_DATE_FROM,
+	@OPR_DATE_TO=@OPR_DATE_TO,
+	@REMARK	=@REMARK,
+	@DS_CODE=@DS_CODE,
+	@BANK_CODE=@BANK_CODE,
+	@NIKBRANCH_CODE	=@NIKBRANCH_CODE,
+	@CHECK_NUMBER	=@CHECK_NUMBER,@AMOUNT = @AMOUNT
+
+	   
+END
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 17-Apr-13
+-- Description:	get list records of Clearing Branch  by bank
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_ClearingBranch_GetNikBranchListByBank]
+	@BANK_CODE	varchar(4)
+AS
+BEGIN		
+	SET NOCOUNT ON;
+
+	SELECT NIKBRANCH_CODE,BRANCH_NAME,ROUTING_NO
+	FROM CLEARING_BRANCH		
+	WHERE STATUS='L' 
+	AND NIKBRANCH_CODE IS NOT NULL AND BANK_CODE=@BANK_CODE
+	ORDER BY BRANCH_NAME;	
+	   
+END
+
+GO
+
+

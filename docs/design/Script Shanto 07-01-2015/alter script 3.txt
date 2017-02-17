@@ -1,0 +1,73 @@
+CREATE TABLE [CLEARING_CHARGE_SET_MAS](
+	MID	numeric(1,0) NOT NULL,
+	CITI_INC_ACC [varchar](16) NOT NULL,
+	CITI_EXP_ACC [varchar](16) NOT NULL,
+	CITI_VAT_ACC [varchar](16) NOT NULL,
+	BBK_ACC [varchar](16) NOT NULL,	
+	INPUT_BY [varchar](20) NULL,
+	INPUT_DATETIME [datetime] NULL,
+	INPUT_FROM [varchar](30) NULL,
+	AUTH_BY [varchar](20) NULL,
+	AUTH_DATETIME [datetime] NULL,
+	AUTH_FROM [varchar](30) NULL,
+	MOD_NO [numeric](3, 0) NOT NULL,
+	[STATUS] [char](1) NOT NULL,	
+ PRIMARY KEY(MID))
+ 
+ GO
+ 
+ 
+ CREATE TABLE [CLEARING_CHARGE_SET_MAS_HIST](
+	MID	numeric(1,0) NOT NULL,
+	CITI_INC_ACC [varchar](16) NOT NULL,
+	CITI_EXP_ACC [varchar](16) NOT NULL,
+	CITI_VAT_ACC [varchar](16) NOT NULL,
+	BBK_ACC [varchar](16) NOT NULL,	
+	INPUT_BY [varchar](20) NULL,
+	INPUT_DATETIME [datetime] NULL,
+	INPUT_FROM [varchar](30) NULL,
+	AUTH_BY [varchar](20) NULL,
+	AUTH_DATETIME [datetime] NULL,
+	AUTH_FROM [varchar](30) NULL,
+	MOD_NO [numeric](3, 0) NOT NULL,
+	[STATUS] [char](1) NOT NULL,
+	IS_AUTH [bit] NOT NULL,
+ PRIMARY KEY(MID,MOD_NO))
+ 
+ GO
+
+
+CREATE TABLE [CLEARING_CHARGE_SET_DET](
+	MID	numeric(1,0) NOT NULL,
+	SLNO [numeric](2, 0) NOT NULL,
+	VALUE_TYPE [numeric](1, 0) NOT NULL,
+	MIN_AMOUNT [numeric](14, 2) NOT NULL,
+	MAX_AMOUNT [numeric](14, 2) NOT NULL,	
+	BBK_AMOUNT [numeric](14, 2) NOT NULL,
+	CITI_INC_AMOUNT [numeric](14, 2) NOT NULL,
+	CITI_VAT_AMOUNT [numeric](14, 2) NOT NULL,
+	CLIENT_DR_AMOUNT [numeric](14, 2) NOT NULL,
+	CHARGEABLE_AMOUNT [numeric](14, 2) NOT NULL,	
+	MOD_NO [numeric](3, 0) NOT NULL,
+	[STATUS] [char](1) NOT NULL,
+ PRIMARY KEY(MID,MOD_NO,SLNO))
+ 
+ GO
+
+
+CREATE TABLE [CLEARING_CHARGE_SET_DET_HIST](
+	MID	numeric(1,0) NOT NULL,
+	SLNO [numeric](2, 0) NOT NULL,
+	VALUE_TYPE [numeric](1, 0) NOT NULL,
+	MIN_AMOUNT [numeric](14, 2) NOT NULL,
+	MAX_AMOUNT [numeric](14, 2) NOT NULL,	
+	BBK_AMOUNT [numeric](14, 2) NOT NULL,
+	CITI_INC_AMOUNT [numeric](14, 2) NOT NULL,
+	CITI_VAT_AMOUNT [numeric](14, 2) NOT NULL,
+	CLIENT_DR_AMOUNT [numeric](14, 2) NOT NULL,
+	CHARGEABLE_AMOUNT [numeric](14, 2) NOT NULL,	
+	MOD_NO [numeric](3, 0) NOT NULL,	
+	IS_AUTH [bit] NOT NULL,
+ PRIMARY KEY(MID,MOD_NO,SLNO))
+ 
+ GO

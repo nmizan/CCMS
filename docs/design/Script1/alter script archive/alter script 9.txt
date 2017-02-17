@@ -1,0 +1,1106 @@
+USE [CCMS]
+GO
+
+CREATE TABLE [dbo].[IRE_RET](
+	ENTRY_LOC	varchar(3),
+	[ChequeSequenceNumber] varchar(50) NULL,
+	[ItemAmount] float NULL,
+	[ReturnReason] varchar(50) NULL	
+)
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 25-Jul-13
+-- Description:	Remove record from IRE_RET
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_IRERet_Remove]	
+	@ENTRY_LOC		varchar(3)
+AS
+BEGIN	
+			
+	
+	DECLARE @ErrorVar		int; 
+
+	SET NOCOUNT ON;
+
+	DELETE FROM IRE_RET
+		WHERE ENTRY_LOC=@ENTRY_LOC;
+
+	SELECT @ErrorVar = @@ERROR;	
+
+	IF @ErrorVar <> 0				
+		BEGIN			
+			RETURN 1;
+		END
+
+	
+END
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_IRERet_Remove] TO [ccms_sp_only]
+
+GO
+
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 25-Jul-13
+-- Description:	Add record to IRE_RET
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_IRERet_Add]	
+	@ENTRY_LOC				varchar(3),
+	@ChequeSequenceNumber	varchar(50), 
+	@ItemAmount				float, 
+	@ReturnReason			varchar(50)
+AS
+BEGIN	
+			
+	
+	DECLARE @ErrorVar		int; 
+
+	SET NOCOUNT ON;
+
+	INSERT INTO IRE_RET(ENTRY_LOC, ChequeSequenceNumber, ItemAmount, ReturnReason)
+		VALUES(@ENTRY_LOC,@ChequeSequenceNumber,@ItemAmount,@ReturnReason)
+
+	SELECT @ErrorVar = @@ERROR;	
+
+	IF @ErrorVar <> 0				
+		BEGIN			
+			RETURN 1;
+		END
+
+	
+END
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_IRERet_Add] TO [ccms_sp_only]
+
+GO
+
+
+
+ALTER VIEW [dbo].[V_ANY_RETURN]
+as
+(
+	SELECT cc.*,cl.ACC_NO,cl.ACC_NAME,cl.MAIL_ADD,l.LOCATION_NAME,rr.REJECT_REASON,
+		b.BANK_NAME, br.BRANCH_NAME, CONVERT(datetime,CONVERT(varchar(12),nc.INPUT_DATETIME))  AS RET_DATE
+		FROM CCHECK cc
+		INNER JOIN NCOLLECTION nc
+		ON nc.NONZONE_REF=cc.NONZONE_REF
+		INNER JOIN RETURN_REJECT rr
+		ON cc.RTN_CODE=rr.REJECT_CODE
+		LEFT OUTER JOIN CLIENT cl
+		ON cc.CLIENT_CODE=cl.CLIENT_CODE
+		LEFT OUTER JOIN LOCATION l
+		ON l.LOCATION_CODE=cc.DLOCATION_CODE
+		LEFT OUTER JOIN BANK b 
+		ON b.BANK_CODE=cc.DRAWEE_BANK_CODE
+		LEFT OUTER JOIN BRANCH br
+		ON b.BANK_CODE=br.BANK_CODE AND br.BRANCH_CODE=cc.BRANCH_CODE
+		WHERE CC.RTN_STATUS='R'
+)
+
+GO
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 10-Mar-13
+-- Description:	Update Status Of Ncollection Ccheck table
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_CCheckUpdateByNCollection]		
+	@NONZONE_REF 	varchar(7),
+	@MOD_NO			int,
+	@RTN_STATUS		char(1),
+	@RTN_CODE		varchar(2)
+AS
+BEGIN	
+	DECLARE @ErrorVar	int;
+
+	SET NOCOUNT ON;
+
+	INSERT INTO NCOLLECTION_CCHECK_HIST(NONZONE_REF, MOD_NO, RTN_STATUS, 
+		RTN_CODE, IS_AUTH)
+		VALUES(@NONZONE_REF, @MOD_NO, @RTN_STATUS, @RTN_CODE, 0);
+    
+
+	SELECT @ErrorVar = @@ERROR;
+	
+	IF @ErrorVar <> 0
+		BEGIN			
+			RETURN 1;
+		END
+		
+	RETURN 0;
+	   
+END
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 10-Mar-13
+-- Description:	Update return Of Ncollection 
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_NCollection_Update]	
+	@NONZONE_REF	varchar(7),
+	@MOD_NO			int,
+	@RTN_STATUS		char(1),
+	@RTN_CODE		varchar(2),
+	@RET_MOD_NO		int output    
+AS
+BEGIN	
+	DECLARE @ErrorVar	int,	
+    @AMOUNT			    numeric(12, 2), 
+	@REF_DATE	        datetime,
+    @VAT			    numeric(12, 2), 
+	@COMMISION	        numeric(12, 2), 
+    @POSTAGE_CHARGE	    numeric(12, 2),
+    @INSTRUMENT_EXP	    numeric(12, 2),
+    @DDREFNO            varchar(15);
+	
+
+	SET NOCOUNT ON;
+
+-------------
+
+	IF EXISTS(SELECT NONZONE_REF FROM NCOLLECTION 
+				WHERE NONZONE_REF=@NONZONE_REF AND MOD_NO=@MOD_NO)
+		BEGIN
+			SELECT @REF_DATE=REF_DATE,@DDREFNO=DDREFNO,@AMOUNT=AMOUNT,
+				@VAT=VAT,@COMMISION=COMMISION,@POSTAGE_CHARGE=POSTAGE_CHARGE,
+				@INSTRUMENT_EXP=INSTRUMENT_EXP
+				FROM NCOLLECTION
+				WHERE NONZONE_REF =@NONZONE_REF
+
+--			IF @RTN_STATUS<>'O'
+--				BEGIN
+--					RETURN 1;
+--				END
+
+			DELETE NCOLLECTION_HIST WHERE NONZONE_REF=@NONZONE_REF AND IS_AUTH=0;
+
+			SELECT @ErrorVar = @@ERROR;		
+
+			IF @ErrorVar <> 0
+				BEGIN			
+					RETURN 1;
+				END
+			
+			SELECT @RET_MOD_NO = @MOD_NO +1;
+			
+			INSERT INTO NCOLLECTION_HIST(NONZONE_REF, REF_DATE, DDREFNO, AMOUNT, 
+				VAT, COMMISION, POSTAGE_CHARGE, INSTRUMENT_EXP, RTN_STATUS, 
+				RTN_CODE, 
+				INPUT_BY, 
+				INPUT_DATETIME, INPUT_FROM, MOD_NO, [STATUS], IS_AUTH)				
+				VALUES(@NONZONE_REF, @REF_DATE, @DDREFNO, @AMOUNT, 
+				@VAT, @COMMISION, @POSTAGE_CHARGE, @INSTRUMENT_EXP, @RTN_STATUS, 
+				@RTN_CODE,
+				substring(suser_name(),charindex('\',suser_name())+1,20),
+				GETDATE(),HOST_NAME(),@RET_MOD_NO,'U',0);
+
+			SELECT @ErrorVar = @@ERROR;
+
+			IF @ErrorVar <> 0
+				BEGIN					
+					RETURN 1;
+				END				
+
+			DELETE NCOLLECTION_CCHECK_HIST
+				WHERE NONZONE_REF=@NONZONE_REF AND IS_AUTH=0;
+
+			SELECT @ErrorVar = @@ERROR;
+
+			IF @ErrorVar <> 0
+				BEGIN
+					RETURN 1;
+				END
+
+			
+			RETURN 0;
+
+				
+		END
+	
+	RETURN 1;
+	   
+END
+
+
+GO
+
+
+ALTER TABLE dbo.USERS
+ADD INV_ATTEMPT	numeric(1,0)
+GO
+
+ALTER TABLE dbo.USERS_HIST
+ADD INV_ATTEMPT	numeric(1,0)
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 16-Nov-12
+-- Description:	update detail to Users table
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_Users_Update]	
+	@USERS_ID		varchar(20),
+	@USERS_NAME		varchar(50),
+	@DEPT_SLNO		numeric(3,0) ,
+	@DOMAIN			varchar(30),
+	@USER_STAT		char(1),
+	@MOD_NO			int,
+	@RET_MOD_NO		int output
+AS
+BEGIN	
+	DECLARE @ErrorVar INT;
+
+	DECLARE	@LAST_LOGIN_DATE	datetime,
+			@INV_ATTEMPT		numeric(1,0);
+	
+	SET NOCOUNT ON;
+
+	BEGIN TRANSACTION;
+
+	SELECT @LAST_LOGIN_DATE=LAST_LOGIN_DATE,@INV_ATTEMPT=INV_ATTEMPT 
+		FROM USERS 
+		WHERE USERS_ID=@USERS_ID;
+
+	IF EXISTS(SELECT USERS_ID FROM USERS 
+				WHERE USERS_ID=@USERS_ID AND MOD_NO=@MOD_NO)
+		BEGIN
+
+			DELETE USERS_HIST WHERE USERS_ID=@USERS_ID AND IS_AUTH=0;
+
+			SELECT @ErrorVar = @@ERROR;		
+
+			IF @ErrorVar <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+			
+			SELECT @RET_MOD_NO = @MOD_NO +1;
+			
+			INSERT INTO USERS_HIST(USERS_ID, USERS_NAME,DEPT_SLNO,DOMAIN,USER_STAT,
+				INPUT_BY,INPUT_DATETIME,INPUT_FROM,MOD_NO,[STATUS],IS_AUTH,
+				LAST_LOGIN_DATE,INV_ATTEMPT)
+				VALUES(@USERS_ID, @USERS_NAME,@DEPT_SLNO,@DOMAIN,@USER_STAT,
+				substring(suser_name(),charindex('\',suser_name())+1,20),
+				GETDATE(),HOST_NAME(),@RET_MOD_NO,'U',0,
+				@LAST_LOGIN_DATE,@INV_ATTEMPT);
+
+			SELECT @ErrorVar = @@ERROR;
+
+			IF @ErrorVar <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END				
+
+			COMMIT TRANSACTION;
+			
+			RETURN 0;
+
+				
+		END
+	ELSE -- might be in hist table
+		BEGIN
+
+			IF EXISTS(SELECT USERS_ID from USERS_HIST 
+						WHERE USERS_ID=@USERS_ID AND MOD_NO=@MOD_NO AND IS_AUTH=0)
+				BEGIN
+
+					DELETE USERS_HIST WHERE USERS_ID=@USERS_ID AND IS_AUTH=0;
+
+					SELECT @ErrorVar = @@ERROR;		
+
+					IF @ErrorVar <> 0
+						BEGIN
+							ROLLBACK TRANSACTION;
+							RETURN 1;
+						END
+
+					INSERT INTO USERS_HIST(USERS_ID, USERS_NAME,DEPT_SLNO,DOMAIN,USER_STAT,
+						INPUT_BY,INPUT_DATETIME,INPUT_FROM,MOD_NO,[STATUS],IS_AUTH,
+						LAST_LOGIN_DATE,INV_ATTEMPT)
+						VALUES(@USERS_ID, @USERS_NAME,@DEPT_SLNO,@DOMAIN,@USER_STAT,
+						substring(suser_name(),charindex('\',suser_name())+1,20),
+						GETDATE(),HOST_NAME(),@MOD_NO,'U',0,
+						@LAST_LOGIN_DATE,@INV_ATTEMPT);
+
+					SELECT @ErrorVar = @@ERROR;
+		
+					IF @ErrorVar <> 0
+						BEGIN
+							ROLLBACK TRANSACTION;
+							RETURN 1;
+						END
+					
+					SELECT @RET_MOD_NO=@MOD_NO;
+					
+					COMMIT TRANSACTION;
+					RETURN 0;
+			
+				END
+			ELSE
+				BEGIN
+					-- not exist
+					ROLLBACK TRANSACTION;
+					RETURN 4;
+				END
+
+		END
+    
+END
+
+GO
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 15-Nov-12
+-- Description:	Authorize record to users table
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_Users_Auth]	
+	@USERS_ID		varchar(20),
+	@MOD_NO			int,
+	@MOD_DATETIME	datetime
+AS
+BEGIN	
+	DECLARE @STATUS				char(1),
+			@USERS_NAME			varchar(50),
+			@DEPT_SLNO			numeric(3,0) ,
+			@DOMAIN				varchar(30),
+			@USER_STAT			char(1),
+			@LAST_LOGIN_DATE	datetime,
+			@INPUT_BY			varchar(20),
+			@INPUT_DATETIME		datetime,
+			@INPUT_FROM			varchar(30),
+			@AUTH_BY			varchar(20),
+			@AUTH_DATETIME		datetime,
+			@AUTH_FROM			varchar(30),
+			@LAST_MOD_NO		int,
+			@IS_AUTH			bit,
+			@INV_ATTEMPT		numeric(1,0);
+	
+	DECLARE @ErrorVar1		int; 
+			
+
+	SET NOCOUNT ON;
+
+	SELECT @STATUS = '';
+
+	BEGIN TRANSACTION
+
+	IF EXISTS(SELECT USERS_ID from USERS_HIST 
+			  WHERE USERS_ID=@USERS_ID AND MOD_NO=@MOD_NO)
+		BEGIN
+			SELECT @STATUS=[STATUS],@USERS_NAME=USERS_NAME,
+				@DEPT_SLNO=DEPT_SLNO,@DOMAIN=DOMAIN,@USER_STAT=USER_STAT,				
+				@INPUT_BY=INPUT_BY,	@INPUT_DATETIME=INPUT_DATETIME,
+				@INPUT_FROM=INPUT_FROM,@IS_AUTH=IS_AUTH
+				FROM USERS_HIST 
+				WHERE USERS_ID=@USERS_ID AND MOD_NO=@MOD_NO;
+			IF (@IS_AUTH = 1)
+				BEGIN
+					-- already authorized
+					ROLLBACK TRANSACTION;
+					RETURN 3;
+				END;
+			IF (@INPUT_BY = substring(suser_name(),charindex('\',suser_name())+1,20))
+				BEGIN
+					-- maker and checker same person
+					ROLLBACK TRANSACTION;
+					RETURN 5;
+				END;
+			IF (@INPUT_DATETIME <> @MOD_DATETIME)
+				BEGIN
+					-- Data hase been changed. Need notification
+					ROLLBACK TRANSACTION;
+					RETURN 7;
+				END;
+
+			SELECT @LAST_LOGIN_DATE=LAST_LOGIN_DATE,@INV_ATTEMPT=INV_ATTEMPT 
+				FROM USERS 
+				WHERE USERS_ID=@USERS_ID;			
+		END;
+	ELSE
+		BEGIN			
+			-- not exist
+			ROLLBACK TRANSACTION;
+			RETURN 4;
+		END	;
+
+	IF @MOD_NO > 1
+		BEGIN	
+		
+			INSERT INTO USERS_HIST(USERS_ID, USERS_NAME, DEPT_SLNO, DOMAIN, 
+				USER_STAT, LAST_LOGIN_DATE, INPUT_BY, INPUT_DATETIME, INPUT_FROM, 
+				AUTH_BY, AUTH_DATETIME, AUTH_FROM, MOD_NO, [STATUS], IS_AUTH, 
+				INV_ATTEMPT)
+				SELECT USERS_ID, USERS_NAME, DEPT_SLNO, DOMAIN, 
+					USER_STAT, LAST_LOGIN_DATE, INPUT_BY, INPUT_DATETIME, INPUT_FROM, 
+					AUTH_BY, AUTH_DATETIME, AUTH_FROM, MOD_NO, [STATUS], 1, 
+					INV_ATTEMPT FROM USERS
+					WHERE USERS_ID=@USERS_ID;
+			
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+
+			UPDATE USERS_HIST
+				SET [STATUS] = 'O' 
+				WHERE USERS_ID=@USERS_ID 
+				AND [STATUS] = 'L';
+
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+			IF @STATUS='U'
+				BEGIN
+					SELECT @STATUS='L';
+				END
+
+			UPDATE USERS
+				SET USERS_NAME=@USERS_NAME,
+				DEPT_SLNO=@DEPT_SLNO,DOMAIN=@DOMAIN,USER_STAT=@USER_STAT,
+				LAST_LOGIN_DATE=@LAST_LOGIN_DATE,INV_ATTEMPT=@INV_ATTEMPT,
+				INPUT_BY=@INPUT_BY,	INPUT_DATETIME=@INPUT_DATETIME,
+				INPUT_FROM=@INPUT_FROM,
+				AUTH_BY=substring(suser_name(),charindex('\',suser_name())+1,20),
+				AUTH_DATETIME=GETDATE(),AUTH_FROM=HOST_NAME(),
+				MOD_NO=@MOD_NO,[STATUS]=@STATUS
+			WHERE USERS_ID=@USERS_ID;
+
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+			
+			DELETE USERS_HIST WHERE USERS_ID=@USERS_ID
+				AND IS_AUTH=0;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END	
+
+		END
+	ELSE -- first record
+		BEGIN
+			INSERT INTO USERS(USERS_ID, USERS_NAME,
+				DEPT_SLNO, DOMAIN, USER_STAT, 
+				LAST_LOGIN_DATE, 
+				INPUT_BY, INPUT_DATETIME, INPUT_FROM, 
+				AUTH_BY, 
+				AUTH_DATETIME, AUTH_FROM, MOD_NO, [STATUS], INV_ATTEMPT)
+				SELECT USERS_ID, USERS_NAME,
+					DEPT_SLNO,DOMAIN,USER_STAT,
+					LAST_LOGIN_DATE,
+					INPUT_BY, INPUT_DATETIME, INPUT_FROM, 
+					substring(suser_name(),charindex('\',suser_name())+1,20), 
+					GETDATE(), HOST_NAME(), MOD_NO, 'L', INV_ATTEMPT
+					FROM USERS_HIST
+					WHERE USERS_ID=@USERS_ID AND MOD_NO=@MOD_NO;
+			
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+			DELETE USERS_HIST WHERE USERS_ID=@USERS_ID
+				AND IS_AUTH=0;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END			
+					
+		END
+
+		COMMIT TRANSACTION
+		
+		SELECT @ErrorVar1 = @@error;
+		
+		IF @ErrorVar1 = 0
+			BEGIN		
+				RETURN 0;
+			END
+		ELSE
+			BEGIN
+				RETURN 1;
+			END
+    
+END
+
+GO
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 15-Nov-12
+-- Description:	Remove record from Users table
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_Users_Remove]	
+	@USERS_ID		varchar(20),	
+	@MOD_NO			int,
+	@RET_MOD_NO		int output
+AS
+BEGIN	
+	DECLARE @STATUS				char(1),
+			@USERS_NAME			varchar(50),
+			@DEPT_SLNO			numeric(3,0) ,
+			@DOMAIN				varchar(30),
+			@USER_STAT			char(1),
+			@LAST_LOGIN_DATE	datetime,			
+			@INPUT_BY			varchar(20),
+			@INPUT_DATETIME		datetime,
+			@INPUT_FROM			varchar(30),			
+			@IS_AUTH			bit,
+			@INV_ATTEMPT		numeric(1,0);			
+	
+	DECLARE @ErrorVar		int; 
+			
+
+	SET NOCOUNT ON;
+
+	SET @STATUS = '';
+
+	BEGIN TRANSACTION
+
+	SELECT @LAST_LOGIN_DATE=LAST_LOGIN_DATE,@INV_ATTEMPT=INV_ATTEMPT 
+		FROM USERS 
+		WHERE USERS_ID=@USERS_ID;
+
+	IF EXISTS(SELECT USERS_ID from USERS 
+			  WHERE USERS_ID=@USERS_ID AND MOD_NO=@MOD_NO)
+		BEGIN
+			SELECT @STATUS=[STATUS],@USERS_NAME=USERS_NAME,
+				@DEPT_SLNO=DEPT_SLNO,@DOMAIN=DOMAIN,@USER_STAT=USER_STAT,							
+				@INPUT_BY=INPUT_BY,	@INPUT_DATETIME=INPUT_DATETIME,
+				@INPUT_FROM=INPUT_FROM
+				FROM USERS 
+				WHERE USERS_ID=@USERS_ID AND MOD_NO=@MOD_NO;
+			
+			IF (@STATUS = 'D')
+				BEGIN
+					-- already deleted
+					ROLLBACK TRANSACTION;
+					RETURN 6;
+				END;
+
+			DELETE USERS_HIST WHERE USERS_ID=@USERS_ID AND IS_AUTH=0;
+
+			SELECT @ErrorVar = @@ERROR;		
+
+			IF @ErrorVar <> 0				
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+			SELECT @RET_MOD_NO = @MOD_NO + 1;
+
+			INSERT INTO 
+				USERS_HIST (USERS_ID, USERS_NAME,
+				DEPT_SLNO,DOMAIN,USER_STAT,
+				LAST_LOGIN_DATE,INV_ATTEMPT,
+				INPUT_BY, INPUT_DATETIME, INPUT_FROM, MOD_NO, 
+				[STATUS], IS_AUTH)
+				VALUES(@USERS_ID, @USERS_NAME,
+				@DEPT_SLNO,@DOMAIN,@USER_STAT,
+				@LAST_LOGIN_DATE, @INV_ATTEMPT,
+				substring(suser_name(),charindex('\',suser_name())+1,20), 
+				GETDATE(), HOST_NAME(), @RET_MOD_NO, 
+				'D', 0)
+
+			SELECT @ErrorVar = @@ERROR;		
+
+			IF @ErrorVar <> 0				
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+			
+			COMMIT TRANSACTION;
+			RETURN 0;
+				
+		END;
+	ELSE 
+		BEGIN			
+			-- item might exist in hist table
+			IF EXISTS(SELECT USERS_ID from USERS_HIST 
+					  WHERE USERS_ID=@USERS_ID AND MOD_NO=@MOD_NO )
+				BEGIN
+					DELETE USERS_HIST
+						WHERE USERS_ID=@USERS_ID AND MOD_NO=@MOD_NO AND IS_AUTH=0;
+
+					SELECT @ErrorVar = @@ERROR;		
+
+					IF @ErrorVar <> 0				
+						BEGIN
+							ROLLBACK TRANSACTION;
+							RETURN 1;
+						END
+					
+					SELECT @RET_MOD_NO = @MOD_NO-1;
+
+					COMMIT TRANSACTION;
+					RETURN 0;			
+
+
+				END
+			ELSE
+				BEGIN
+					-- not exist
+					ROLLBACK TRANSACTION;
+					RETURN 4;
+				END
+			
+		END		
+    
+END
+
+GO
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 15-Nov-12
+-- Description:	Get detail of Department  table
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_Department_GetDetailList]		
+	@DEL_FLAG	int,
+	@AUTH_FLAG	bit
+AS
+BEGIN	
+		
+	SET NOCOUNT ON;
+	
+	IF @AUTH_FLAG=0
+		BEGIN						
+			SELECT *,'S' = 'U'				 
+				FROM DEPARTMENT_HIST  
+				WHERE IS_AUTH=0
+				ORDER BY DEPT_ID;			
+		END;
+	ELSE
+		BEGIN
+			IF @DEL_FLAG=0
+				BEGIN
+					SELECT *,1,'S' = 'A'				
+						FROM DEPARTMENT
+						WHERE [STATUS] ='L'					
+						ORDER BY DEPT_ID;
+				END;
+			ELSE
+				BEGIN
+					SELECT *,1,'S' = 
+						CASE  
+							WHEN [STATUS] = 'D' THEN 'D'                    
+							ELSE 'A'
+						END 
+						FROM DEPARTMENT
+						WHERE [STATUS] IN ('L','D')					
+						ORDER BY DEPT_ID;
+				END;
+		END;	
+
+
+
+	
+	   
+END
+
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 16-Nov-12
+-- Description:	Get detail of Users table
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_Users_GetDetailList]		
+	@DEL_FLAG	int,
+	@AUTH_FLAG	bit	
+AS
+BEGIN	
+		
+	SET NOCOUNT ON;
+
+	IF @AUTH_FLAG=0
+		BEGIN						
+			SELECT *,d.DEPT_NAME,'S' = 'U'				 
+				FROM USERS_HIST uh
+				LEFT OUTER JOIN DEPARTMENT d
+				ON uh.DEPT_SLNO=d.SLNO   
+				WHERE IS_AUTH=0
+				ORDER BY USERS_ID;			
+		END;
+	ELSE
+		BEGIN
+			IF @DEL_FLAG=0
+				BEGIN
+					SELECT *,1,d.DEPT_NAME,'S' = 'A'				
+						FROM USERS u
+						LEFT OUTER JOIN DEPARTMENT d
+						ON u.DEPT_SLNO=d.SLNO
+						WHERE u.STATUS ='L'					
+						ORDER BY USERS_ID;
+				END;
+			ELSE
+				BEGIN
+					SELECT *,1,d.DEPT_NAME,'S' = 
+						CASE  
+							WHEN u.STATUS = 'D' THEN 'D'                    
+							ELSE 'A'
+						END 
+						FROM USERS u
+						LEFT OUTER JOIN DEPARTMENT d
+						ON u.DEPT_SLNO=d.SLNO
+						WHERE u.STATUS IN ('L','D')					
+						ORDER BY USERS_ID;
+				END;
+		END;	
+
+
+		   
+END
+
+GO
+
+
+ALTER TABLE F_GROUP
+ALTER COLUMN FG_ID varchar(70) not null;
+GO
+
+ALTER TABLE F_GROUP
+ALTER COLUMN FG_NAME varchar(256) not null;
+GO
+
+ALTER TABLE F_GROUP_HIST
+ALTER COLUMN FG_ID varchar(70) not null;
+GO
+
+ALTER TABLE F_GROUP_HIST
+ALTER COLUMN FG_NAME varchar(256) not null;
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 19-Nov-12
+-- Description:	Get detail of Department  table
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_FGroup_GetDetailList]		
+	@DEL_FLAG	int,
+	@AUTH_FLAG	bit	
+AS
+BEGIN	
+		
+	SET NOCOUNT ON;
+
+	IF @AUTH_FLAG=0
+		BEGIN						
+			SELECT gh.*,d.DEPT_NAME,'S' = 'U'				 
+				FROM F_GROUP_HIST gh
+				LEFT OUTER JOIN DEPARTMENT d
+				ON gh.DEPT_SLNO=d.SLNO   
+				WHERE IS_AUTH=0
+				ORDER BY FG_ID;			
+		END;
+	ELSE
+		BEGIN
+			IF @DEL_FLAG=0
+				BEGIN
+					SELECT *,1,d.DEPT_NAME,'S' = 'A'				
+						FROM F_GROUP g
+						LEFT OUTER JOIN DEPARTMENT d
+						ON g.DEPT_SLNO=d.SLNO
+						WHERE g.STATUS ='L'					
+						ORDER BY FG_ID;
+				END;
+			ELSE
+				BEGIN
+					SELECT *,1,d.DEPT_NAME,'S' = 
+						CASE  
+							WHEN g.STATUS = 'D' THEN 'D'                    
+							ELSE 'A'
+						END 
+						FROM F_GROUP g
+						LEFT OUTER JOIN DEPARTMENT d
+						ON g.DEPT_SLNO=d.SLNO
+						WHERE g.STATUS IN ('L','D')					
+						ORDER BY FG_ID;
+				END;
+		END;	
+
+	   
+END
+
+GO
+
+
+
+ALTER TABLE dbo.F_GROUP
+ADD CONSTRAINT UX_FGROUP_FGID UNIQUE (FG_ID)
+GO
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 18-Nov-12
+-- Description:	Add detail to F_Group
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_FGroup_Add]	
+	@FG_ID		varchar(70),
+	@FG_NAME 	varchar(256),
+	@DEPT_SLNO	numeric(3,0),
+	@RET_SLNO	numeric(3,0) output	
+AS
+BEGIN	
+	DECLARE @ErrorVar	int,
+			@MaxS1		int,
+			@MaxS2		int;
+	
+	SET NOCOUNT ON;
+	
+	IF EXISTS(SELECT FG_ID FROM F_GROUP WHERE FG_ID=@FG_ID
+				AND DEPT_SLNO=@DEPT_SLNO)
+		BEGIN
+			-- Duplicate Entry				
+			RETURN 2	
+		END
+	
+	DELETE F_GROUP_HIST WHERE 
+		FG_ID=@FG_ID AND DEPT_SLNO=@DEPT_SLNO AND IS_AUTH=0;
+
+	SELECT @ErrorVar = @@ERROR;
+		
+	IF @ErrorVar <> 0
+		BEGIN			
+			RETURN 1;
+		END
+		
+	SELECT @MaxS1=ISNULL(MAX(SLNO),0) FROM F_GROUP;
+	SELECT @MaxS2=ISNULL(MAX(SLNO),0) FROM F_GROUP_HIST;
+
+	IF @MaxS1>@MaxS2
+		BEGIN
+			SELECT @RET_SLNO = @MaxS1 + 1;
+		END
+	ELSE
+		BEGIN
+			SELECT @RET_SLNO = @MaxS2 + 1;
+		END
+		
+
+	INSERT INTO F_GROUP_HIST(SLNO,FG_ID,FG_NAME,DEPT_SLNO,
+		INPUT_BY,INPUT_DATETIME,INPUT_FROM,MOD_NO,[STATUS],IS_AUTH)
+		VALUES(@RET_SLNO,@FG_ID,@FG_NAME,@DEPT_SLNO,
+		substring(suser_name(),charindex('\',suser_name())+1,20),
+		GETDATE(),HOST_NAME(),1,'U',0);
+
+	SELECT @ErrorVar = @@ERROR;
+	
+	IF @ErrorVar <> 0
+		BEGIN			
+			RETURN 1;
+		END
+		
+	RETURN 0;
+	   
+END
+
+GO
+
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 19-Nov-12
+-- Description:	update detail to F_Group table
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_FGroup_Update]	
+	@SLNO			numeric(6,0),
+	@FG_ID			varchar(70),
+	@FG_NAME 		varchar(256),
+	@DEPT_SLNO		numeric(3,0),	
+	@MOD_NO			int,
+	@RET_MOD_NO		int output
+AS
+BEGIN	
+	DECLARE @ErrorVar INT;
+	
+	SET NOCOUNT ON;
+
+	IF EXISTS(SELECT FG_ID FROM F_GROUP 
+				WHERE SLNO=@SLNO AND MOD_NO=@MOD_NO)
+		BEGIN
+
+			DELETE F_GROUP_HIST WHERE SLNO=@SLNO AND IS_AUTH=0;
+
+			SELECT @ErrorVar = @@ERROR;		
+
+			IF @ErrorVar <> 0
+				BEGIN					
+					RETURN 1;
+				END
+			
+			SELECT @RET_MOD_NO = @MOD_NO +1;
+			
+			INSERT INTO F_GROUP_HIST(SLNO,FG_ID, FG_NAME,DEPT_SLNO,
+				INPUT_BY,INPUT_DATETIME,INPUT_FROM,MOD_NO,[STATUS],IS_AUTH)
+				VALUES(@SLNO,@FG_ID, @FG_NAME,@DEPT_SLNO,
+				substring(suser_name(),charindex('\',suser_name())+1,20),
+				GETDATE(),HOST_NAME(),@RET_MOD_NO,'U',0);
+
+			SELECT @ErrorVar = @@ERROR;
+
+			IF @ErrorVar <> 0
+				BEGIN
+					RETURN 1;
+				END				
+			
+			DELETE PERM_FORMS_HIST
+				WHERE FG_SLNO=@SLNO AND IS_AUTH=0;
+
+			SELECT @ErrorVar = @@ERROR;
+
+			IF @ErrorVar <> 0
+				BEGIN
+					RETURN 1;
+				END
+
+			DELETE PERM_MENUS_HIST
+				WHERE FG_SLNO=@SLNO AND IS_AUTH=0;
+
+			SELECT @ErrorVar = @@ERROR;
+
+			IF @ErrorVar <> 0
+				BEGIN
+					RETURN 1;
+				END
+			
+			RETURN 0;
+
+				
+		END
+	ELSE -- might be in hist table
+		BEGIN
+
+			IF EXISTS(SELECT FG_ID from F_GROUP_HIST 
+						WHERE SLNO=@SLNO AND MOD_NO=@MOD_NO AND IS_AUTH=0)
+				BEGIN
+
+					DELETE F_GROUP_HIST WHERE SLNO=@SLNO AND IS_AUTH=0;
+
+					SELECT @ErrorVar = @@ERROR;		
+
+					IF @ErrorVar <> 0
+						BEGIN							
+							RETURN 1;
+						END
+
+					INSERT INTO F_GROUP_HIST(SLNO,FG_ID,FG_NAME,DEPT_SLNO,
+						INPUT_BY,INPUT_DATETIME,INPUT_FROM,MOD_NO,[STATUS],IS_AUTH)
+						VALUES(@SLNO,@FG_ID, @FG_NAME,@DEPT_SLNO,
+						substring(suser_name(),charindex('\',suser_name())+1,20),
+						GETDATE(),HOST_NAME(),@MOD_NO,'U',0);
+
+					SELECT @ErrorVar = @@ERROR;
+		
+					IF @ErrorVar <> 0
+						BEGIN							
+							RETURN 1;
+						END
+					
+					SELECT @RET_MOD_NO=@MOD_NO;
+
+					DELETE PERM_FORMS_HIST
+						WHERE FG_SLNO=@SLNO AND IS_AUTH=0;
+
+					SELECT @ErrorVar = @@ERROR;
+
+					IF @ErrorVar <> 0
+						BEGIN
+							RETURN 1;
+						END
+
+					DELETE PERM_MENUS_HIST
+						WHERE FG_SLNO=@SLNO AND IS_AUTH=0;
+
+					SELECT @ErrorVar = @@ERROR;
+
+					IF @ErrorVar <> 0
+						BEGIN
+							RETURN 1;
+						END
+							
+					
+					RETURN 0;
+			
+				END
+			ELSE
+				BEGIN
+					-- not exist
+					
+					RETURN 4;
+				END
+
+		END
+    
+END
+
+GO
+
+
+

@@ -1,0 +1,12 @@
+alter table CLEARING_CLIENT add Direct_Debit_Customer bit
+alter table CLEARING_CLIENT_HIST add Direct_Debit_Customer bit
+update CLEARING_CLIENT set Direct_Debit_Customer=0
+update CLEARING_CLIENT_HIST set Direct_Debit_Customer=0
+
+alter table CSD_DET alter column UNIQUE_COLLECTION_NO varchar(14)
+
+alter table CCHECK add UNIQUE_COLLECTION_NO varchar(14)
+
+alter table CCASH add UNIQUE_COLLECTION_NO varchar(14)
+
+alter table CLEARINGTAB add UNIQUE_COLLECTION_NO varchar(14)

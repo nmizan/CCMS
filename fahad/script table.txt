@@ -1,0 +1,36 @@
+Branch->
+	NIKBRANCH_CODE varchar](7) NOT NULL,
+
+Client ->
+	IS_DISABLE	bit not null
+
+
+CREATE TABLE DD(
+	D_CODE varchar(12) NOT NULL,
+	SLNO numeric(3, 0) NOT NULL,
+	DD_NO varchar(18) NOT NULL,
+	DD_DATE datetime NULL,	
+	AMOUNT numeric(12, 2) NULL,
+	DRAWER_BANKCODE varchar (4) NULL,
+	DRAWER_BRANCHCODE varchar (4) NULL,
+	DRAWER_LOCATION varchar(4) NULL,
+	DRAWEE_BRANCH varchar(25) NULL, 
+	NIKBRANCH_CODE varchar(7) NULL,
+	RTN_STATUS char(1) NULL,
+	VAT numeric (12, 2) NULL,
+	COMMISION numeric (12, 2) NULL,
+	POSTAGE_CHARGE numeric (12, 2) NULL,
+	INSTRUMENT_EXP numeric (12, 2) NULL,
+) ON [PRIMARY]
+
+
+CREATE TABLE [dbo].[normalcollection](
+	NONZONEREF [char](7) NOT NULL,
+	REF_DATE [datetime] NULL,
+	RTN_STATUS [char](1) NULL,
+	STATUS_DATE [datetime] NULL,
+	DDREFNO [char](8) NULL,
+	COLLECTED_AMOUNT [numeric](12, 2) NULL,
+	VAT [numeric](8, 2) NULL
+	CHECKREF varchar(15) NULL
+) ON [PRIMARY]

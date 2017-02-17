@@ -1,0 +1,50 @@
+
+SS = Screen Shot
+SD = Screen Design
+
+-----------------------------------------------------
+-----------------------------------------------------
+Form Name				SS	SD
+-----------------------------------------------------
+-----------------------------------------------------
+Login						**
+------------- ---------------------------------------
+Parameter				
+-----------------------------------------------------
+client					**
+nikash client
+cittibankbranch
+bank
+branch					**
+location				**
+zone
+reject/return
+entrylocation
+cheque type
+bbk account info
+holiday					**
+locationcharge
+deposit schedule stock maintain
+nikash branch
+-----------------------------------------------------
+Deposit Information
+------------------------------------------------------
+Deposit Schedule			**
+Citicash detail				**
+citispeed detail			**
+citicheck detail			**
+flexfile
+flex reversal file generate
+Excise DutyUpload
+Outstanding Reversal
+
+
+collection
+-------------
+Collection Schdule			**
+DD Detail				**
+Normal Collection			**
+DD information for Sub system
+
+
+

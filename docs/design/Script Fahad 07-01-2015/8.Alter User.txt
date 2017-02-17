@@ -1,0 +1,347 @@
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 16-Nov-12
+-- Description:	update detail to Users table
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_Users_Update]	
+	@USERS_ID		varchar(20),
+	@USERS_NAME		varchar(50),
+	@DEPT_SLNO		numeric(3,0) ,
+	@DOMAIN			varchar(30),
+	@USER_STAT		char(1),
+	@IS_ADMIN		bit,
+	@MOD_NO			int,
+	@RET_MOD_NO		int output
+AS
+BEGIN	
+	DECLARE @ErrorVar INT;
+
+	DECLARE	@LAST_LOGIN_DATE	datetime,
+			@INV_ATTEMPT		numeric(1,0),
+			@NEW_USER_STAT      char(1);
+	
+	SET NOCOUNT ON;
+
+	BEGIN TRANSACTION;
+
+	SELECT @LAST_LOGIN_DATE=LAST_LOGIN_DATE,@INV_ATTEMPT=INV_ATTEMPT ,@NEW_USER_STAT =USER_STAT
+		FROM USERS 
+		WHERE USERS_ID=@USERS_ID;
+		
+		IF (@NEW_USER_STAT = 'D' AND @USER_STAT = 'E')
+     
+		  BEGIN
+	            IF DATEDIFF(day ,@LAST_LOGIN_DATE,GETDATE()) >= 100
+	            BEGIN
+	             
+	              SET @LAST_LOGIN_DATE = NULL
+	
+	            END
+		  END;
+
+	IF EXISTS(SELECT USERS_ID FROM USERS 
+				WHERE USERS_ID=@USERS_ID AND MOD_NO=@MOD_NO)
+		BEGIN
+
+			DELETE USERS_HIST WHERE USERS_ID=@USERS_ID AND IS_AUTH=0;
+
+			SELECT @ErrorVar = @@ERROR;		
+
+			IF @ErrorVar <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+			
+			SELECT @RET_MOD_NO = @MOD_NO +1;
+			
+			INSERT INTO USERS_HIST(USERS_ID, USERS_NAME,DEPT_SLNO,DOMAIN,USER_STAT,
+				INPUT_BY,INPUT_DATETIME,INPUT_FROM,MOD_NO,[STATUS],IS_AUTH,
+				LAST_LOGIN_DATE,INV_ATTEMPT,IS_ADMIN)
+				VALUES(@USERS_ID, @USERS_NAME,@DEPT_SLNO,@DOMAIN,@USER_STAT,
+				substring(suser_name(),charindex('\',suser_name())+1,20),
+				GETDATE(),HOST_NAME(),@RET_MOD_NO,'U',0,
+				@LAST_LOGIN_DATE,@INV_ATTEMPT,@IS_ADMIN);
+
+			SELECT @ErrorVar = @@ERROR;
+
+			IF @ErrorVar <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END				
+
+			COMMIT TRANSACTION;
+			
+			RETURN 0;
+
+				
+		END
+	ELSE -- might be in hist table
+		BEGIN
+
+			IF EXISTS(SELECT USERS_ID from USERS_HIST 
+						WHERE USERS_ID=@USERS_ID AND MOD_NO=@MOD_NO AND IS_AUTH=0)
+				BEGIN
+
+					DELETE USERS_HIST WHERE USERS_ID=@USERS_ID AND IS_AUTH=0;
+
+					SELECT @ErrorVar = @@ERROR;		
+
+					IF @ErrorVar <> 0
+						BEGIN
+							ROLLBACK TRANSACTION;
+							RETURN 1;
+						END
+
+					INSERT INTO USERS_HIST(USERS_ID, USERS_NAME,DEPT_SLNO,DOMAIN,USER_STAT,
+						INPUT_BY,INPUT_DATETIME,INPUT_FROM,MOD_NO,[STATUS],IS_AUTH,
+						LAST_LOGIN_DATE,INV_ATTEMPT,IS_ADMIN)
+						VALUES(@USERS_ID, @USERS_NAME,@DEPT_SLNO,@DOMAIN,@USER_STAT,
+						substring(suser_name(),charindex('\',suser_name())+1,20),
+						GETDATE(),HOST_NAME(),@MOD_NO,'U',0,
+						@LAST_LOGIN_DATE,@INV_ATTEMPT,@IS_ADMIN);
+
+					SELECT @ErrorVar = @@ERROR;
+		
+					IF @ErrorVar <> 0
+						BEGIN
+							ROLLBACK TRANSACTION;
+							RETURN 1;
+						END
+					
+					SELECT @RET_MOD_NO=@MOD_NO;
+					
+					COMMIT TRANSACTION;
+					RETURN 0;
+			
+				END
+			ELSE
+				BEGIN
+					-- not exist
+					ROLLBACK TRANSACTION;
+					RETURN 4;
+				END
+
+		END
+    
+END
+
+GO
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 15-Nov-12
+-- Description:	Authorize record to users table
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_Users_Auth]	
+	@USERS_ID		varchar(20),
+	@MOD_NO			int,
+	@MOD_DATETIME	datetime
+AS
+BEGIN	
+	DECLARE @STATUS				char(1),
+			@USERS_NAME			varchar(50),
+			@DEPT_SLNO			numeric(3,0) ,
+			@DOMAIN				varchar(30),
+			@USER_STAT			char(1),
+			@LAST_LOGIN_DATE	datetime,
+			@IS_ADMIN			bit,
+			@INPUT_BY			varchar(20),
+			@INPUT_DATETIME		datetime,
+			@INPUT_FROM			varchar(30),
+			@AUTH_BY			varchar(20),
+			@AUTH_DATETIME		datetime,
+			@AUTH_FROM			varchar(30),
+			@LAST_MOD_NO		int,
+			@IS_AUTH			bit,
+			@INV_ATTEMPT		numeric(1,0),
+			@OLD_USER_STAT      char(1);
+	
+	DECLARE @ErrorVar1		int; 
+			
+
+	SET NOCOUNT ON;
+
+	SELECT @STATUS = '';
+
+	BEGIN TRANSACTION
+
+	IF EXISTS(SELECT USERS_ID from USERS_HIST 
+			  WHERE USERS_ID=@USERS_ID AND MOD_NO=@MOD_NO)
+		BEGIN
+			SELECT @STATUS=[STATUS],@USERS_NAME=USERS_NAME,
+				@DEPT_SLNO=DEPT_SLNO,@DOMAIN=DOMAIN,@USER_STAT=USER_STAT,
+				@IS_ADMIN=IS_ADMIN,				
+				@INPUT_BY=INPUT_BY,	@INPUT_DATETIME=INPUT_DATETIME,
+				@INPUT_FROM=INPUT_FROM,@IS_AUTH=IS_AUTH
+				FROM USERS_HIST 
+				WHERE USERS_ID=@USERS_ID AND MOD_NO=@MOD_NO;
+			IF (@IS_AUTH = 1)
+				BEGIN
+					-- already authorized
+					ROLLBACK TRANSACTION;
+					RETURN 3;
+				END;
+			IF (@INPUT_BY = substring(suser_name(),charindex('\',suser_name())+1,20))
+				BEGIN
+					-- maker and checker same person
+					ROLLBACK TRANSACTION;
+					RETURN 5;
+				END;
+			IF (@INPUT_DATETIME <> @MOD_DATETIME)
+				BEGIN
+					-- Data hase been changed. Need notification
+					ROLLBACK TRANSACTION;
+					RETURN 7;
+				END;
+
+			SELECT @LAST_LOGIN_DATE=LAST_LOGIN_DATE,@INV_ATTEMPT=INV_ATTEMPT , @OLD_USER_STAT =USER_STAT 
+				FROM USERS 
+				WHERE USERS_ID=@USERS_ID;		
+				
+				IF (@OLD_USER_STAT = 'D' AND @USER_STAT = 'E')
+     
+					BEGIN
+						IF DATEDIFF(day ,@LAST_LOGIN_DATE,GETDATE()) >= 100
+						BEGIN
+					     
+						  SET @LAST_LOGIN_DATE = NULL
+
+						END
+					END;
+					
+		END;
+	ELSE
+		BEGIN			
+			-- not exist
+			ROLLBACK TRANSACTION;
+			RETURN 4;
+		END	;
+
+	IF @MOD_NO > 1
+		BEGIN	
+		
+			INSERT INTO USERS_HIST(USERS_ID, USERS_NAME, DEPT_SLNO, DOMAIN, 
+				USER_STAT, LAST_LOGIN_DATE, INPUT_BY, INPUT_DATETIME, INPUT_FROM, 
+				AUTH_BY, AUTH_DATETIME, AUTH_FROM, MOD_NO, [STATUS], IS_AUTH, 
+				INV_ATTEMPT,IS_ADMIN)
+				SELECT USERS_ID, USERS_NAME, DEPT_SLNO, DOMAIN, 
+					USER_STAT, LAST_LOGIN_DATE, INPUT_BY, INPUT_DATETIME, INPUT_FROM, 
+					AUTH_BY, AUTH_DATETIME, AUTH_FROM, MOD_NO, [STATUS], 1, 
+					INV_ATTEMPT,IS_ADMIN FROM USERS
+					WHERE USERS_ID=@USERS_ID;
+			
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+
+			UPDATE USERS_HIST
+				SET [STATUS] = 'O' 
+				WHERE USERS_ID=@USERS_ID 
+				AND [STATUS] = 'L';
+
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+			IF @STATUS='U'
+				BEGIN
+					SELECT @STATUS='L';
+				END
+
+			UPDATE USERS
+				SET USERS_NAME=@USERS_NAME,
+				DEPT_SLNO=@DEPT_SLNO,DOMAIN=@DOMAIN,USER_STAT=@USER_STAT,
+				LAST_LOGIN_DATE=@LAST_LOGIN_DATE,INV_ATTEMPT=@INV_ATTEMPT,
+				IS_ADMIN=@IS_ADMIN,
+				INPUT_BY=@INPUT_BY,	INPUT_DATETIME=@INPUT_DATETIME,
+				INPUT_FROM=@INPUT_FROM,
+				AUTH_BY=substring(suser_name(),charindex('\',suser_name())+1,20),
+				AUTH_DATETIME=GETDATE(),AUTH_FROM=HOST_NAME(),
+				MOD_NO=@MOD_NO,[STATUS]=@STATUS
+			WHERE USERS_ID=@USERS_ID;
+
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+			
+			DELETE USERS_HIST WHERE USERS_ID=@USERS_ID
+				AND IS_AUTH=0;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END	
+
+		END
+	ELSE -- first record
+		BEGIN
+			INSERT INTO USERS(USERS_ID, USERS_NAME,
+				DEPT_SLNO, DOMAIN, USER_STAT, 
+				LAST_LOGIN_DATE, 
+				INPUT_BY, INPUT_DATETIME, INPUT_FROM, 
+				AUTH_BY, 
+				AUTH_DATETIME, AUTH_FROM, MOD_NO, [STATUS], INV_ATTEMPT,
+				IS_ADMIN)
+				SELECT USERS_ID, USERS_NAME,
+					DEPT_SLNO,DOMAIN,USER_STAT,
+					LAST_LOGIN_DATE,
+					INPUT_BY, INPUT_DATETIME, INPUT_FROM, 
+					substring(suser_name(),charindex('\',suser_name())+1,20), 
+					GETDATE(), HOST_NAME(), MOD_NO, 'L', INV_ATTEMPT,
+					IS_ADMIN
+					FROM USERS_HIST
+					WHERE USERS_ID=@USERS_ID AND MOD_NO=@MOD_NO;
+			
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+			DELETE USERS_HIST WHERE USERS_ID=@USERS_ID
+				AND IS_AUTH=0;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END			
+					
+		END
+
+		COMMIT TRANSACTION
+		
+		SELECT @ErrorVar1 = @@error;
+		
+		IF @ErrorVar1 = 0
+			BEGIN		
+				RETURN 0;
+			END
+		ELSE
+			BEGIN
+				RETURN 1;
+			END
+    
+END
+
+GO
+

@@ -1,0 +1,24 @@
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		Mohammad Yasir Arafat
+-- Create date: 06 Sept 2015
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE [CMS_Process_UpdatePPMGenDateDepositCheck]
+	-- Add the parameters for the stored procedure here
+	
+AS
+BEGIN
+update DSCHEDULE set PPM_GenDate=getdate()
+from DSCHEDULE,BANK,BRANCH,CSD, CSD_DET, Client
+			where DSCHEDULE.D_CODE=CSD.D_CODE and 
+			DSCHEDULE.CORR_BANK_CODE=BANK.BANK_CODE and DSCHEDULE.CORR_BRANCH_CODE=BRANCH.BRANCH_CODE and
+			 BRANCH.BANK_CODE=DSCHEDULE.CORR_BANK_CODE and CSD.D_CODE=CSD_DET.D_CODE and 
+			 DSCHEDULE.FLEXGEN_DATE is not NULL and DSCHEDULE.CLIENT_CODE=client.CLIENT_CODE and
+			 DSCHEDULE.PPM_GenDate is null and DSCHEDULE.SCHEDULE_DATE = getdate();				
+END
+GO

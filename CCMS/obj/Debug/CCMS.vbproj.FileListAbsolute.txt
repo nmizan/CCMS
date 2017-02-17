@@ -1,0 +1,552 @@
+G:\Yasir\CTNA\CCMS\CCMS\bin\Debug\CCMS.exe.config
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.vbproj.ResolveComReference.cache
+G:\Yasir\CTNA\CCMS\CCMS\bin\Debug\CCMS.exe
+G:\Yasir\CTNA\CCMS\CCMS\bin\Debug\CCMS.pdb
+G:\Yasir\CTNA\CCMS\CCMS\bin\Debug\CCMS.xml
+G:\Yasir\CTNA\CCMS\CCMS\bin\Debug\Microsoft.Office.Interop.Excel.dll
+G:\Yasir\CTNA\CCMS\CCMS\bin\Debug\Microsoft.Office.Interop.Outlook.dll
+G:\Yasir\CTNA\CCMS\CCMS\bin\Debug\Microsoft.Practices.EnterpriseLibrary.Common.dll
+G:\Yasir\CTNA\CCMS\CCMS\bin\Debug\Microsoft.Practices.EnterpriseLibrary.Data.dll
+G:\Yasir\CTNA\CCMS\CCMS\bin\Debug\MigraDoc.DocumentObjectModel.dll
+G:\Yasir\CTNA\CCMS\CCMS\bin\Debug\MigraDoc.Rendering.dll
+G:\Yasir\CTNA\CCMS\CCMS\bin\Debug\PdfSharp.dll
+G:\Yasir\CTNA\CCMS\CCMS\bin\Debug\Winforms.Components.dll
+G:\Yasir\CTNA\CCMS\CCMS\bin\Debug\Microsoft.Practices.ObjectBuilder2.dll
+G:\Yasir\CTNA\CCMS\CCMS\bin\Debug\office.dll
+G:\Yasir\CTNA\CCMS\CCMS\bin\Debug\Microsoft.Vbe.Interop.dll
+G:\Yasir\CTNA\CCMS\CCMS\bin\Debug\Microsoft.Practices.Unity.dll
+G:\Yasir\CTNA\CCMS\CCMS\bin\Debug\office.xml
+G:\Yasir\CTNA\CCMS\CCMS\bin\Debug\Microsoft.Office.Interop.Outlook.xml
+G:\Yasir\CTNA\CCMS\CCMS\bin\Debug\Microsoft.Office.Interop.Excel.xml
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\ResolveAssemblyReference.cache
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmInvoice.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmPPMFeedExport.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmPPMServiceClearing.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmPPMServiceCollection.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmPPMServiceControl.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmPPM_Clearing.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmPPM_Collection.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmRptUsersFormPerm.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmRptUsersMenuPerm.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmRptUsersInactivity.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmDepoScheSearch.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmCitiCheckSearch.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmAppSettting.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmCitiSpeedCollectionReturnProcess.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmCitiSpeedReturnFile.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmClearingChargeDet.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmClearingChargeFile.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmClearingSearch.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmClientMail.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmCTRRefSearch.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmDDBreakup.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmDepositExportGo.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmEmailSettingDetail.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmEmailSettingSummary.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmGuaranteedCreditBooking.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmImportSameDayMis.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmLoginSession.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmProcessSameDayMis.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmReportSameDayMis.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmRptClearBACHChargeSummSheet.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmRptClearChargeSumm.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmRptClearClientWiseCharge.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmRptClearClientWiseChargeSumm.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmRptClearGovtCheck.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmRptClearingCheckHistOld.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmClearDDCheckProcess.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmCitiSpeedReturnSumm.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmCitiSpeedReturnDet.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmClearingReturnFile.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmClearingReturnSumm.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmClearCheckImport.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmClearingReturnDet.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmLogReport.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmRptDepositBreak2.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmRptGuaranteedCreditBooking.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmRptUsersRole.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmSameDayMISDetail.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmSameDayMISEmailHistory.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmSameDayMISSummary.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmSetClearDate.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmEERSFeedExport.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmClearRetImport.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmRptClearPDC.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmRptClearDepositDet.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmRptClearDeposit.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmRptClearHighValue.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmRptClearBranchwise.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmRptClearCheckSumm.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmPDCTransfer.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmPDCSumm.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmPDCDet.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmRptClearReturn.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmRptHoliday.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmClearingSumm.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmFlexAccSumm.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmFlexAccDet.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmCitiAnyFunding.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmCCMSRefSearch.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmCitiAnyReturnSumm.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmCollScheduleSumm.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmCollectionProcessCitiAny.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmDDSumm.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmPendingAuth.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmRptAnyCheckCollectionReprint.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmRptMonthBillCashCheck.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmSubSysDDInfo.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmCitiSpeedMismatchTotal.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmDepoScheMismatchTotal.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmDepoScheMissingDetail.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmClearingClientSumm.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmClearingDepositFile.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmClearingLocationSumm.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmClearingLocationDet.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmClearingBranchSumm.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmClearingBranchDet.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmClearingBankSumm.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmClearingBankDet.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmClearingClientDet.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmCitiCheckSumm.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmCitiSpeedSumm.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmCitiCashSumm.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmDepoScheSumm.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmAbout.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmRptAnyReminder.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmRptAnyCheckCollection.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmTempTest.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmUpWait.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmDepositBreak.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmRptUnclearFund.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmRptDDFunding.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmRptAnyReturn.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmRptAnyOutstanding.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmRptAnyFunding.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmRptAnyProcessing.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmRptCashSpeedDayZero.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmRptCitiAnyDepositDetail.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmRptSpeedReturn.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmRptSpeedDeposit.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmRptCashDeposit.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmReminderCitiAny.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmHolidaySumm.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmReversalGen.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmReversalOutstanding.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmRptCashSpeedSummary.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmBooking.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmReportViewer.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmScheduleStockSumm.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmClientLocChargeSumm.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmClientLocChargeDet.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmClientSumm.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmUsersFGSumm.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmBranchSumm.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmCitibankBranchSumm.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmList.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmReturnSumm.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmCheckTypeSumm.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmZoneSumm.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmLocationSumm.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmBankSumm.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmScheduleStockDet.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmClearingDetail.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmCitiAnyReturnDet.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmDDDetail.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmCollSchedule.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmCitiCheckDetail.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmCitiSpeedDetail.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmCitiCashDetail.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmDepoSchedule.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmCitiBankBranchDet.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmZoneDet.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmCheckTypeDet.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmReturnDet.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmBankDet.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmBranchDet.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmClientDet.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmHolidayDet.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmLocationDet.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmPermFGDet.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmUsersFGDet.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmFGPermSumm.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmUserSumm.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmUsersDet.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmDeptSumm.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmLogin.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmDeptDet.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.FrmMain.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.Resources.resources
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.vbproj.GenerateResource.Cache
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.exe
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.xml
+G:\Yasir\CTNA\CCMS\CCMS\obj\Debug\CCMS.pdb
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\ResolveAssemblyReference.cache
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.vbproj.ResolveComReference.cache
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmInvoice.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmPPMFeedExport.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmPPMServiceClearing.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmPPMServiceCollection.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmPPMServiceControl.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmPPM_Clearing.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmPPM_Collection.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmRptUsersFormPerm.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmRptUsersMenuPerm.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmRptUsersInactivity.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmDepoScheSearch.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmCitiCheckSearch.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmAppSettting.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmCitiSpeedCollectionReturnProcess.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmCitiSpeedReturnFile.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmClearingChargeDet.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmClearingChargeFile.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmClearingSearch.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmClientMail.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmCTRRefSearch.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmDDBreakup.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmDepositExportGo.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmEmailSettingDetail.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmEmailSettingSummary.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmGuaranteedCreditBooking.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmImportSameDayMis.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmLoginSession.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmProcessSameDayMis.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmReportSameDayMis.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmRptClearBACHChargeSummSheet.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmRptClearChargeSumm.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmRptClearClientWiseCharge.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmRptClearClientWiseChargeSumm.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmRptClearGovtCheck.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmRptClearingCheckHistOld.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmClearDDCheckProcess.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmCitiSpeedReturnSumm.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmCitiSpeedReturnDet.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmClearingReturnFile.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmClearingReturnSumm.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmClearCheckImport.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmClearingReturnDet.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmLogReport.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmRptDepositBreak2.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmRptGuaranteedCreditBooking.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmRptUsersRole.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmSameDayMISDetail.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmSameDayMISEmailHistory.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmSameDayMISSummary.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmSetClearDate.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmEERSFeedExport.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmClearRetImport.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmRptClearPDC.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmRptClearDepositDet.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmRptClearDeposit.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmRptClearHighValue.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmRptClearBranchwise.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmRptClearCheckSumm.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmPDCTransfer.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmPDCSumm.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmPDCDet.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmRptClearReturn.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmRptHoliday.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmClearingSumm.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmFlexAccSumm.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmFlexAccDet.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmCitiAnyFunding.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmCCMSRefSearch.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmCitiAnyReturnSumm.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmCollScheduleSumm.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmCollectionProcessCitiAny.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmDDSumm.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmPendingAuth.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmRptAnyCheckCollectionReprint.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmRptMonthBillCashCheck.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmSubSysDDInfo.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmCitiSpeedMismatchTotal.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmDepoScheMismatchTotal.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmDepoScheMissingDetail.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmClearingClientSumm.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmClearingDepositFile.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmClearingLocationSumm.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmClearingLocationDet.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmClearingBranchSumm.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmClearingBranchDet.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmClearingBankSumm.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmClearingBankDet.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmClearingClientDet.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmCitiCheckSumm.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmCitiSpeedSumm.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmCitiCashSumm.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmDepoScheSumm.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmAbout.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmRptAnyReminder.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmRptAnyCheckCollection.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmTempTest.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmUpWait.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmDepositBreak.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmRptUnclearFund.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmRptDDFunding.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmRptAnyReturn.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmRptAnyOutstanding.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmRptAnyFunding.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmRptAnyProcessing.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmRptCashSpeedDayZero.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmRptCitiAnyDepositDetail.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmRptSpeedReturn.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmRptSpeedDeposit.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmRptCashDeposit.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmReminderCitiAny.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmHolidaySumm.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmReversalGen.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmReversalOutstanding.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmRptCashSpeedSummary.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmBooking.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmReportViewer.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmScheduleStockSumm.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmClientLocChargeSumm.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmClientLocChargeDet.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmClientSumm.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmUsersFGSumm.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmBranchSumm.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmCitibankBranchSumm.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmList.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmReturnSumm.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmCheckTypeSumm.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmZoneSumm.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmLocationSumm.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmBankSumm.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmScheduleStockDet.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmClearingDetail.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmCitiAnyReturnDet.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmDDDetail.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmCollSchedule.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmCitiCheckDetail.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmCitiSpeedDetail.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmCitiCashDetail.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmDepoSchedule.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmCitiBankBranchDet.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmZoneDet.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmCheckTypeDet.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmReturnDet.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmBankDet.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmBranchDet.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmClientDet.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmHolidayDet.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmLocationDet.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmPermFGDet.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmUsersFGDet.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmFGPermSumm.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmUserSumm.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmUsersDet.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmDeptSumm.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmLogin.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmDeptDet.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.FrmMain.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.Resources.resources
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.vbproj.GenerateResource.Cache
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\bin\Debug\CCMS.exe.config
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\bin\Debug\CCMS.exe
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\bin\Debug\CCMS.pdb
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\bin\Debug\CCMS.xml
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\bin\Debug\Microsoft.Office.Interop.Excel.dll
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\bin\Debug\Microsoft.Office.Interop.Outlook.dll
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\bin\Debug\Microsoft.Practices.EnterpriseLibrary.Common.dll
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\bin\Debug\Microsoft.Practices.EnterpriseLibrary.Data.dll
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\bin\Debug\MigraDoc.DocumentObjectModel.dll
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\bin\Debug\MigraDoc.Rendering.dll
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\bin\Debug\PdfSharp.dll
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\bin\Debug\Winforms.Components.dll
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\bin\Debug\Microsoft.Practices.ObjectBuilder2.dll
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\bin\Debug\office.dll
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\bin\Debug\Microsoft.Vbe.Interop.dll
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\bin\Debug\Microsoft.Practices.Unity.dll
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\bin\Debug\office.xml
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\bin\Debug\Microsoft.Office.Interop.Outlook.xml
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\bin\Debug\Microsoft.Office.Interop.Excel.xml
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.exe
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.xml
+D:\00.Development(Mizan)\CCMS_Src_02May2016\CCMS\obj\Debug\CCMS.pdb
+D:\00.Development(Mizan)\CCMS_01_June_2016\CCMS\bin\Debug\CCMS.exe.config
+D:\00.Development(Mizan)\CCMS_01_June_2016\CCMS\obj\Debug\CCMS.vbproj.ResolveComReference.cache
+D:\00.Development(Mizan)\CCMS_01_June_2016\CCMS\obj\Debug\CCMS.exe
+D:\00.Development(Mizan)\CCMS_01_June_2016\CCMS\obj\Debug\CCMS.xml
+D:\00.Development(Mizan)\CCMS_01_June_2016\CCMS\obj\Debug\CCMS.pdb
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\bin\Debug\CCMS.exe.config
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.vbproj.ResolveComReference.cache
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.exe
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.xml
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.pdb
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\bin\Debug\CCMS.exe
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\bin\Debug\CCMS.pdb
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\bin\Debug\CCMS.xml
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\bin\Debug\Microsoft.Office.Interop.Excel.dll
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\bin\Debug\Microsoft.Office.Interop.Outlook.dll
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\bin\Debug\Microsoft.Practices.EnterpriseLibrary.Common.dll
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\bin\Debug\Microsoft.Practices.EnterpriseLibrary.Data.dll
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\bin\Debug\MigraDoc.DocumentObjectModel.dll
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\bin\Debug\MigraDoc.Rendering.dll
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\bin\Debug\PdfSharp.dll
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\bin\Debug\Winforms.Components.dll
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\bin\Debug\Microsoft.Practices.ObjectBuilder2.dll
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\bin\Debug\office.dll
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\bin\Debug\Microsoft.Vbe.Interop.dll
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\bin\Debug\Microsoft.Practices.Unity.dll
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\bin\Debug\office.xml
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\bin\Debug\Microsoft.Office.Interop.Outlook.xml
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\bin\Debug\Microsoft.Office.Interop.Excel.xml
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\ResolveAssemblyReference.cache
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmInvoice.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmPPMFeedExport.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmPPMServiceClearing.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmPPMServiceCollection.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmPPMServiceControl.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmPPM_Clearing.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmPPM_Collection.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmRptUsersFormPerm.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmRptUsersMenuPerm.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmRptUsersInactivity.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmDepoScheSearch.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmCitiCheckSearch.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmAppSettting.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmCitiSpeedCollectionReturnProcess.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmCitiSpeedReturnFile.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmClearingChargeDet.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmClearingChargeFile.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmClearingSearch.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmClientMail.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmCTRRefSearch.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmDDBreakup.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmDepositExportGo.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmEmailSettingDetail.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmEmailSettingSummary.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmGuaranteedCreditBooking.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmImportSameDayMis.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmLoginSession.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmProcessSameDayMis.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmReportSameDayMis.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmRptClearBACHChargeSummSheet.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmRptClearChargeSumm.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmRptClearClientWiseCharge.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmRptClearClientWiseChargeSumm.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmRptClearGovtCheck.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmRptClearingCheckHistOld.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmClearDDCheckProcess.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmCitiSpeedReturnSumm.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmCitiSpeedReturnDet.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmClearingReturnFile.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmClearingReturnSumm.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmClearCheckImport.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmClearingReturnDet.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmLogReport.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmRptDepositBreak2.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmRptGuaranteedCreditBooking.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmRptUsersRole.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmSameDayMISDetail.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmSameDayMISEmailHistory.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmSameDayMISSummary.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmSetClearDate.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmEERSFeedExport.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmClearRetImport.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmRptClearPDC.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmRptClearDepositDet.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmRptClearDeposit.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmRptClearHighValue.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmRptClearBranchwise.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmRptClearCheckSumm.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmPDCTransfer.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmPDCSumm.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmPDCDet.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmRptClearReturn.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmRptHoliday.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmClearingSumm.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmFlexAccSumm.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmFlexAccDet.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmCitiAnyFunding.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmCCMSRefSearch.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmCitiAnyReturnSumm.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmCollScheduleSumm.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmCollectionProcessCitiAny.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmDDSumm.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmPendingAuth.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmRptAnyCheckCollectionReprint.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmRptMonthBillCashCheck.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmSubSysDDInfo.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmCitiSpeedMismatchTotal.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmDepoScheMismatchTotal.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmDepoScheMissingDetail.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmClearingClientSumm.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmClearingDepositFile.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmClearingLocationSumm.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmClearingLocationDet.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmClearingBranchSumm.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmClearingBranchDet.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmClearingBankSumm.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmClearingBankDet.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmClearingClientDet.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmCitiCheckSumm.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmCitiSpeedSumm.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmCitiCashSumm.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmDepoScheSumm.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmAbout.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmRptAnyReminder.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmRptAnyCheckCollection.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmTempTest.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmUpWait.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmDepositBreak.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmRptUnclearFund.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmRptDDFunding.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmRptAnyReturn.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmRptAnyOutstanding.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmRptAnyFunding.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmRptAnyProcessing.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmRptCashSpeedDayZero.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmRptCitiAnyDepositDetail.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmRptSpeedReturn.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmRptSpeedDeposit.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmRptCashDeposit.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmReminderCitiAny.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmHolidaySumm.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmReversalGen.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmReversalOutstanding.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmRptCashSpeedSummary.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmBooking.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmReportViewer.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmScheduleStockSumm.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmClientLocChargeSumm.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmClientLocChargeDet.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmClientSumm.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmUsersFGSumm.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmBranchSumm.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmCitibankBranchSumm.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmList.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmReturnSumm.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmCheckTypeSumm.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmZoneSumm.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmLocationSumm.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmBankSumm.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmScheduleStockDet.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmClearingDetail.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmCitiAnyReturnDet.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmDDDetail.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmCollSchedule.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmCitiCheckDetail.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmCitiSpeedDetail.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmCitiCashDetail.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmDepoSchedule.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmCitiBankBranchDet.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmZoneDet.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmCheckTypeDet.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmReturnDet.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmBankDet.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmBranchDet.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmClientDet.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmHolidayDet.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmLocationDet.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmPermFGDet.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmUsersFGDet.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmFGPermSumm.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmUserSumm.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmUsersDet.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmDeptSumm.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmLogin.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmDeptDet.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmMain.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.Resources.resources
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.vbproj.GenerateResource.Cache
+D:\00.Development(Mizan)\CCMS ( 01 June 2016)\CCMS\obj\Debug\CCMS.FrmCitiCashWithBearerSumm.resources

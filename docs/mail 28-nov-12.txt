@@ -1,0 +1,28 @@
+Dear Shanto 
+ 
+Pls find below logic for booking and reversal file :
+ 
+For Booking file..
+ 
+User will select corr bank name at the time of booking.
+Booking file will generate one for all banks.
+ 
+Accounting entry .
+ 
+Dr. Corr bank accounts
+Cr. Sundry accounts
+ 
+For Reversal file..
+ 
+User will select reversal file for the day and generate by maker checker.
+There should be a window for showing the entries of the day to client accounts with ref no previously booked and date.
+ 
+Accounting entry
+ 
+Dr.  – Sundry accounts.
+Cr.   -  Respective Client accounts
+ 
+For Booking and Reversal there should be view screen of previously processed files .
+ 
+Regards
+Dewan

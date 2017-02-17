@@ -1,0 +1,291 @@
+USE [CCMS]
+GO
+
+/****** Object:  StoredProcedure [dbo].[CMS_Process_Revgenerate]    Script Date: 06/25/2015 15:15:29 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 25-Feb-13
+-- Last update: 16-Jul-14
+-- Description: Process for reversal
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_Process_Revgenerate]	
+AS
+BEGIN	
+
+	DECLARE @v_CASH_CR_TYPE	varchar(2),
+		@v_REF_NO		varchar(10),
+		@v_VALUE_DATE	datetime,
+		@v_REV_DATE		datetime,
+		@v_ACC_NO		varchar(16),
+		@v_REFACC_NO	varchar(16),
+		@v_CLIENT_CODE	char(15),
+		@v_TOTAL		numeric(14,2),
+		@v_DEPOSIT_TYPE	varchar(5),
+		@v_D_CODE		varchar(15),
+		@v_CHECKDS_NO	varchar(30),
+		@vCTR_REF		varchar(22);
+		
+	UPDATE CCMSREF_TAB SET STATUS_ID=1, AUTHORIZE=1   
+		WHERE D_CODE IN  
+			(SELECT a.D_CODE    
+				FROM CCMSREF_TAB a , DSCHEDULE b    
+				WHERE   
+				A.D_CODE = B.D_CODE   
+				AND a.FILENAME IS NULL   
+				AND b.DS_CODE IN (SELECT DS_CODE FROM CSCHEDULE)   
+			) 
+  
+	UPDATE CCMSREF_TAB SET STATUS_ID=1, AUTHORIZE=1   
+		WHERE D_CODE IN  
+			(SELECT a.D_CODE    
+				FROM CCMSREF_TAB a , DSCHEDULE b 
+				WHERE
+				A.D_CODE = B.D_CODE
+				AND a.FILENAME IS NULL   
+				AND a.REV_DATE=b.SCHEDULE_DATE
+			) 
+ 
+ ----- che
+
+	DELETE FROM TMP_REVERSAL ;
+	INSERT INTO TMP_REVERSAL(CR_TYPE,REF_NO,VALUE_DATE,LOCATION_CODE,REV_DATE,
+		ACC_NO,REFACC_NO,CLIENT_CODE,AMOUNT,DEPOSIT_TYPE,
+		DS_CODE,CHECKDS_NO,CUSTOMER_REF)                  
+		SELECT c.CASH_CR_TYPE,a.REF_NO,a.VALUE_DATE,b.LOCATION_CODE,a.REV_DATE,
+			a.ACC_NO,a.REFACC_NO,b.CLIENT_CODE,SUM(b.CITICASH_AMOUNT) as total,b.DEPOSIT_TYPE,
+			'' as D_CODE ,'' CHECKDS_NO ,''
+			FROM CCMSREF_TAB a ,DSCHEDULE b,CLIENT c
+			WHERE
+			CONVERT(datetime,CONVERT(varchar(12), a.REV_DATE)) <= CONVERT(datetime,CONVERT(varchar(12), getdate()))
+			AND b.CITICASH_AMOUNT>0
+			AND a.D_CODE=b.D_CODE
+			AND b.CLIENT_CODE=c.CLIENT_CODE
+			AND a.FILENAME IS NULL
+			AND c.CASH_CR_TYPE='L'
+			AND (a.STATUS_ID=1)    
+			AND (a.AUTHORIZE =1)     
+			GROUP BY a.REV_DATE,a.REF_NO,b.LOCATION_CODE,b.CLIENT_CODE,a.VALUE_DATE,c.CASH_CR_TYPE,                  
+				a.ACC_NO,a.REFACC_NO,b.DEPOSIT_TYPE                  
+		UNION ALL                  
+--\\\\\\by deposit\\\\\\\\\\\\\                  
+		SELECT c.CASH_CR_TYPE,a.REF_NO,VALUE_DATE,b.LOCATION_CODE,a.REV_DATE,
+			a.ACC_NO,a.REFACC_NO,b.CLIENT_CODE,SUM(b.CITICASH_AMOUNT) as total,b.DEPOSIT_TYPE,
+			b.D_CODE ,isnull(b.D_CODE,'') CHECKDS_NO ,isnull(d.customer_ref,'')customer_ref
+			FROM CCMSREF_TAB a ,DSCHEDULE b
+			LEFT OUTER JOIN ccash d on d.D_CODE=b.D_CODE,CLIENT c
+			WHERE
+			CONVERT(datetime,CONVERT(varchar(12), a.REV_DATE)) <= CONVERT(datetime,CONVERT(varchar(12), getdate()))                     
+			AND b.CITICASH_AMOUNT>0
+			AND a.D_CODE=b.D_CODE
+			AND b.CLIENT_CODE=c.CLIENT_CODE
+			AND a.FILENAME IS NULL
+			AND c.CASH_CR_TYPE='D'                  
+			AND ( a.STATUS_ID=1 )
+			AND ( a.AUTHORIZE =1 )
+			GROUP BY a.REV_DATE,a.REF_NO,b.CLIENT_CODE,a.VALUE_DATE,b.LOCATION_CODE,c.CASH_CR_TYPE,
+			a.ACC_NO,a.REFACC_NO ,b.D_CODE,b.DEPOSIT_TYPE,d.customer_ref      
+--\\\\\total\\\\\\\\\\\\\\\                  
+		--UNION ALL
+		--SELECT c.CASH_CR_TYPE,a.REF_NO,VALUE_DATE,'000' as LOCATION_CODE,a.REV_DATE,
+		--	a.ACC_NO,a.REFACC_NO,b.CLIENT_CODE,SUM(b.CITICASH_AMOUNT) as total,b.DEPOSIT_TYPE,
+		--	substring(CONVERT(varchar(12), VALUE_DATE,112),3,8)as D_CODE, CONVERT(varchar,count(b.CITICASH_AMOUNT)) CHECKDS_NO,''
+		--	FROM CCMSREF_TAB a ,DSCHEDULE b,CLIENT c
+		--	WHERE
+		--	CONVERT(datetime,CONVERT(varchar(12), a.REV_DATE)) <= CONVERT(datetime,CONVERT(varchar(12), getdate()))
+		--	AND b.CITICASH_AMOUNT>0
+		--	AND a.D_CODE=b.D_CODE
+		--	AND b.CLIENT_CODE=c.CLIENT_CODE 
+		--	AND a.FILENAME IS NULL 
+		--	AND c.CASH_CR_TYPE='T'
+		--	AND ( a.STATUS_ID=1 )
+		--	AND ( a.AUTHORIZE =1  )
+		--	GROUP BY a.REV_DATE,a.REF_NO,b.CLIENT_CODE,a.VALUE_DATE,c.CASH_CR_TYPE, 
+		--	a.ACC_NO,a.REFACC_NO,b.DEPOSIT_TYPE           
+----########################By Ref no ###############               
+		UNION ALL                 
+		SELECT c.CASH_CR_TYPE,a.REF_NO,VALUE_DATE,'000' as LOCATION_CODE,a.REV_DATE,a.ACC_NO,a.REFACC_NO,
+			b.CLIENT_CODE,b.CITICASH_AMOUNT as total,b.DEPOSIT_TYPE,left(rtrim(d.CASH_REF ),10) as D_CODE ,  d.D_CODE CHECKDS_NO ,d.customer_ref 
+			FROM CCMSREF_TAB a ,DSCHEDULE b,CLIENT c,ccash d
+			WHERE
+			CONVERT(datetime,CONVERT(varchar(12), a.REV_DATE)) <= CONVERT(datetime,CONVERT(varchar(12), getdate())) 
+			AND b.CITICASH_AMOUNT>0
+			AND a.D_CODE=b.D_CODE
+			AND b.CLIENT_CODE=c.CLIENT_CODE 
+			AND a.FILENAME IS NULL 
+			AND d.D_CODE=b.D_CODE
+			AND c.CASH_CR_TYPE='R'
+			AND ( a.STATUS_ID=1 )
+			AND ( a.AUTHORIZE =1  )	
+			
+	------ start of cash transaction by total and generate ctr reference		
+	
+	SELECT @vCTR_REF=CTR_REF FROM GENPRM;
+
+	DECLARE curRev CURSOR FOR
+		SELECT c.CASH_CR_TYPE,a.REF_NO,VALUE_DATE,a.REV_DATE,
+			a.ACC_NO,a.REFACC_NO,b.CLIENT_CODE,SUM(b.CITICASH_AMOUNT) as TOTAL,b.DEPOSIT_TYPE,
+			substring(CONVERT(varchar(12), VALUE_DATE,112),3,8)as D_CODE, 
+			CONVERT(varchar,count(b.CITICASH_AMOUNT)) CHECKDS_NO
+			FROM CCMSREF_TAB a ,DSCHEDULE b,CLIENT c
+			WHERE
+			CONVERT(datetime,CONVERT(varchar(12), a.REV_DATE)) <= CONVERT(datetime,CONVERT(varchar(12), getdate()))
+			AND b.CITICASH_AMOUNT>0
+			AND a.D_CODE=b.D_CODE
+			AND b.CLIENT_CODE=c.CLIENT_CODE 
+			AND a.FILENAME IS NULL 
+			AND c.CASH_CR_TYPE='T'
+			AND ( a.STATUS_ID=1 )
+			AND ( a.AUTHORIZE =1  )
+			GROUP BY a.REV_DATE,a.REF_NO,b.CLIENT_CODE,a.VALUE_DATE,c.CASH_CR_TYPE, 
+			a.ACC_NO,a.REFACC_NO,b.DEPOSIT_TYPE;
+			
+	OPEN curRev;
+	FETCH NEXT FROM curRev 
+        INTO @v_CASH_CR_TYPE,@v_REF_NO,@v_VALUE_DATE,@v_REV_DATE,
+			@v_ACC_NO,@v_REFACC_NO,@v_CLIENT_CODE,@v_TOTAL,@v_DEPOSIT_TYPE,
+			@v_D_CODE,
+			@v_CHECKDS_NO;
+
+	WHILE @@FETCH_STATUS=0 
+ 	BEGIN
+		
+		INSERT INTO TMP_REVERSAL(CR_TYPE,REF_NO,VALUE_DATE,LOCATION_CODE,REV_DATE,
+			ACC_NO,REFACC_NO,CLIENT_CODE,AMOUNT,DEPOSIT_TYPE,
+			DS_CODE,CHECKDS_NO,CUSTOMER_REF,CTR_REF)
+			VALUES(@v_CASH_CR_TYPE,@v_REF_NO,@v_VALUE_DATE,'000',@v_REV_DATE,
+				@v_ACC_NO,@v_REFACC_NO,@v_CLIENT_CODE,@v_TOTAL,@v_DEPOSIT_TYPE,
+				@v_D_CODE,@v_CHECKDS_NO,'',@vCTR_REF);
+				
+		UPDATE CCMSREF_TAB SET CTR_REF=@vCTR_REF
+			FROM CCMSREF_TAB a 
+			INNER JOIN DSCHEDULE b ON a.D_CODE=b.D_CODE
+			INNER JOIN CLIENT c ON c.CLIENT_CODE=b.CLIENT_CODE 
+			WHERE			
+				a.REV_DATE = @v_REV_DATE
+				AND b.CITICASH_AMOUNT>0			
+				AND a.FILENAME IS NULL 
+				AND c.CASH_CR_TYPE='T'
+				AND ( a.STATUS_ID=1) AND ( a.AUTHORIZE =1)
+				AND a.REF_NO=@v_REF_NO
+				AND a.VALUE_DATE=@v_VALUE_DATE
+				AND a.ACC_NO=@v_ACC_NO
+				AND a.REFACC_NO= @v_REFACC_NO
+				AND b.CLIENT_CODE=@v_CLIENT_CODE
+				AND b.DEPOSIT_TYPE=@v_DEPOSIT_TYPE
+		
+		SELECT @vCTR_REF=@vCTR_REF+1;
+		
+		FETCH NEXT FROM curRev 
+			INTO @v_CASH_CR_TYPE,@v_REF_NO,@v_VALUE_DATE,@v_REV_DATE,
+				@v_ACC_NO,@v_REFACC_NO,@v_CLIENT_CODE,@v_TOTAL,@v_DEPOSIT_TYPE,
+				@v_D_CODE,
+				@v_CHECKDS_NO;
+	END
+	
+	UPDATE GENPRM SET CTR_REF=@vCTR_REF;
+
+	CLOSE curRev;
+	DEALLOCATE curRev;
+					  
+	------ end of cash transaction by total and generate ctr reference
+	
+	INSERT INTO TMP_REVERSAL( CR_TYPE,REF_NO,VALUE_DATE,LOCATION_CODE,REV_DATE, 
+		ACC_NO,REFACC_NO,CLIENT_CODE,AMOUNT,b.DEPOSIT_TYPE,
+		b.DS_CODE,CHECKDS_NO,CUSTOMER_REF)
+		SELECT c.SPEED_CR_TYPE,a.REF_NO,VALUE_DATE,b.LOCATION_CODE,a.REV_DATE,
+			a.ACC_NO,a.REFACC_NO,b.CLIENT_CODE,SUM(b.citicheck_AMOUNT) as total,b.DEPOSIT_TYPE,
+			'' as D_CODE , '' CHECKDS_NO ,'' CUSTOMER_REF
+			FROM CCMSREF_TAB a ,DSCHEDULE b,CLIENT c 
+			WHERE 
+			CONVERT(datetime,CONVERT(varchar(12), a.REV_DATE)) <= CONVERT(datetime,CONVERT(varchar(12), getdate()))			                   
+			AND b.citicheck_AMOUNT>0
+			AND a.D_CODE=b.D_CODE       
+			AND b.CLIENT_CODE=c.CLIENT_CODE 
+			AND a.FILENAME IS NULL			                 
+			AND c.SPEED_CR_TYPE='L'
+			AND ( a.STATUS_ID=1 )
+			AND ( a.AUTHORIZE =1  ) 
+			GROUP BY a.REV_DATE,b.LOCATION_CODE,a.REF_NO,b.CLIENT_CODE,a.VALUE_DATE,c.SPEED_CR_TYPE,
+			a.ACC_NO,a.REFACC_NO,b.DEPOSIT_TYPE                
+		UNION ALL 
+----By Deposit  
+		SELECT c.SPEED_CR_TYPE,a.REF_NO,VALUE_DATE,b.LOCATION_CODE,a.REV_DATE,
+			a.ACC_NO,a.REFACC_NO,b.CLIENT_CODE,SUM(b.citicheck_AMOUNT) as total,b.DEPOSIT_TYPE,
+			b.D_CODE , b.D_CODE CHECKDS_NO,''customer_ref
+			FROM CCMSREF_TAB a ,DSCHEDULE b
+			,CLIENT c
+			WHERE
+			CONVERT(datetime,CONVERT(varchar(12), a.REV_DATE)) <= CONVERT(datetime,CONVERT(varchar(12), getdate()))
+			AND b.citicheck_AMOUNT>0 
+			AND a.D_CODE=b.D_CODE 
+			AND b.CLIENT_CODE=c.CLIENT_CODE 
+			AND c.SPEED_CR_TYPE='D'
+			AND a.FILENAME IS NULL
+			AND ( a.STATUS_ID=1 )
+			AND ( a.AUTHORIZE =1  )
+			GROUP BY a.REV_DATE,a.REF_NO,b.DS_CODE,b.CLIENT_CODE,a.VALUE_DATE,c.SPEED_CR_TYPE,b.LOCATION_CODE,                  
+			a.ACC_NO,a.REFACC_NO,b.D_CODE,b.DEPOSIT_TYPE                      
+		UNION ALL                
+------By Total                  
+		SELECT c.SPEED_CR_TYPE,a.REF_NO,VALUE_DATE,'000' as LOCATION_CODE,a.REV_DATE,
+			a.ACC_NO,a.REFACC_NO,b.CLIENT_CODE,SUM(b.citicheck_AMOUNT) as total,b.DEPOSIT_TYPE,
+			substring(CONVERT(varchar(10), VALUE_DATE,112),3,8) , '' CHECKDS_NO ,''
+			FROM CCMSREF_TAB a ,DSCHEDULE b,CLIENT c 
+			WHERE 
+			CONVERT(datetime,CONVERT(varchar(12), a.REV_DATE)) <= CONVERT(datetime,CONVERT(varchar(12), getdate()))
+			AND b.citicheck_AMOUNT>0 
+			AND a.D_CODE=b.D_CODE
+			AND b.CLIENT_CODE=c.CLIENT_CODE 
+			AND a.FILENAME IS NULL 
+			AND c.SPEED_CR_TYPE='T'
+			AND ( a.STATUS_ID=1 )
+			AND ( a.AUTHORIZE =1  ) 
+			GROUP BY a.REV_DATE,b.CLIENT_CODE,a.VALUE_DATE,a.REF_NO,c.SPEED_CR_TYPE, 
+			a.ACC_NO,a.REFACC_NO,b.DEPOSIT_TYPE 
+		UNION ALL 
+--\\\\\\\\\\\\\\\By Check\\\\\\\\ 
+		SELECT  c.SPEED_CR_TYPE,a.REF_NO,VALUE_DATE,b.LOCATION_CODE,a.REV_DATE,
+			a.ACC_NO,a.REFACC_NO,b.CLIENT_CODE,D.AMOUNT,b.DEPOSIT_TYPE,
+			d.check_no , b.D_CODE CHECKDS_NO  ,d.Customer_Ref 
+			FROM CCMSREF_TAB a,CLIENT c,DSCHEDULE b,csd_det d 
+			WHERE
+			CONVERT(datetime,CONVERT(varchar(12), a.REV_DATE)) <= CONVERT(datetime,CONVERT(varchar(12), getdate())) 
+			AND d.AMOUNT>0 
+			AND a.D_CODE=b.D_CODE 
+			AND b.CLIENT_CODE=c.CLIENT_CODE 
+			AND a.D_CODE=d.D_CODE 
+			AND a.FILENAME IS NULL 
+			AND c.SPEED_CR_TYPE='C'
+			AND ( a.STATUS_ID=1 )
+			AND ( a.AUTHORIZE =1  ) 
+		UNION ALL         
+		SELECT  c.SPEED_CR_TYPE,a.REF_NO,VALUE_DATE,b.LOCATION_CODE,a.REV_DATE,
+			a.ACC_NO,a.REFACC_NO,b.CLIENT_CODE,D.AMOUNT,b.DEPOSIT_TYPE,
+			left(d.CHECK_REF,10)  ,  b.D_CODE CHECKDS_NO ,d.Customer_Ref 
+			FROM CCMSREF_TAB a,CLIENT c,DSCHEDULE b,csd_det d 
+			WHERE 
+			CONVERT(datetime,CONVERT(varchar(12), a.REV_DATE)) <= CONVERT(datetime,CONVERT(varchar(12), getdate()))
+			AND d.AMOUNT>0
+			AND a.D_CODE=b.D_CODE 
+			AND b.CLIENT_CODE=c.CLIENT_CODE 
+			AND a.D_CODE=d.D_CODE 
+			AND a.FILENAME IS NULL 
+			AND c.SPEED_CR_TYPE='R' 
+			AND ( a.STATUS_ID=1 )
+			AND ( a.AUTHORIZE =1  ) 
+			ORDER BY a.REF_NO
+         
+END
+
+
+GO
+
+

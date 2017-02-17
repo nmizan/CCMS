@@ -1,0 +1,370 @@
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 24-Jan-13
+-- Description:	Authorize record to TotalCS
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_TotalCS_Auth]	
+	@CS_CODE		varchar(12),	
+	@MOD_NO			int,
+	@MOD_DATETIME	datetime
+AS
+BEGIN	
+	DECLARE @STATUS			char(1),			
+			@TOTAL_AMOUNT	numeric(12,2), 			
+			@INPUT_BY		varchar(20),
+			@INPUT_DATETIME datetime,
+			@INPUT_FROM		varchar(30),
+			@LAST_MOD_NO	int,
+			@IS_AUTH		bit;			
+	
+	DECLARE @ErrorVar1		int; 
+			
+	SET NOCOUNT ON;
+
+	SELECT @STATUS = '';
+
+	BEGIN TRANSACTION;
+
+	IF EXISTS(SELECT CS_CODE from TOTALCS_HIST 
+			  WHERE CS_CODE=@CS_CODE AND MOD_NO=@MOD_NO)
+		BEGIN
+			SELECT @STATUS=[STATUS],
+				@TOTAL_AMOUNT=TOTAL_AMOUNT, 				
+				@INPUT_BY=INPUT_BY,	@INPUT_DATETIME=INPUT_DATETIME,
+				@INPUT_FROM=INPUT_FROM,@IS_AUTH=IS_AUTH
+				FROM TOTALCS_HIST 
+				WHERE CS_CODE=@CS_CODE AND MOD_NO=@MOD_NO;
+			IF (@IS_AUTH = 1)
+				BEGIN
+					-- already authorized
+					ROLLBACK TRANSACTION;
+					RETURN 3;
+				END;
+			IF (@INPUT_BY = substring(suser_name(),charindex('\',suser_name())+1,20))
+				BEGIN
+					-- maker and checker same person
+					ROLLBACK TRANSACTION;
+					RETURN 5;
+				END;
+			IF (@INPUT_DATETIME <> @MOD_DATETIME)
+				BEGIN
+					-- Data hase been changed. Need notification
+					ROLLBACK TRANSACTION;
+					RETURN 7;
+				END;			
+		END;
+	ELSE
+		BEGIN			
+			-- not exist
+			ROLLBACK TRANSACTION;
+			RETURN 4;
+		END	;
+
+	IF @STATUS='U'
+		BEGIN
+			SELECT @STATUS='L';
+		END
+		
+	IF @MOD_NO > 1
+		BEGIN	
+		
+			INSERT INTO TOTALCS_HIST 
+				SELECT *,1 FROM TOTALCS
+				WHERE CS_CODE=@CS_CODE;
+			
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+
+			UPDATE TOTALCS_HIST
+				SET [STATUS] = 'O' 
+				WHERE CS_CODE=@CS_CODE
+				AND [STATUS] = 'L';
+
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+			--IF @STATUS='U'
+			--	BEGIN
+			--		SELECT @STATUS='L';
+			--	END
+
+			UPDATE TOTALCS
+				SET
+				TOTAL_AMOUNT=@TOTAL_AMOUNT,				
+				INPUT_BY=@INPUT_BY,	INPUT_DATETIME=@INPUT_DATETIME,
+				INPUT_FROM=@INPUT_FROM,
+				AUTH_BY=substring(suser_name(),charindex('\',suser_name())+1,20),
+				AUTH_DATETIME=GETDATE(),AUTH_FROM=HOST_NAME(),
+				MOD_NO=@MOD_NO,[STATUS]=@STATUS
+			WHERE CS_CODE=@CS_CODE;
+
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+			
+			DELETE TOTALCS_HIST WHERE CS_CODE=@CS_CODE
+				AND IS_AUTH=0;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END	
+
+		END
+	ELSE -- first record
+		BEGIN
+			INSERT INTO TOTALCS
+				SELECT CS_CODE,TOTAL_AMOUNT,
+					INPUT_BY, INPUT_DATETIME, INPUT_FROM, 
+					substring(suser_name(),charindex('\',suser_name())+1,20), 
+					GETDATE(), HOST_NAME(), MOD_NO, 'L' 
+					FROM TOTALCS_HIST
+					WHERE CS_CODE=@CS_CODE AND MOD_NO=@MOD_NO;
+			
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END
+
+			DELETE TOTALCS_HIST WHERE CS_CODE=@CS_CODE
+				AND IS_AUTH=0;
+			
+			SELECT @ErrorVar1 = @@error;
+
+			IF @ErrorVar1 <> 0
+				BEGIN
+					ROLLBACK TRANSACTION;
+					RETURN 1;
+				END			
+					
+		END
+	
+	-- Now update CSCHEDULE
+
+	INSERT INTO CSCHEDULE_HIST(CS_CODE, SCHEDULE_DATE, LOCATION_CODE, CORR_BANK_CODE, 
+		CORR_BRANCH_CODE, DS_CODE, CITICASH_AMOUNT, CITICHECK_AMOUNT, NO_CHECK, 
+		MOD_NO, IS_AUTH)
+		SELECT CS_CODE, SCHEDULE_DATE, LOCATION_CODE, CORR_BANK_CODE, 
+		CORR_BRANCH_CODE, DS_CODE, CITICASH_AMOUNT, CITICHECK_AMOUNT, NO_CHECK, 
+		MOD_NO, 1
+		FROM CSCHEDULE
+		WHERE CS_CODE=@CS_CODE;
+	
+	SELECT @ErrorVar1 = @@error;
+
+	IF @ErrorVar1 <> 0
+		BEGIN
+			ROLLBACK TRANSACTION;
+			RETURN 1;
+		END
+	
+	DELETE CSCHEDULE WHERE CS_CODE=@CS_CODE;
+
+	SELECT @ErrorVar1 = @@error;
+
+	IF @ErrorVar1 <> 0
+		BEGIN
+			ROLLBACK TRANSACTION;
+			RETURN 1;
+		END
+
+	INSERT INTO CSCHEDULE(CS_CODE, SCHEDULE_DATE, LOCATION_CODE, CORR_BANK_CODE, 
+		CORR_BRANCH_CODE, DS_CODE, CITICASH_AMOUNT, CITICHECK_AMOUNT, 
+		NO_CHECK, MOD_NO, [STATUS])
+		SELECT CS_CODE, SCHEDULE_DATE, LOCATION_CODE, CORR_BANK_CODE, 
+		CORR_BRANCH_CODE, DS_CODE, CITICASH_AMOUNT, CITICHECK_AMOUNT, 
+		NO_CHECK, MOD_NO, @STATUS
+		FROM CSCHEDULE_HIST 
+		WHERE CS_CODE=@CS_CODE AND MOD_NO=@MOD_NO;
+	
+	SELECT @ErrorVar1 = @@error;
+
+	IF @ErrorVar1 <> 0
+		BEGIN
+			ROLLBACK TRANSACTION;
+			RETURN 1;
+		END	
+
+	DELETE CSCHEDULE_HIST WHERE CS_CODE=@CS_CODE AND MOD_NO=@MOD_NO;
+
+	SELECT @ErrorVar1 = @@error;
+
+	IF @ErrorVar1 <> 0
+		BEGIN
+			ROLLBACK TRANSACTION;
+			RETURN 1;
+		END
+	
+	COMMIT TRANSACTION;
+		
+	SELECT @ErrorVar1 = @@error;
+		
+	IF @ErrorVar1 = 0
+		BEGIN		
+			RETURN 0;
+		END
+	ELSE
+		BEGIN
+			RETURN 1;
+		END
+
+    
+END
+
+
+GO
+
+
+
+
+
+
+-- =============================================
+-- Author:		Fahad Khan
+-- Create date: 22-Oct-14
+-- Description: Process for Speed return
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_Process_ReturnGenerate]
+	@RTN_DATE	datetime
+	
+AS
+BEGIN
+
+	SET NOCOUNT ON;
+
+	DECLARE 
+		@D_CODE		varchar(12),
+		@SLNO       numeric(3,0),
+		@RTN_CODE   varchar(2) ;
+		
+    DELETE FROM TMP_RETURN_CSD WHERE RTN_DATE = @RTN_DATE ;
+    
+    DECLARE @ErrorVar	int;
+	
+	SELECT @ErrorVar = @@ERROR;
+	
+	IF @ErrorVar <> 0
+		BEGIN			
+			RETURN 1;
+		END
+		
+
+	DECLARE tmpcursor1 CURSOR FOR
+	
+		SELECT D_CODE, SLNO, RTN_CODE FROM RETURN_CSD WHERE RTN_STATUS ='R' AND RTN_DATE = @RTN_DATE AND [STATUS]='L';
+
+	OPEN tmpcursor1;
+	FETCH NEXT FROM tmpcursor1 INTO @D_CODE,@SLNO , @RTN_CODE;
+
+	WHILE @@FETCH_STATUS=0 
+ 	BEGIN
+ 	
+ 	
+ 	    INSERT INTO TMP_RETURN_CSD( RTN_DATE, CLIENT_CODE, AC_NO, LOCATION_CODE, 
+ 	    LOCATION_NAME, AMOUNT, DS_CODE, D_CODE, SLNO, BANK_ACC_NO, INSTRUMENT_NO, 
+ 	    SCHEDULE_DATE, CS_CODE, REASON )  
+		SELECT @RTN_DATE ,ds.CLIENT_CODE,c.ACC_NO , ds.LOCATION_CODE, l.LOCATION_NAME, 
+		csd.AMOUNT ,ds.DS_CODE, csd.D_CODE, csd.SLNO, b.ACC_NO , csd.CHECK_NO , 
+		ds.SCHEDULE_DATE,csc.CS_CODE , rr.REJECT_REASON FROM CSD_DET csd 
+		--INNER JOIN CSD cs ON cs.D_CODE = csd.D_CODE and csd.MOD_NO = cs.MOD_NO and cs.STATUS ='L' 
+		INNER JOIN DSCHEDULE ds ON csd.D_CODE = ds.D_CODE AND ds.[STATUS]='L'
+		--INNER JOIN DCOLLECTED dc ON dc.DS_CODE = ds.DS_CODE AND ds.MOD_NO = dc.MOD_NO AND dc.STATUS = 'L' 
+		INNER JOIN CLIENT c ON c.CLIENT_CODE = ds.CLIENT_CODE 
+		INNER JOIN LOCATION l ON ds.LOCATION_CODE = l.LOCATION_CODE 
+		INNER JOIN BANK b ON b.BANK_CODE = csd.DRAWEE_BANK_CODE 
+		INNER JOIN RETURN_REJECT rr ON rr.REJECT_CODE = @RTN_CODE  
+		INNER JOIN CSCHEDULE csc ON csc.DS_CODE = ds.DS_CODE AND csc.[STATUS]='L'
+		WHERE csd.[STATUS]='L' AND csd.RTN_STATUS ='R' AND csd.D_CODE = @D_CODE 
+		AND csd.SLNO = @SLNO AND csd.RTN_CODE = @RTN_CODE ;
+		
+		
+
+		FETCH NEXT FROM tmpcursor1 
+			INTO @D_CODE,@SLNO , @RTN_CODE;
+
+	END
+
+	CLOSE tmpcursor1;	
+	DEALLOCATE tmpcursor1;
+	
+	SELECT @ErrorVar = @@ERROR;
+	
+	IF @ErrorVar <> 0
+		BEGIN			
+			RETURN 1;
+		END
+
+
+	RETURN 0;
+	
+    
+END   
+
+GO
+
+
+
+CREATE VIEW [dbo].[V_USER_INACTIVITY]
+AS
+	SELECT USERS_ID, USERS_NAME, 
+	DATEDIFF(day, LAST_LOGIN_DATE, GETDATE()) AS DayDiff, USER_STAT
+	FROM  dbo.USERS
+
+
+GO
+
+
+
+
+CREATE VIEW [dbo].[V_USERS_ROLE_MENU_PERMISSION]
+AS
+	SELECT  ufg.USERS_ID, u.FG_NAME, uml.MENU_NAME, d.IS_VISIBLE, d.IS_ENABLE
+	FROM dbo.F_GROUP AS u LEFT OUTER JOIN
+	  dbo.PERM_MENUS AS d ON d.FG_SLNO = u.SLNO LEFT OUTER JOIN
+	  dbo.MENU_LIST AS uml ON uml.SLNO = d.MENU_SLNO LEFT OUTER JOIN
+	  dbo.USERS_FG_DET AS ufg ON ufg.FG_SLNO = u.SLNO
+	WHERE u.STATUS = 'L'
+	
+GO
+
+
+
+
+CREATE VIEW [dbo].[V_USERS_ROLE_FORM_PERMISSION]
+AS
+	SELECT ufg.USERS_ID, u.SLNO, u.FG_ID, u.FG_NAME, uml.FORMS_NAME, 
+		d.IS_SHOW, d.IS_NEW, d.IS_UNLOCK, d.IS_AUTHORIZER, 
+		d.IS_DELETE,d.IS_SAVE
+	FROM dbo.F_GROUP AS u LEFT OUTER JOIN
+	  dbo.PERM_FORMS AS d ON d.FG_SLNO = u.SLNO LEFT OUTER JOIN
+	  dbo.FORM_LIST AS uml ON uml.SLNO = d.FORM_SLNO LEFT OUTER JOIN
+	  dbo.USERS_FG_DET AS ufg ON ufg.FG_SLNO = u.SLNO
+	WHERE u.STATUS = 'L'
+
+GO
+
+
+
+
+

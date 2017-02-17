@@ -1,0 +1,701 @@
+USE [CCMS]
+GO
+
+
+
+-- =============================================
+-- Author:		Fahad Khan
+-- Create date: 25-Feb-13
+-- Description:	Get detail of DD
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_DD_GetDetail]	
+	@D_CODE	varchar(12)
+AS
+BEGIN	
+	
+	SET NOCOUNT ON;
+
+	SELECT dm.*,bn.BANK_NAME,br.BRANCH_NAME,lc.LOCATION_NAME FROM 
+	(SELECT d.* FROM 
+		(SELECT *,'IS_AUTH'=1 FROM DD WHERE D_CODE=@D_CODE
+		UNION
+		SELECT *  FROM DD_HIST WHERE D_CODE=@D_CODE
+		) as d
+		WHERE d.MOD_NO=(SELECT MAX(MOD_NO) FROM (
+			SELECT SLNO,MOD_NO FROM DD WHERE D_CODE=@D_CODE
+			UNION
+			SELECT SLNO,MOD_NO FROM DD_HIST where D_CODE=@D_CODE) as m
+			WHERE m.SLNO=d.SLNO)
+		) as dm
+	LEFT OUTER JOIN BANK as bn ON dm.DRAWER_BANKCODE=bn.BANK_CODE 
+    LEFT OUTER JOIN BRANCH as br ON br.BRANCH_CODE= dm.DRAWER_BRANCHCODE
+    LEFT OUTER JOIN LOCATION as lc ON lc.LOCATION_CODE= dm.DRAWER_LOCATION
+	ORDER BY dm.SLNO	
+
+END
+
+GO
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 18-Dec-12
+-- Description:	Get detail of branch by branch code
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_Branch_GetDetailByCode]	
+	@BANK_CODE		varchar(4),
+	@BRANCH_CODE	varchar(4)
+AS
+BEGIN	
+	
+	SET NOCOUNT ON;
+	
+	SELECT * FROM BRANCH 
+	WHERE BANK_CODE=@BANK_CODE AND BRANCH_CODE=@BRANCH_CODE
+ 
+END
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 26-May-13
+-- Description:	get list records of Nikash Branch from Branch by bank
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_Branch_GetNikBranchListByBank]
+	@BANK_CODE	varchar(4)
+AS
+BEGIN		
+	SET NOCOUNT ON;
+
+	SELECT NIKBRANCH_CODE,BRANCH_NAME
+	FROM BRANCH		
+	WHERE STATUS='L' 
+	AND NIKBRANCH_CODE IS NOT NULL AND BANK_CODE=@BANK_CODE
+	ORDER BY BRANCH_NAME;	
+	   
+END
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_Branch_GetNikBranchListByBank] TO [ccms_sp_only]
+
+GO
+
+
+-- =============================================
+-- Author:		Fahad Khan
+-- Create date: 20-FEB-13
+-- Description:	Get detail of branch by NikBranch code
+-- =============================================
+ALTER PROCEDURE [dbo].[CMS_Branch_GetDetailByNikBranch]	
+	@BANK_CODE		varchar(4),
+	@NIKBRANCH_CODE	varchar(7)
+AS
+BEGIN	
+	
+	SET NOCOUNT ON;
+	
+	SELECT * FROM BRANCH 
+	WHERE BANK_CODE=@BANK_CODE AND NIKBRANCH_CODE=@NIKBRANCH_CODE;
+ 
+END
+
+GO
+
+
+CREATE view [dbo].[V_DD_BREAKUP]      
+AS    
+(
+	SELECT a.D_CODE,a.CLIENT_CODE,a.CHECK_NO,  
+	b.* 
+	FROM CCHECK  a,  
+		(  
+		SELECT a.NONZONE_REF,b.d_code dd_dcode,a.DDREFNO,
+		a.AMOUNT,a.VAT,a.COMMISION, a.POSTAGE_CHARGE, a.INSTRUMENT_EXP,
+		b.DD_NO,b.DD_DATE,b.AMOUNT dd_amount FROM NCOLLECTION a,  
+		dd b WHERE a.ddrefno=(b.d_code+ RIGHT('000'+convert(varchar(3),b.slno ),3))  
+		)b  
+	WHERE a.NONZONE_REF=b.NONZONE_REF
+)
+GO
+
+GRANT SELECT ON [dbo].[V_DD_BREAKUP] TO [ccms_sp_only]
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 27-May-13
+-- Description:	get detail of DD for subsystem
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_DD_GetDetailForSubsystem]
+	@ACC_NO	varchar(16),
+	@D_CODE	varchar(12)
+AS
+BEGIN		
+	SET NOCOUNT ON;
+
+	SELECT ISNULL(drawer_bankcode,0) BANK_CODE,
+	ISNULL(NIKBRANCH_CODE,0) NIKBRANCH_CODE, DD_DATE, 
+	'01/01/1900' OPR_DATE, DD_NO,
+    '14' CHQTYPE, AMOUNT, D_CODE,@ACC_NO ACC_NO ,SLNO 
+    FROM DD
+	WHERE D_CODE =@D_CODE;	
+	   
+END
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_DD_GetDetailForSubsystem] TO [ccms_sp_only]
+
+GO
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 27-May-13
+-- Description:	get group data of DD for subsystem by Nikbranch
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_DD_GetGroupForSubSysByNik]
+	@ACC_NO	varchar(16),
+	@D_CODE	varchar(12)
+AS
+BEGIN		
+	SET NOCOUNT ON;
+
+	SELECT ISNULL(D_CODE,0) D_CODE, COUNT(D_CODE) TOTAL_CHKNO, 
+	SUM(AMOUNT) TOTAL_CHKAMT, '01/01/1900' OPRDATE, 
+	ISNULL(NIKBRANCH_CODE,0) NIKBRANCH_CODE, @ACC_NO ACC_NO
+	FROM DD 
+	WHERE D_CODE =@D_CODE
+	GROUP BY D_CODE,NIKBRANCH_CODE	
+	   
+END
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_DD_GetGroupForSubSysByNik] TO [ccms_sp_only]
+
+GO
+
+
+
+
+CREATE TABLE  [dbo].[TMP_MON_BILL] (
+	DS_CODE	varchar(12) NOT NULL,
+	D_CODE	varchar(12) NOT NULL,
+	CITICASH_AMOUNT numeric(14, 2) NULL,
+	CITICHECK_AMOUNT numeric(14, 2) NULL,
+	SCHEDULE_DATE datetime NULL,
+	NO_CHECK numeric(4, 0) NULL,
+	CLIENT_CODE varchar(6) NULL,
+	LOCATION_CODE varchar(4) NULL,
+	LOCATION_NAME varchar(35) NULL,
+	ACC_NAME varchar(50),
+	CASH_CHARGE numeric(12,2)	,
+	SPEED_CHARGE numeric(12,2),
+	RETURN_CHARGE numeric(12,2),
+	CASH_STD_CHARGE numeric(12,2),
+	SPEED_STD_CHARGE numeric(12,2),
+	CASH_VAT numeric(8,2),
+	SPEED_VAT numeric(8,2),
+	RETURN_AMOUNT numeric(14,2),
+	NO_OF_RETURN numeric(8,0)
+) 
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 29-May-13
+-- Description: Process for Monthly Bill
+-- =============================================
+
+CREATE PROCEDURE [dbo].[CMS_Process_MonthBill]			
+	@START_DATE	DATETIME,
+	@END_DATE	DATETIME
+AS
+BEGIN	
+				
+	SET NOCOUNT ON;
+
+	DELETE FROM TMP_MON_BILL;
+
+	INSERT INTO TMP_MON_BILL(DS_CODE, D_CODE, CITICASH_AMOUNT, CITICHECK_AMOUNT, 
+		SCHEDULE_DATE, NO_CHECK, CLIENT_CODE, LOCATION_CODE, LOCATION_NAME, 
+		ACC_NAME, CASH_CHARGE, SPEED_CHARGE, RETURN_CHARGE, CASH_STD_CHARGE, 
+		SPEED_STD_CHARGE, CASH_VAT, SPEED_VAT, RETURN_AMOUNT, NO_OF_RETURN)
+		SELECT ds.DS_CODE,ds.D_CODE,ISNULL(ds.CITICASH_AMOUNT,0) AS CITICASH_AMOUNT,
+			ISNULL(ds.CITICHECK_AMOUNT,0) AS CITICHECK_AMOUNT,ds.SCHEDULE_DATE,
+			ds.NO_CHECK,ds.CLIENT_CODE,ds.LOCATION_CODE,lo.LOCATION_NAME,
+			cl.ACC_NAME,ISNULL(clc.CASH_CHARGE,cl.CASH_CHARGE) AS CASH_CHARGE,
+			ISNULL(clc.SPEED_CHARGE,cl.SPEED_CHARGE) AS SPEED_CHARGE,cl.RETURN_CHARGE,
+			cl.CASH_STD_CHARGE,cl.SPEED_STD_CHARGE,cl.CASH_VAT,cl.SPEED_VAT,
+			ISNULL(rt.RETURN_AMOUNT,0) AS RETURN_AMOUNT,ISNULL(rt.NO_OF_RETURN,0) AS NO_OF_RETURN
+			FROM DSCHEDULE ds
+			INNER JOIN LOCATION lo ON lo.LOCATION_CODE=ds.LOCATION_CODE
+			INNER JOIN CLIENT cl ON cl.CLIENT_CODE=ds.CLIENT_CODE
+			LEFT OUTER JOIN (SELECT * FROM CLIENT_LOC_CHARGE WHERE [STATUS]='L') clc 
+			ON clc.LOCATION_CODE=ds.LOCATION_CODE AND clc.CLIENT_CODE=ds.CLIENT_CODE
+			LEFT OUTER JOIN (SELECT D_CODE,SUM(AMOUNT) AS RETURN_AMOUNT, COUNT(D_CODE) AS NO_OF_RETURN
+			FROM CSD_DET WHERE RTN_STATUS='R'
+			GROUP BY D_CODE) rt
+			ON rt.D_CODE=ds.D_CODE
+			WHERE SCHEDULE_DATE BETWEEN @START_DATE AND @END_DATE;
+
+	         
+END
+
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_Process_MonthBill] TO [ccms_sp_only]
+
+GO
+
+CREATE view [dbo].[V_MONTH_BILL]      
+AS    
+(
+	SELECT DS_CODE, D_CODE, CITICASH_AMOUNT, CITICHECK_AMOUNT, SCHEDULE_DATE, 
+		CLIENT_CODE, LOCATION_CODE, LOCATION_NAME, ACC_NAME, 
+		CASH_CHARGE,(CASH_CHARGE/1000*CITICASH_AMOUNT) AS C_CASH_CHARGE, 
+		SPEED_CHARGE,(SPEED_CHARGE/1000*CITICHECK_AMOUNT) AS C_SPEED_CHARGE, 
+		RETURN_CHARGE,(RETURN_CHARGE*NO_OF_RETURN) AS C_RETURN_CHARGE , CASH_STD_CHARGE, 
+		SPEED_STD_CHARGE, CASH_VAT,((CASH_STD_CHARGE/1000*CITICASH_AMOUNT)*CASH_VAT/100) AS C_CASH_VAT,
+		SPEED_VAT, ((SPEED_STD_CHARGE/1000*CITICHECK_AMOUNT)*SPEED_VAT/100) AS C_SPEED_VAT,
+		RETURN_AMOUNT, NO_OF_RETURN,(RETURN_CHARGE*NO_OF_RETURN)*SPEED_VAT/100 AS C_RETURN_VAT
+		FROM TMP_MON_BILL
+)
+GO
+
+GRANT SELECT ON [dbo].[V_MONTH_BILL] TO [ccms_sp_only]
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 02-June-13
+-- Description: Collection Process for CitiAnywhere Check
+-- =============================================
+
+CREATE PROCEDURE [dbo].[CMS_Process_CollectionCitiAny]	
+AS
+BEGIN	
+	DECLARE 
+		@ErrorVar		INT,
+		@v_D_CODE		varchar(12),
+		@v_SLNO			numeric(3,0),
+		@maxNONZONE_REF	numeric(7,0);
+		
+	
+	SET NOCOUNT ON;
+
+	BEGIN TRANSACTION;
+
+	DECLARE tmpcursor1 CURSOR FOR
+		SELECT DISTINCT ct.D_CODE FROM CCHECKTOTAL as ct INNER JOIN CCHECK as cc 
+			ON ct.D_CODE=cc.D_CODE AND ct.MOD_NO=cc.MOD_NO
+			WHERE cc.RTN_STATUS ='O' AND cc.REMINDER_DATE is null
+			AND ct.[STATUS]='L';
+
+	OPEN tmpcursor1;
+	FETCH NEXT FROM tmpcursor1 
+        INTO @v_D_CODE;
+
+	WHILE @@FETCH_STATUS=0 
+ 	BEGIN
+
+		DELETE CCHECKTOTAL_HIST
+			WHERE D_CODE=@v_D_CODE AND IS_AUTH=0;
+
+		INSERT INTO CCHECKTOTAL_HIST
+			SELECT *,1 FROM CCHECKTOTAL WHERE D_CODE=@v_D_CODE;
+
+		UPDATE CCHECKTOTAL_HIST
+			SET [STATUS]='O'
+			WHERE D_CODE=@v_D_CODE AND [STATUS]='L';
+
+		UPDATE CCHECKTOTAL
+			SET MOD_NO=MOD_NO+1,
+				INPUT_BY=substring(suser_name(),charindex('\',suser_name())+1,20),	
+				INPUT_DATETIME=GETDATE(),INPUT_FROM=HOST_NAME(),
+				AUTH_BY=substring(suser_name(),charindex('\',suser_name())+1,20),
+				AUTH_DATETIME=GETDATE(),AUTH_FROM=HOST_NAME()
+			WHERE D_CODE=@v_D_CODE;
+		
+		DELETE CCHECK_HIST
+			WHERE D_CODE=@v_D_CODE AND IS_AUTH=0;
+
+		INSERT INTO CCHECK_HIST(SLNO, D_CODE, CLIENT_CODE, DLOCATION_CODE, 
+			CUSTOMER_REF, SLIP_DATE, VALUE_DATE, CHECK_NO, AMOUNT, CHECK_DATE, 
+			CHECK_TYPE, DRAWER, DRAWEE_BANK_CODE, LOCATION_CODE, BRANCH_CODE, 
+			CHECK_REF, RTN_STATUS, NONZONE_REF, MOD_NO, IS_AUTH, REMINDER_DATE, 
+			REMINDER_NO, RTN_CODE)
+			SELECT SLNO, D_CODE, CLIENT_CODE, DLOCATION_CODE, 
+			CUSTOMER_REF, SLIP_DATE, VALUE_DATE, CHECK_NO, AMOUNT, CHECK_DATE, 
+			CHECK_TYPE, DRAWER, DRAWEE_BANK_CODE, LOCATION_CODE, BRANCH_CODE, 
+			CHECK_REF, RTN_STATUS, NONZONE_REF, MOD_NO,1, REMINDER_DATE, 
+			REMINDER_NO , RTN_CODE
+			FROM CCHECK	
+			WHERE D_CODE=@v_D_CODE
+		
+		UPDATE CCHECK
+			SET MOD_NO=MOD_NO+1 
+			WHERE D_CODE=@v_D_CODE
+
+		FETCH NEXT FROM tmpcursor1 
+				INTO @v_D_CODE;
+
+	END
+
+	CLOSE tmpcursor1;	
+	DEALLOCATE tmpcursor1;
+----2----------------------
+	SELECT @maxNONZONE_REF=ISNULL(MAX(NONZONE_REF),0) FROM CCHECK
+		WHERE NONZONE_REF IS NOT NULL;
+		
+		
+	DECLARE tmpcursor2 CURSOR FOR
+		SELECT DISTINCT ct.D_CODE,cc.SLNO
+			FROM CCHECKTOTAL as ct INNER JOIN CCHECK as cc 
+			ON ct.D_CODE=cc.D_CODE AND ct.MOD_NO=cc.MOD_NO
+			WHERE cc.RTN_STATUS ='O' AND cc.REMINDER_DATE is null
+			AND ct.[STATUS]='L';
+
+	OPEN tmpcursor2;
+	FETCH NEXT FROM tmpcursor2 
+        INTO @v_D_CODE,@v_SLNO;
+
+	WHILE @@FETCH_STATUS=0 
+ 	BEGIN
+		SELECT @maxNONZONE_REF=@maxNONZONE_REF+1;
+
+		UPDATE CCHECK
+			SET NONZONE_REF=RIGHT('0000000' + convert(varchar,@maxNONZONE_REF), 7),
+			REMINDER_DATE=CONVERT(datetime,CONVERT(varchar(12), GETDATE())),
+			REMINDER_NO=1
+			WHERE D_CODE=@v_D_CODE AND SLNO=@v_SLNO;
+
+		INSERT NCOLLECTION(NONZONE_REF, 
+			REF_DATE, 
+			INPUT_BY, INPUT_DATETIME, INPUT_FROM, 
+			AUTH_BY, AUTH_DATETIME, AUTH_FROM, 
+			MOD_NO, RTN_STATUS, [STATUS])
+			VALUES(RIGHT('0000000' + convert(varchar,@maxNONZONE_REF), 7),
+			CONVERT(datetime,CONVERT(varchar(12), GETDATE())),
+			substring(suser_name(),charindex('\',suser_name())+1,20),
+			GETDATE(),HOST_NAME(),
+			substring(suser_name(),charindex('\',suser_name())+1,20),
+			GETDATE(),HOST_NAME(),
+			1,'O','L');
+
+
+		FETCH NEXT FROM tmpcursor2 
+        INTO @v_D_CODE,@v_SLNO;
+
+	END
+
+	CLOSE tmpcursor2;	
+	DEALLOCATE tmpcursor2;
+
+-----------------------------------
+
+	SELECT @ErrorVar = @@error;			
+
+	IF @ErrorVar <> 0
+		BEGIN
+			ROLLBACK TRANSACTION;
+			RETURN 1;
+		END
+
+	COMMIT TRANSACTION;
+
+	
+         
+END
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_Process_CollectionCitiAny] TO [ccms_sp_only]
+
+GO
+
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 06-Mar-13
+-- Description: Reminder Process for CitiAnywhere Check
+-- =============================================
+
+ALTER PROCEDURE [dbo].[CMS_Process_ReminderCitiAny]	
+AS
+BEGIN	
+	DECLARE 
+		@ErrorVar		INT,
+		@v_D_CODE		varchar(12),
+		@v_SLNO			numeric(3,0),
+		@maxNONZONE_REF	numeric(7,0);
+		
+	
+	SET NOCOUNT ON;
+
+	BEGIN TRANSACTION;
+
+
+--3--------------------------------
+
+	DECLARE tmpcursor3 CURSOR FOR
+		SELECT DISTINCT ct.D_CODE FROM CCHECKTOTAL as ct INNER JOIN CCHECK as cc 
+			ON ct.D_CODE=cc.D_CODE AND ct.MOD_NO=cc.MOD_NO
+			WHERE cc.RTN_STATUS ='O' AND DATEDIFF(dd,cc.REMINDER_DATE,GETDATE())>30
+			AND ct.[STATUS]='L';
+
+	OPEN tmpcursor3;
+	FETCH NEXT FROM tmpcursor3 
+        INTO @v_D_CODE;
+
+	WHILE @@FETCH_STATUS=0 
+ 	BEGIN
+
+		DELETE CCHECKTOTAL_HIST
+			WHERE D_CODE=@v_D_CODE AND IS_AUTH=0;
+
+		INSERT INTO CCHECKTOTAL_HIST
+			SELECT *,1 FROM CCHECKTOTAL WHERE D_CODE=@v_D_CODE;
+
+		UPDATE CCHECKTOTAL_HIST
+			SET [STATUS]='O'
+			WHERE D_CODE=@v_D_CODE AND [STATUS]='L';
+
+		UPDATE CCHECKTOTAL
+			SET MOD_NO=MOD_NO+1,
+				INPUT_BY=substring(suser_name(),charindex('\',suser_name())+1,20),	
+				INPUT_DATETIME=GETDATE(),INPUT_FROM=HOST_NAME(),
+				AUTH_BY=substring(suser_name(),charindex('\',suser_name())+1,20),
+				AUTH_DATETIME=GETDATE(),AUTH_FROM=HOST_NAME()
+			WHERE D_CODE=@v_D_CODE;
+		
+		DELETE CCHECK_HIST
+			WHERE D_CODE=@v_D_CODE AND IS_AUTH=0;
+
+		INSERT INTO CCHECK_HIST(SLNO, D_CODE, CLIENT_CODE, DLOCATION_CODE, 
+			CUSTOMER_REF, SLIP_DATE, VALUE_DATE, CHECK_NO, AMOUNT, CHECK_DATE, 
+			CHECK_TYPE, DRAWER, DRAWEE_BANK_CODE, LOCATION_CODE, BRANCH_CODE, 
+			CHECK_REF, RTN_STATUS, NONZONE_REF, MOD_NO, IS_AUTH, REMINDER_DATE, 
+			REMINDER_NO, RTN_CODE)
+			SELECT SLNO, D_CODE, CLIENT_CODE, DLOCATION_CODE, 
+			CUSTOMER_REF, SLIP_DATE, VALUE_DATE, CHECK_NO, AMOUNT, CHECK_DATE, 
+			CHECK_TYPE, DRAWER, DRAWEE_BANK_CODE, LOCATION_CODE, BRANCH_CODE, 
+			CHECK_REF, RTN_STATUS, NONZONE_REF, MOD_NO,1, REMINDER_DATE, 
+			REMINDER_NO, RTN_CODE 
+			FROM CCHECK	
+			WHERE D_CODE=@v_D_CODE
+		
+		UPDATE CCHECK
+			SET MOD_NO=MOD_NO+1 
+			WHERE D_CODE=@v_D_CODE
+
+		FETCH NEXT FROM tmpcursor3 
+				INTO @v_D_CODE;
+
+	END
+
+	CLOSE tmpcursor3;	
+	DEALLOCATE tmpcursor3;
+
+-----4------------------------------
+
+			
+	DECLARE tmpcursor4 CURSOR FOR
+		SELECT DISTINCT ct.D_CODE,cc.SLNO
+			FROM CCHECKTOTAL as ct INNER JOIN CCHECK as cc 
+			ON ct.D_CODE=cc.D_CODE AND ct.MOD_NO=cc.MOD_NO
+			WHERE cc.RTN_STATUS ='O' AND DATEDIFF(dd,cc.REMINDER_DATE,GETDATE())>30
+			AND ct.[STATUS]='L';
+
+	OPEN tmpcursor4;
+	FETCH NEXT FROM tmpcursor4 
+        INTO @v_D_CODE,@v_SLNO;
+
+	WHILE @@FETCH_STATUS=0 
+ 	BEGIN
+		
+		UPDATE CCHECK
+			SET REMINDER_DATE=CONVERT(datetime,CONVERT(varchar(12), GETDATE())),
+			REMINDER_NO=REMINDER_NO+1
+			WHERE D_CODE=@v_D_CODE AND SLNO=@v_SLNO;
+		
+		FETCH NEXT FROM tmpcursor4 
+        INTO @v_D_CODE,@v_SLNO;
+
+	END
+
+	CLOSE tmpcursor4;	
+	DEALLOCATE tmpcursor4;
+
+-----------------------------------
+
+	SELECT @ErrorVar = @@error;			
+
+	IF @ErrorVar <> 0
+		BEGIN
+			ROLLBACK TRANSACTION;
+			RETURN 1;
+		END
+
+	COMMIT TRANSACTION;
+
+	
+         
+END
+
+GO
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 03-May-13
+-- Description:	Get detail from TOTALCS table
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_TotalCS_GetDetailList]		
+	@DEL_FLAG	int	,
+	@AUTH_FLAG	bit
+AS
+BEGIN	
+		
+	SET NOCOUNT ON;
+
+
+	IF @AUTH_FLAG=0
+		BEGIN						
+			SELECT *,'S' = 'U'				 
+				FROM TOTALCS_HIST 
+				WHERE IS_AUTH=0
+				ORDER BY CS_CODE;			
+		END;
+	ELSE
+		BEGIN
+			IF @DEL_FLAG=0
+				BEGIN
+					SELECT *,1,'S' = 'A'				
+						FROM TOTALCS
+						WHERE [STATUS] ='L'				
+						ORDER BY CS_CODE;
+				END;
+			ELSE
+				BEGIN
+					SELECT *,1,'S' = 
+						CASE  
+							WHEN [STATUS] = 'D' THEN 'D'        
+							ELSE 'A'
+						END 
+						FROM TOTALCS
+						WHERE [STATUS] IN ('L','D')			
+						ORDER BY CS_CODE;
+				END;
+		END;	
+	   
+END
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_TotalCS_GetDetailList] TO [ccms_sp_only]
+
+GO
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 03-May-13
+-- Description:	Get detail from DD table
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_DD_GetDetailList]	
+	@AUTH_FLAG	bit
+AS
+BEGIN	
+		
+	SET NOCOUNT ON;
+
+	IF @AUTH_FLAG=0
+		BEGIN						
+			SELECT DD.*,'S' = 'U',b.BANK_NAME AS DRAWER_BANKNAME,
+				br.BRANCH_NAME AS DRAWER_BRANCHNAME,
+				l.LOCATION_NAME AS DRAWER_LOCATIONNAME,nbr.BRANCH_NAME AS DRAWEE			 
+				FROM DD_HIST DD
+				LEFT OUTER JOIN BANK b 
+				ON b.BANK_CODE=dd.DRAWER_BANKCODE
+				LEFT OUTER JOIN BRANCH br 
+				ON br.BANK_CODE=dd.DRAWER_BANKCODE AND br.BRANCH_CODE=dd.DRAWER_BRANCHCODE
+				LEFT OUTER JOIN LOCATION l
+				ON l.LOCATION_CODE=dd.DRAWER_LOCATION
+				LEFT OUTER JOIN BRANCH nbr
+				ON nbr.BANK_CODE=dd.DRAWER_BANKCODE AND nbr.NIKBRANCH_CODE=dd.NIKBRANCH_CODE 
+				WHERE DD.IS_AUTH=0
+				ORDER BY DD.D_CODE,DD.SLNO;
+		END;
+	ELSE
+		BEGIN
+			
+			SELECT DD.*,'S' = 'A',b.BANK_NAME AS DRAWER_BANKNAME,
+				br.BRANCH_NAME AS DRAWER_BRANCHNAME,
+				l.LOCATION_NAME AS DRAWER_LOCATIONNAME,nbr.BRANCH_NAME AS DRAWEE			 
+				FROM DD DD
+				LEFT OUTER JOIN BANK b 
+				ON b.BANK_CODE=dd.DRAWER_BANKCODE
+				LEFT OUTER JOIN BRANCH br 
+				ON br.BANK_CODE=dd.DRAWER_BANKCODE AND br.BRANCH_CODE=dd.DRAWER_BRANCHCODE
+				LEFT OUTER JOIN LOCATION l
+				ON l.LOCATION_CODE=dd.DRAWER_LOCATION
+				LEFT OUTER JOIN BRANCH nbr
+				ON nbr.BANK_CODE=dd.DRAWER_BANKCODE AND nbr.NIKBRANCH_CODE=dd.NIKBRANCH_CODE 
+				ORDER BY DD.D_CODE,DD.SLNO;
+									
+		END;	
+	   
+END
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_DD_GetDetailList] TO [ccms_sp_only]
+
+GO
+
+
+-- =============================================
+-- Author:		Iftekharul Alam Khan Lodi
+-- Create date: 05-June-13
+-- Description:	Get detail of holiday by date
+-- =============================================
+CREATE PROCEDURE [dbo].[CMS_Holiday_GetDetailByDate]		
+	@HOLI_DAY	datetime
+AS
+BEGIN	
+		
+	SET NOCOUNT ON;
+
+	SELECT * 
+	FROM HOLIDAY
+	WHERE HOLI_DAY=@HOLI_DAY AND [STATUS]='L';
+	
+END
+
+
+GO
+
+GRANT EXECUTE ON [dbo].[CMS_Holiday_GetDetailByDate] TO [ccms_sp_only]
+
+GO
+
+
+
+
+
+
+
+

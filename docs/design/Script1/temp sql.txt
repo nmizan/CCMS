@@ -1,0 +1,52 @@
+CREATE PROCEDURE [dbo].CMS_TmpFormList_GetDetail	
+AS
+BEGIN	
+	SELECT * FROM TMP_FORM_LIST ORDER BY ID
+END
+
+GO
+
+GRANT EXECUTE ON [dbo].CMS_TmpFormList_GetDetail TO [ccms_sp_only]
+
+GO
+
+
+CREATE PROCEDURE [dbo].CMS_TmpMenuList_GetDetail	
+AS
+BEGIN	
+	SELECT * FROM TMP_MENU_LIST ORDER BY ID
+END
+
+GO
+
+GRANT EXECUTE ON [dbo].CMS_TmpMenuList_GetDetail TO [ccms_sp_only]
+
+GO
+
+------------
+
+
+CREATE PROCEDURE [dbo].CMS_PermForms_GetDetailsAll
+AS
+BEGIN	
+	SELECT * FROM PERM_FORMS
+END
+
+GO
+
+GRANT EXECUTE ON [dbo].CMS_PermForms_GetDetailsAll TO [ccms_sp_only]
+
+GO
+
+
+CREATE PROCEDURE [dbo].CMS_PermMenus_GetDetailsAll	
+AS
+BEGIN	
+	SELECT * FROM PERM_MENUS 
+END
+
+GO
+
+GRANT EXECUTE ON [dbo].CMS_PermMenus_GetDetailsAll TO [ccms_sp_only]
+
+GO
